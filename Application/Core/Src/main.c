@@ -132,7 +132,7 @@ int main(void)
 
 
   sprintf(buffch,"Starting Application (%d.%d)", BL_Version[0], BL_Version[1]);
-
+  printf("Starting Bootloader (%d.%d)\r\n", BL_Version[0], BL_Version[1]);
   /*##-1- LCD Initialization #################################################*/
   /* Initialize the LCD */
   BSP_LCD_Init();
