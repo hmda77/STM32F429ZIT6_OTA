@@ -1,1 +1,2 @@
 ../Core/Src/ota_app.c:18:6:go_to_ota_app	16	static
+../Core/Src/ota_app.c:38:13:etx_ota_download_and_flash	16	static
