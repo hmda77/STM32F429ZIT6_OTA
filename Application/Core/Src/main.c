@@ -23,6 +23,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
 #include "../../../Drivers/BSP/STM32F429I-Discovery/stm32f429i_discovery_lcd.h"
 /* USER CODE END Includes */
 
@@ -133,6 +135,49 @@ int main(void)
 
   sprintf(buffch,"Starting Application (%d.%d)", BL_Version[0], BL_Version[1]);
   printf("Starting Bootloader (%d.%d)\r\n", BL_Version[0], BL_Version[1]);
+
+
+  /* check the User Interrupt for 5 seconds */
+  GPIO_PinState OTA_Pin_state;
+  OTA_Pin_state = GPIO_PIN_SET;
+
+  uint32_t end_tick = HAL_GetTick() + 5000;   // from now to 5 Seconds
+  printf("Press The Blue Button to trigger OTA update...\r\n");
+  do
+  {
+	  OTA_Pin_state = HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
+      uint32_t current_tick = HAL_GetTick();
+      /* Check the button is pressed or not for 3seconds */
+      if( ( OTA_Pin_state != GPIO_PIN_RESET ) || ( current_tick > end_tick ) )
+      {
+        /* Either timeout or Button is pressed */
+        break;
+      }
+  }while(true);
+
+  /*Start the Firmware or Application update */
+  if( OTA_Pin_state == GPIO_PIN_SET )
+  {
+  	HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
+  	HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_SET);
+    printf("Starting Firmware Download!!!\r\n");
+    /* OTA Request. Receive the data from the UART4 and flash */
+    if( true )
+//    if( etx_ota_download_and_flash(&huart5) != ETX_OTA_EX_OK )
+    {
+      /* Error. Don't process. */
+      printf("OTA Update : ERROR!!! HALT!!!\r\n");
+//      HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
+      HAL_Delay(3000);
+      HAL_NVIC_SystemReset();
+    }
+    else
+    {
+      /* Reset to load the new application */
+      printf("Firmware update is done!!! Rebooting...\r\n");
+      HAL_NVIC_SystemReset();
+    }
+  }
   /*##-1- LCD Initialization #################################################*/
   /* Initialize the LCD */
   BSP_LCD_Init();
@@ -169,6 +214,7 @@ int main(void)
   BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2 - 27, (uint8_t*)"MUST'V BEEN THE", CENTER_MODE);
   BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2 - 12, (uint8_t*)"DEADLY", CENTER_MODE);
   BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2 + 3, (uint8_t*)"KISS", CENTER_MODE);
+
 
 
   /* USER CODE END 2 */
@@ -656,6 +702,17 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+#ifdef __GNUC__
+
+int __io_putchar(int ch)
+
+#else
+int fputc(int ch, FILE *f)
+#endif
+{
+	HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+	return ch;
+}
 
 /* USER CODE END 4 */
 
