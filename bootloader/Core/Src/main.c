@@ -22,7 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -639,7 +639,25 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+int __io_putchar(int ch)
 
+#else
+int fputc(int ch, FILE *f)
+#endif
+{
+	HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+	return ch;
+}
+
+static void go_to_application (void){
+	printf("Gonna Jump to Application ...\n");
+	void (*app_reset_handler) (void) = (void*) (*(volatile uint32_t *) (0x08040000 + 4));
+
+//	__set_MSP((*(volatile uint32_t *) (0x08040000)));
+	HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_RESET);
+
+	app_reset_handler();
+}
 /* USER CODE END 4 */
 
 /**
