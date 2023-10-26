@@ -1,6 +1,6 @@
-[STM32F429ZIT6 OTA Project]
+# STM32F429ZIT6 OTA Project
 
-# To-Do:
+## To-Do:
 
 - [ ] Write Bootloader an Application For Update
 - [ ] Write A PC Tool for fownload Application Binary File (ABF)
