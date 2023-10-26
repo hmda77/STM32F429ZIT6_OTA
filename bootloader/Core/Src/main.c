@@ -122,6 +122,9 @@ int main(void)
   MX_USB_HOST_Init();
   MX_UART5_Init();
   /* USER CODE BEGIN 2 */
+  printf("start BootLoader");
+  HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_SET);
+  HAL_Delay(5000);
   go_to_application();
   /* USER CODE END 2 */
 
