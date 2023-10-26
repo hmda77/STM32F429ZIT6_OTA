@@ -126,7 +126,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_SET);
   printf("Starting Bootloader (%d.%d)\r\n", BL_Version[0], BL_Version[1]);
-  HAL_Delay(5000);
+  HAL_Delay(2000);
   go_to_application();
   /* USER CODE END 2 */
 
