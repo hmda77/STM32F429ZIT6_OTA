@@ -7,7 +7,15 @@
 
 #include "ota_app.h"
 
-void go_to_ota_app()
+/*
+ * Exception codes
+ */
+
+
+ETX_OTA_EX_ etx_ota_download_and_flash(UART_HandleTypeDef *huart);
+
+
+void go_to_ota_app(UART_HandleTypeDef *huart)
 {
   /*Start the Firmware or Application update */
     printf("Starting Firmware Download!!!\r\n");

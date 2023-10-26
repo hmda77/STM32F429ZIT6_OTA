@@ -10,7 +10,12 @@
 
 #include "main.h"
 
+typedef enum
+{
+  ETX_OTA_EX_OK       = 0,    // Success
+  ETX_OTA_EX_ERR      = 1,    // Failure
+}ETX_OTA_EX_;
 
-void go_to_ota_app();
+void go_to_ota_app(UART_HandleTypeDef *huart);
 
 #endif /* INC_OTA_APP_H_ */
