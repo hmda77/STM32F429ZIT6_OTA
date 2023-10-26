@@ -32,6 +32,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define B_MAJOR 0
+#define B_MINOR 1
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -57,7 +59,7 @@ UART_HandleTypeDef huart1;
 SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
-
+const uint8_t BL_Version[2] =  {B_MAJOR, B_MINOR};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -122,8 +124,8 @@ int main(void)
   MX_USB_HOST_Init();
   MX_UART5_Init();
   /* USER CODE BEGIN 2 */
-  printf("start BootLoader");
   HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_SET);
+  printf("Starting Bootloader (%d.%d)\r\n", BL_Version[0], BL_Version[1]);
   HAL_Delay(5000);
   go_to_application();
   /* USER CODE END 2 */
