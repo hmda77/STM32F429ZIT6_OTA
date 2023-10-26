@@ -22,7 +22,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
+#include "../../../Drivers/BSP/STM32F429I-Discovery/stm32f429i_discovery_lcd.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -32,6 +33,11 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
+// MINOR AND MAJOR VERSION Definition
+#define V_MAJOR 0
+#define V_MINOR 1
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -57,6 +63,9 @@ UART_HandleTypeDef huart1;
 SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
+
+const uint8_t BL_Version[2] =  {V_MAJOR, V_MINOR}; //App Version
+char buffch[100];
 
 /* USER CODE END PV */
 
@@ -120,6 +129,47 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USB_HOST_Init();
   /* USER CODE BEGIN 2 */
+
+
+  sprintf(buffch,"Starting Application (%d.%d)", BL_Version[0], BL_Version[1]);
+
+  /*##-1- LCD Initialization #################################################*/
+  /* Initialize the LCD */
+  BSP_LCD_Init();
+
+  /* Layer2 Init */
+  BSP_LCD_LayerDefaultInit(1, LCD_FRAME_BUFFER_LAYER1);
+  /* Set Foreground Layer */
+  BSP_LCD_SelectLayer(1);
+  /* Clear the LCD */
+  BSP_LCD_Clear(LCD_COLOR_BLACK);
+  BSP_LCD_SetColorKeying(1, LCD_COLOR_BLACK);
+  BSP_LCD_SetLayerVisible(1, DISABLE);
+
+  /* Layer1 Init */
+  BSP_LCD_LayerDefaultInit(0, LCD_FRAME_BUFFER_LAYER0);
+
+  /* Set Foreground Layer */
+  BSP_LCD_SelectLayer(0);
+
+  /* Enable The LCD */
+  BSP_LCD_DisplayOn();
+
+  /* Clear the LCD */
+  BSP_LCD_Clear(LCD_COLOR_BLACK);
+
+
+  /* Set Touchscreen Demo description */
+
+  BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
+  BSP_LCD_SetTextColor(LCD_COLOR_RED);
+  BSP_LCD_SetFont(&Font12);
+  BSP_LCD_DisplayStringAt(0, 0, (uint8_t*)buffch, CENTER_MODE);
+  BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+  BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2 - 27, (uint8_t*)"MUST'V BEEN THE", CENTER_MODE);
+  BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2 - 12, (uint8_t*)"DEADLY", CENTER_MODE);
+  BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2 + 3, (uint8_t*)"KISS", CENTER_MODE);
+
 
   /* USER CODE END 2 */
 

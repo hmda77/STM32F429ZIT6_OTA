@@ -243,7 +243,9 @@ void Error_Handler(void);
 #define NBL1_GPIO_Port GPIOE
 
 /* USER CODE BEGIN Private defines */
-
+#define LCD_FRAME_BUFFER_LAYER0                  (LCD_FRAME_BUFFER+0x130000)
+#define LCD_FRAME_BUFFER_LAYER1                  LCD_FRAME_BUFFER
+#define CONVERTED_FRAME_BUFFER                   (LCD_FRAME_BUFFER+0x260000)
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
