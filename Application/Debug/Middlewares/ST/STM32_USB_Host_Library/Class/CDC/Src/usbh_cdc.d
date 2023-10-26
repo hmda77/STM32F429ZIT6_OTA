@@ -42,6 +42,13 @@ Middlewares/ST/STM32_USB_Host_Library/Class/CDC/Src/usbh_cdc.o: \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/../../../Drivers/BSP/STM32F429I-Discovery/stm32f429i_discovery_lcd.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/../../../Drivers/BSP/STM32F429I-Discovery/stm32f429i_discovery.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/../../../Drivers/BSP/STM32F429I-Discovery/stm32f429i_discovery_sdram.h \
+ c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\utilities\fonts\fonts.h \
+ c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\drivers\bsp\components\ili9341\ili9341.h \
+ c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\drivers\bsp\components\common\lcd.h \
+ ../Core/Inc/ota_app.h ../Core/Inc/main.h \
  ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_def.h \
  ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_ioreq.h \
  ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_core.h \
@@ -90,6 +97,14 @@ Middlewares/ST/STM32_USB_Host_Library/Class/CDC/Src/usbh_cdc.o: \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/../../../Drivers/BSP/STM32F429I-Discovery/stm32f429i_discovery_lcd.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/../../../Drivers/BSP/STM32F429I-Discovery/stm32f429i_discovery.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/../../../Drivers/BSP/STM32F429I-Discovery/stm32f429i_discovery_sdram.h:
+c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\utilities\fonts\fonts.h:
+c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\drivers\bsp\components\ili9341\ili9341.h:
+c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\drivers\bsp\components\common\lcd.h:
+../Core/Inc/ota_app.h:
+../Core/Inc/main.h:
 ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_def.h:
 ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_ioreq.h:
 ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_core.h:

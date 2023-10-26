@@ -22,10 +22,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
-#include "../../../Drivers/BSP/STM32F429I-Discovery/stm32f429i_discovery_lcd.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -68,6 +64,7 @@ SDRAM_HandleTypeDef hsdram1;
 
 const uint8_t BL_Version[2] =  {V_MAJOR, V_MINOR}; //App Version
 char buffch[100];
+bool ota_update_request = false;
 
 /* USER CODE END PV */
 
@@ -134,50 +131,9 @@ int main(void)
 
 
   sprintf(buffch,"Starting Application (%d.%d)", BL_Version[0], BL_Version[1]);
-  printf("Starting Bootloader (%d.%d)\r\n", BL_Version[0], BL_Version[1]);
+  printf("Starting Application (%d.%d)\r\n", BL_Version[0], BL_Version[1]);
 
 
-  /* check the User Interrupt for 5 seconds */
-  GPIO_PinState OTA_Pin_state;
-  OTA_Pin_state = GPIO_PIN_SET;
-
-  uint32_t end_tick = HAL_GetTick() + 5000;   // from now to 5 Seconds
-  printf("Press The Blue Button to trigger OTA update...\r\n");
-  do
-  {
-	  OTA_Pin_state = HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
-      uint32_t current_tick = HAL_GetTick();
-      /* Check the button is pressed or not for 3seconds */
-      if( ( OTA_Pin_state != GPIO_PIN_RESET ) || ( current_tick > end_tick ) )
-      {
-        /* Either timeout or Button is pressed */
-        break;
-      }
-  }while(true);
-
-  /*Start the Firmware or Application update */
-  if( OTA_Pin_state == GPIO_PIN_SET )
-  {
-  	HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
-  	HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_SET);
-    printf("Starting Firmware Download!!!\r\n");
-    /* OTA Request. Receive the data from the UART4 and flash */
-    if( true )
-//    if( etx_ota_download_and_flash(&huart5) != ETX_OTA_EX_OK )
-    {
-      /* Error. Don't process. */
-      printf("OTA Update : ERROR!!! HALT!!!\r\n");
-//      HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
-      HAL_Delay(3000);
-      HAL_NVIC_SystemReset();
-    }
-    else
-    {
-      /* Reset to load the new application */
-      printf("Firmware update is done!!! Rebooting...\r\n");
-      HAL_NVIC_SystemReset();
-    }
-  }
   /*##-1- LCD Initialization #################################################*/
   /* Initialize the LCD */
   BSP_LCD_Init();
@@ -225,11 +181,22 @@ int main(void)
   {
     /* USER CODE END WHILE */
     MX_USB_HOST_Process();
+
+    /* USER CODE BEGIN 3 */
     HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
     HAL_Delay(1000);
     HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
     HAL_Delay(1000);
-    /* USER CODE BEGIN 3 */
+    if (ota_update_request){
+    	printf("OTA Update Requested\r\n");
+    	HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
+    	HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_SET);
+    	go_to_ota_app();
+    	HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
+    	HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_RESET);
+    	ota_update_request = false;
+    }
+
   }
   /* USER CODE END 3 */
 }
@@ -654,8 +621,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : B1_Pin MEMS_INT1_Pin MEMS_INT2_Pin TP_INT1_Pin */
-  GPIO_InitStruct.Pin = B1_Pin|MEMS_INT1_Pin|MEMS_INT2_Pin|TP_INT1_Pin;
+  /*Configure GPIO pin : B1_Pin */
+  GPIO_InitStruct.Pin = B1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : MEMS_INT1_Pin MEMS_INT2_Pin TP_INT1_Pin */
+  GPIO_InitStruct.Pin = MEMS_INT1_Pin|MEMS_INT2_Pin|TP_INT1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_EVT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -698,6 +671,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 
 }
 

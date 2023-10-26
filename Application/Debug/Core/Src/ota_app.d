@@ -1,4 +1,4 @@
-Core/Src/stm32f4xx_hal_msp.o: ../Core/Src/stm32f4xx_hal_msp.c \
+Core/Src/ota_app.o: ../Core/Src/ota_app.c ../Core/Inc/ota_app.h \
  ../Core/Inc/main.h ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
@@ -44,7 +44,8 @@ Core/Src/stm32f4xx_hal_msp.o: ../Core/Src/stm32f4xx_hal_msp.c \
  c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\utilities\fonts\fonts.h \
  c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\drivers\bsp\components\ili9341\ili9341.h \
  c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\drivers\bsp\components\common\lcd.h \
- ../Core/Inc/ota_app.h ../Core/Inc/main.h
+ ../Core/Inc/ota_app.h
+../Core/Inc/ota_app.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -92,4 +93,3 @@ c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\utilities\fonts\fonts.
 c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\drivers\bsp\components\ili9341\ili9341.h:
 c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\drivers\bsp\components\common\lcd.h:
 ../Core/Inc/ota_app.h:
-../Core/Inc/main.h:

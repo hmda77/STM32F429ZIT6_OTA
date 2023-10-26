@@ -38,13 +38,13 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h \
- ../USB_HOST/App/usb_host.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/../../../Drivers/BSP/STM32F429I-Discovery/stm32f429i_discovery_lcd.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/../../../Drivers/BSP/STM32F429I-Discovery/stm32f429i_discovery.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/../../../Drivers/BSP/STM32F429I-Discovery/stm32f429i_discovery_sdram.h \
  c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\utilities\fonts\fonts.h \
  c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\drivers\bsp\components\ili9341\ili9341.h \
- c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\drivers\bsp\components\common\lcd.h
+ c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\drivers\bsp\components\common\lcd.h \
+ ../Core/Inc/ota_app.h ../Core/Inc/main.h ../USB_HOST/App/usb_host.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -85,10 +85,12 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h:
-../USB_HOST/App/usb_host.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/../../../Drivers/BSP/STM32F429I-Discovery/stm32f429i_discovery_lcd.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/../../../Drivers/BSP/STM32F429I-Discovery/stm32f429i_discovery.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/../../../Drivers/BSP/STM32F429I-Discovery/stm32f429i_discovery_sdram.h:
 c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\utilities\fonts\fonts.h:
 c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\drivers\bsp\components\ili9341\ili9341.h:
 c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\drivers\bsp\components\common\lcd.h:
+../Core/Inc/ota_app.h:
+../Core/Inc/main.h:
+../USB_HOST/App/usb_host.h:
