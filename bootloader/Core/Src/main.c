@@ -36,7 +36,6 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -76,7 +75,7 @@ static void MX_UART5_Init(void);
 void MX_USB_HOST_Process(void);
 
 /* USER CODE BEGIN PFP */
-
+static void go_to_application (void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -123,7 +122,7 @@ int main(void)
   MX_USB_HOST_Init();
   MX_UART5_Init();
   /* USER CODE BEGIN 2 */
-
+  go_to_application();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -639,6 +638,7 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+#ifdef __GNUC__
 int __io_putchar(int ch)
 
 #else
