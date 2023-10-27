@@ -28,7 +28,7 @@ OTA_EX_ ota_download_and_flash(UART_HandleTypeDef *huart);
 static uint16_t ota_receive_chunk(UART_HandleTypeDef *huart, uint8_t *buf, uint16_t max_len );
 static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len );
 static void ota_send_resp(UART_HandleTypeDef *huart, uint8_t rsp);
-static HAL_StatusTypeDef write_data_to_slot(uint8_t *data, uint8_t data_len, bool is_first_block);
+static HAL_StatusTypeDef write_data_to_slot(uint8_t *data, uint32_t data_len, bool is_first_block);
 uint32_t ota_calcCRC(uint8_t * pData, uint32_t DataLength);
 
 /* -------------------- Functions ------------------- */
@@ -305,6 +305,7 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 				HAL_StatusTypeDef	ex		 = HAL_ERROR;
 
 				if( data->packet_type == OTA_PACKET_TYPE_DATA ){
+
 					bool is_first_block = false;
 
 					if( ota_fw_received_size == 0){
@@ -315,10 +316,6 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 
 					/* Write the chunk to the Flash */
 					ex = write_data_to_slot(buf+4, data_len, is_first_block);
-
-					//Delete this line in future
-					ota_fw_received_size += data_len;
-
 					if( ex == HAL_OK)
 					{
 						printf("[%ld/%ld]\r\n", ota_fw_received_size/OTA_DATA_MAX_SIZE,
@@ -387,7 +384,7 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
  * @retval HAL_StatusTypeDef
  */
 static HAL_StatusTypeDef write_data_to_slot(uint8_t *data,
-											uint8_t data_len,
+											uint32_t data_len,
 											bool is_first_block)
 {
 	HAL_StatusTypeDef ret = HAL_ERROR;
@@ -422,7 +419,38 @@ static HAL_StatusTypeDef write_data_to_slot(uint8_t *data,
 			}
 		}
 
+		uint32_t flash_addr = OTA_SLOT_FLASH_ADDR;
 
+		for( int i = 0; i < data_len; i++)
+		{
+			ret = HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE,
+									(flash_addr + ota_fw_received_size),
+									data[i]);
+
+			if ( ret == HAL_OK )
+			{
+				//update the data count
+				ota_fw_received_size +=1;
+			}
+			else
+			{
+				printf("Flash Write Error\r\n");
+				break;
+			}
+		}
+
+		if( ret != HAL_OK )
+		{
+			break;
+		}
+
+
+		// Lock Flash
+		ret = HAL_FLASH_Lock();
+		if( ret != HAL_OK )
+		{
+			break;
+		}
 	}while(false);
 
 	return ret;
