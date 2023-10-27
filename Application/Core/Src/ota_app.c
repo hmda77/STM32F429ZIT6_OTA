@@ -184,7 +184,7 @@ static uint16_t ota_receive_chunk(UART_HandleTypeDef *huart, uint8_t *buf, uint1
 		index +=4u;
 
 		// Receive EOF byte (1 byte)
-		ret = HAL_UART_Receive(huart, buf, 1, HAL_MAX_DELAY);
+		ret = HAL_UART_Receive(huart, &buf[index], 1, HAL_MAX_DELAY);
 		if ( ret != HAL_OK)
 		{
 			// doesn't received anything
@@ -316,6 +316,9 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 					// TODO: write data to slot
 					// ex = write_data_to_slot ()
 
+					//Delete this line in future
+					ota_fw_received_size += data_len;
+
 					if( ex != HAL_OK)
 					{
 						printf("[%ld/%ld]\r\n", ota_fw_received_size/OTA_DATA_MAX_SIZE,
@@ -394,7 +397,7 @@ static void ota_send_resp(UART_HandleTypeDef *huart, uint8_t rsp){
 	pack.crc = ota_calcCRC(&pack.status, 1);
 
 	//send respond
-	HAL_UART_Transmit(huart, (uint8_t *)&rsp, sizeof(OTA_RESP_),HAL_MAX_DELAY);
+	HAL_UART_Transmit(huart, (uint8_t *)&pack, sizeof(OTA_RESP_),HAL_MAX_DELAY);
 
 }
 
