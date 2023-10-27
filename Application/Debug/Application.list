@@ -2747,10 +2747,10 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
  8041304:	4a32      	ldr	r2, [pc, #200]	; (80413d0 <ota_process_data+0x1ec>)
  8041306:	6013      	str	r3, [r2, #0]
 
-					if( ex != HAL_OK)
+					if( ex == HAL_OK)
  8041308:	7c7b      	ldrb	r3, [r7, #17]
  804130a:	2b00      	cmp	r3, #0
- 804130c:	d04d      	beq.n	80413aa <ota_process_data+0x1c6>
+ 804130c:	d14d      	bne.n	80413aa <ota_process_data+0x1c6>
 					{
 						printf("[%ld/%ld]\r\n", ota_fw_received_size/OTA_DATA_MAX_SIZE,
  804130e:	4b30      	ldr	r3, [pc, #192]	; (80413d0 <ota_process_data+0x1ec>)

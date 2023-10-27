@@ -319,7 +319,7 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 					//Delete this line in future
 					ota_fw_received_size += data_len;
 
-					if( ex != HAL_OK)
+					if( ex == HAL_OK)
 					{
 						printf("[%ld/%ld]\r\n", ota_fw_received_size/OTA_DATA_MAX_SIZE,
 												ota_fw_total_size/OTA_DATA_MAX_SIZE);
