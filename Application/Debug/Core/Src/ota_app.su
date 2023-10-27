@@ -1,2 +1,6 @@
-../Core/Src/ota_app.c:18:6:go_to_ota_app	16	static
-../Core/Src/ota_app.c:38:13:etx_ota_download_and_flash	16	static
+../Core/Src/ota_app.c:40:6:go_to_ota_app	16	static
+../Core/Src/ota_app.c:66:9:ota_download_and_flash	24	static
+../Core/Src/ota_app.c:120:17:ota_receive_chunk	48	static
+../Core/Src/ota_app.c:238:16:ota_process_data	48	static
+../Core/Src/ota_app.c:384:13:ota_send_resp	32	static
+../Core/Src/ota_app.c:409:10:ota_calcCRC	32	static
