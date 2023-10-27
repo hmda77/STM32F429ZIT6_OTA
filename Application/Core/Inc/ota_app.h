@@ -10,7 +10,12 @@
 
 #include "main.h"
 
-/* ---------------- define ------------------*/
+/* -------------------------------------------- *
+ *												*
+ * 					Defines						*
+ *												*
+ * -------------------------------------------- *
+ */
 
 #define OTA_DATA_MAX_SIZE   ( 1024 )  //Maximum data Size
 #define OTA_DATA_ENDBYTES   (    5 )  //data CRC and EOF
@@ -25,7 +30,25 @@
 #define OTA_SLOT_FLASH_ADDR		0x08120000				// First Block base address
 #define OTA_SLOT_SECTOR			FLASH_SECTOR_17			// First Sector Of Slot
 #define OTA_SLOT_NB_SECTOR		(    7 ) 				// Number Of sectors to be erased
-/* ------------- type definitions ------------*/
+
+#define OTA_CFG_FLASH_ADDR		0x08010000				// Configuration's Base Address
+#define OTA_CFG_SECTOR			FLASH_SECTOR_4			// Configuration's Sector
+
+/*
+ * Reboot reason
+ */
+#define OTA_FIRST_TIME_BOOT			( 0xFFFFFFFF )		// First time Boot
+#define OTA_NORMAL_BOOT				( 0xABABABAB )		// Normal Boot
+#define OTA_UPDATE_APP				( 0xCDCDCDCD )		// UPDATE REQUEST
+#define OTA_LOAD_PREV_APP			( 0xEFEFEFEF )		// Load previous APP
+
+
+/* -------------------------------------------- *
+ *												*
+ * 				Type Definitions				*
+ *												*
+ * -------------------------------------------- *
+ */
 /*
  * Exception codes
  */
@@ -80,6 +103,36 @@ typedef struct
   uint32_t reserved1;
   uint32_t reserved2;
 }__attribute__((packed)) meta_info;
+
+
+
+/*
+ * Slot table
+ */
+typedef struct
+{
+    uint8_t  is_this_slot_not_valid;  //Is this slot has a valid firmware/application?
+    uint8_t  is_this_slot_active;     //Is this slot's firmware is currently running?
+    uint8_t  should_we_run_this_fw;   //Do we have to run this slot's firmware?
+    uint32_t fw_size;                 //Slot's firmware/application size
+    uint32_t fw_crc;                  //Slot's firmware/application CRC
+    uint32_t reserved1;
+    uint32_t reserved2;
+    uint32_t reserved3;
+}__attribute__((packed)) OTA_SLOT_;
+
+
+/*
+ * General configuration
+ */
+typedef struct
+{
+    uint32_t  reboot_cause;
+    OTA_SLOT_ slot_table;
+}__attribute__((packed)) OTA_GNRL_CFG_;
+
+
+
 
 /*
  * OTA Command format
@@ -156,13 +209,23 @@ typedef struct
   uint8_t   eof;
 }__attribute__((packed)) OTA_RESP_;
 
-/* -----------------------------------------*/
 
+/* -------------------------------------------- *
+ *												*
+ * 				Function References				*
+ *												*
+ * -------------------------------------------- *
+ */
 void go_to_ota_app(UART_HandleTypeDef *huart);
 
 
 
-/* ----------------- CRC TABEL ------------- */
+/* -------------------------------------------- *
+ *												*
+ * 					CRC Table					*
+ *												*
+ * -------------------------------------------- *
+ */
 static const uint32_t crc_table[0x100] = {
   0x00000000, 0x04C11DB7, 0x09823B6E, 0x0D4326D9, 0x130476DC, 0x17C56B6B, 0x1A864DB2, 0x1E475005, 0x2608EDB8, 0x22C9F00F, 0x2F8AD6D6, 0x2B4BCB61, 0x350C9B64, 0x31CD86D3, 0x3C8EA00A, 0x384FBDBD,
   0x4C11DB70, 0x48D0C6C7, 0x4593E01E, 0x4152FDA9, 0x5F15ADAC, 0x5BD4B01B, 0x569796C2, 0x52568B75, 0x6A1936C8, 0x6ED82B7F, 0x639B0DA6, 0x675A1011, 0x791D4014, 0x7DDC5DA3, 0x709F7B7A, 0x745E66CD,

@@ -21,6 +21,8 @@ static uint32_t ota_fw_crc;
 static uint32_t ota_fw_received_size;
 /* Buffer to hold the received data */
 static uint8_t Rx_Buffer[ OTA_PACKET_MAX_SIZE ];
+/*Configuration */
+OTA_GNRL_CFG_ *cfg_flash	=	(OTA_GNRL_CFG_*) (OTA_CFG_FLASH_ADDR);
 
 
 /*------------------- Defined Functions -------------- */
@@ -28,6 +30,7 @@ OTA_EX_ ota_download_and_flash(UART_HandleTypeDef *huart);
 static uint16_t ota_receive_chunk(UART_HandleTypeDef *huart, uint8_t *buf, uint16_t max_len );
 static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len );
 static void ota_send_resp(UART_HandleTypeDef *huart, uint8_t rsp);
+static HAL_StatusTypeDef write_cfg_to_flash( OTA_GNRL_CFG_ *cfg );
 static HAL_StatusTypeDef write_data_to_slot(uint8_t *data, uint32_t data_len, bool is_first_block);
 uint32_t ota_calcCRC(uint8_t * pData, uint32_t DataLength);
 
@@ -312,6 +315,7 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 						// This is the first block
 						is_first_block = true;
 						//TODO: CFG if needed
+
 					}
 
 					/* Write the chunk to the Flash */
@@ -354,12 +358,30 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 							break;
 						}
 
-						printf("Done!\r\n");
+						printf("Validated Successfully!\r\n");
 
 						// TODO: Update CFG
 
-						ota_state = OTA_STATE_IDLE;
-						ret = OTA_EX_OK;
+						OTA_GNRL_CFG_ cfg;
+						memcpy(&cfg, cfg_flash, sizeof(OTA_GNRL_CFG_));
+
+						// update information
+						cfg.slot_table.fw_crc					= cal_crc;
+						cfg.slot_table.fw_size					= ota_fw_total_size;
+						cfg.slot_table.is_this_slot_not_valid	= 0u;
+						cfg.slot_table.should_we_run_this_fw	= 1u;
+						cfg.slot_table.is_this_slot_active		= 0u;
+
+						// update the reboot reason
+						cfg.reboot_cause = OTA_UPDATE_APP;
+
+						// Write config to flash
+						ret = write_cfg_to_flash( &cfg );
+						if( ret == OTA_EX_OK )
+						{
+							ota_state = OTA_STATE_IDLE;
+							ret = OTA_EX_OK;
+						}
 					}
 				}
 			}
@@ -452,6 +474,82 @@ static HAL_StatusTypeDef write_data_to_slot(uint8_t *data,
 		{
 			break;
 		}
+	}while(false);
+
+	return ret;
+}
+
+/**
+  * @brief Write the configuration to flash
+  * @param cfg config structure
+  * @retval none
+  */
+static HAL_StatusTypeDef write_cfg_to_flash( OTA_GNRL_CFG_ *cfg )
+{
+	HAL_StatusTypeDef ret = HAL_ERROR;
+
+	do
+	{
+		if( cfg == NULL )
+		{
+			break;
+		}
+
+		ret = HAL_FLASH_Unlock();
+		if( ret != HAL_OK )
+		{
+			break;
+		}
+
+		// Check if the FLASH_FLAG_BSY
+		FLASH_WaitForLastOperation(HAL_MAX_DELAY);
+
+		// Erase the flash configuration sector
+		FLASH_EraseInitTypeDef EraseInitStruct;
+		uint32_t SectorError;
+
+		EraseInitStruct.TypeErase		= FLASH_TYPEERASE_SECTORS;
+		EraseInitStruct.Sector			= OTA_CFG_SECTOR;
+		EraseInitStruct.NbSectors		= 1u;
+		EraseInitStruct.VoltageRange	= FLASH_VOLTAGE_RANGE_3;
+
+		// clear all flags before you write it to flash
+		    __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_EOP | FLASH_FLAG_OPERR |
+		                FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR);
+
+		ret = HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError);
+		if( ret != HAL_OK )
+		{
+			break;
+		}
+
+		// Write the configuration
+		uint8_t *data = (uint8_t*) cfg;
+		for( uint32_t i = 0u; i<sizeof(OTA_GNRL_CFG_); i++ )
+		{
+			ret = HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE,
+									OTA_CFG_FLASH_ADDR + i,
+									data[i]);
+			if( ret != HAL_OK )
+			{
+				printf("Slot table Flash Write Error\r\n");
+				break;
+			}
+		}
+
+	    //Check if the FLASH_FLAG_BSY.
+	    FLASH_WaitForLastOperation( HAL_MAX_DELAY );
+
+	    if( ret != HAL_OK )
+	    {
+	      break;
+	    }
+
+	    ret = HAL_FLASH_Lock();
+	    if( ret != HAL_OK )
+	    {
+	      break;
+	    }
 	}while(false);
 
 	return ret;
