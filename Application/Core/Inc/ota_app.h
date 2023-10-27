@@ -22,7 +22,9 @@
 #define OTA_NACK 0x01    // NACK
 #define OTA_ACK  0x00    // ACK
 
-#define OTA_SLOT_FLASH_ADDR 0x08120000
+#define OTA_SLOT_FLASH_ADDR		0x08120000				// First Block base address
+#define OTA_SLOT_SECTOR			FLASH_SECTOR_17			// First Sector Of Slot
+#define OTA_SLOT_NB_SECTOR		(    7 ) 				// Number Of sectors to be erased
 /* ------------- type definitions ------------*/
 /*
  * Exception codes

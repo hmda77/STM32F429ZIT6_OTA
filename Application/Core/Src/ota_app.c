@@ -28,6 +28,7 @@ OTA_EX_ ota_download_and_flash(UART_HandleTypeDef *huart);
 static uint16_t ota_receive_chunk(UART_HandleTypeDef *huart, uint8_t *buf, uint16_t max_len );
 static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len );
 static void ota_send_resp(UART_HandleTypeDef *huart, uint8_t rsp);
+static HAL_StatusTypeDef write_data_to_slot(uint8_t *data, uint8_t data_len, bool is_first_block);
 uint32_t ota_calcCRC(uint8_t * pData, uint32_t DataLength);
 
 /* -------------------- Functions ------------------- */
@@ -313,8 +314,7 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 					}
 
 					/* Write the chunk to the Flash */
-					// TODO: write data to slot
-					// ex = write_data_to_slot ()
+					ex = write_data_to_slot(buf+4, data_len, is_first_block);
 
 					//Delete this line in future
 					ota_fw_received_size += data_len;
@@ -373,6 +373,56 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 			}
 			break;
 		};
+	}while(false);
+
+	return ret;
+}
+
+
+/**
+ * @brief Write received data to flash slot
+ * @param data data to be written
+ * @param data_len data length
+ * @param is_first_block true if this is first block, false not first block
+ * @retval HAL_StatusTypeDef
+ */
+static HAL_StatusTypeDef write_data_to_slot(uint8_t *data,
+											uint8_t data_len,
+											bool is_first_block)
+{
+	HAL_StatusTypeDef ret = HAL_ERROR;
+
+	do
+	{
+		// Unlock Flash
+		ret = HAL_FLASH_Unlock();
+		if ( ret != HAL_OK )
+		{
+			break;
+		}
+
+		// Erase Only on First Block
+		if( is_first_block )
+		{
+			printf("Erasing The Slot Flash memory....\r\n");
+			// Erase The Flash
+			FLASH_EraseInitTypeDef EraseInitStruct;
+			uint32_t SectorError;
+
+			EraseInitStruct.TypeErase			= FLASH_TYPEERASE_SECTORS;
+			EraseInitStruct.Sector				= OTA_SLOT_SECTOR;
+			EraseInitStruct.NbSectors			= OTA_SLOT_NB_SECTOR;
+			EraseInitStruct.VoltageRange		= FLASH_VOLTAGE_RANGE_3;
+
+			ret = HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError);
+
+			if( ret != HAL_OK ){
+				printf("Flash Erase Error On Sector 0x%08lx\r\n",SectorError);
+				break;
+			}
+		}
+
+
 	}while(false);
 
 	return ret;
