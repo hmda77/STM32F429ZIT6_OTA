@@ -358,6 +358,7 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 
 						// TODO: Update CFG
 
+						ota_state = OTA_STATE_IDLE;
 						ret = OTA_EX_OK;
 					}
 				}
