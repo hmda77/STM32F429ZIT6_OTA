@@ -34,7 +34,7 @@
 
 // MINOR AND MAJOR VERSION Definition
 #define V_MAJOR 0
-#define V_MINOR 1
+#define V_MINOR 2
 
 /* USER CODE END PD */
 

@@ -39,13 +39,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  17 .debug_macro  0002c83a  00000000  00000000  00066c08  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   0002cfc9  00000000  00000000  00093442  2**0
+ 18 .debug_line   0002d0cc  00000000  00000000  00093442  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    000f0ca9  00000000  00000000  000c040b  2**0
+ 19 .debug_str    000f0ca9  00000000  00000000  000c050e  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .comment      00000050  00000000  00000000  001b10b4  2**0
+ 20 .comment      00000050  00000000  00000000  001b11b7  2**0
                   CONTENTS, READONLY
- 21 .debug_frame  00009f0c  00000000  00000000  001b1104  2**2
+ 21 .debug_frame  00009f0c  00000000  00000000  001b1208  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -468,13 +468,13 @@ int main(void)
   sprintf(buffch,"Starting Application (%d.%d)", BL_Version[0], BL_Version[1]);
  80205cc:	2300      	movs	r3, #0
  80205ce:	461a      	mov	r2, r3
- 80205d0:	2301      	movs	r3, #1
+ 80205d0:	2302      	movs	r3, #2
  80205d2:	4951      	ldr	r1, [pc, #324]	; (8020718 <main+0x184>)
  80205d4:	4851      	ldr	r0, [pc, #324]	; (802071c <main+0x188>)
  80205d6:	f00d fa37 	bl	802da48 <siprintf>
   printf("Starting Application (%d.%d)\r\n", BL_Version[0], BL_Version[1]);
  80205da:	2300      	movs	r3, #0
- 80205dc:	2201      	movs	r2, #1
+ 80205dc:	2202      	movs	r2, #2
  80205de:	4619      	mov	r1, r3
  80205e0:	484f      	ldr	r0, [pc, #316]	; (8020720 <main+0x18c>)
  80205e2:	f00d f993 	bl	802d90c <iprintf>
