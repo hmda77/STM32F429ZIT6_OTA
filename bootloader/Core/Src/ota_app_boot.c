@@ -31,7 +31,7 @@ static uint16_t ota_receive_chunk(UART_HandleTypeDef *huart, uint8_t *buf, uint1
 static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len );
 static void ota_send_resp(UART_HandleTypeDef *huart, uint8_t rsp);
 static HAL_StatusTypeDef write_cfg_to_flash( OTA_GNRL_CFG_ *cfg );
-static HAL_StatusTypeDef write_data_to_slot(uint8_t *data, uint32_t data_len, bool is_first_block);
+static HAL_StatusTypeDef write_data_to_flash(uint8_t *data, uint32_t data_len, bool is_first_block);
 uint32_t ota_calcCRC(uint8_t * pData, uint32_t DataLength);
 
 /* -------------------- Functions ------------------- */
@@ -55,8 +55,7 @@ void go_to_ota_app(UART_HandleTypeDef *huart)
     {
       /* Reset to load the new application */
       printf("Firmware update is done!!! Rebooting...\r\n");
-      HAL_Delay(10000);
-//      HAL_NVIC_SystemReset();
+      HAL_NVIC_SystemReset();
     }
 }
 
@@ -319,7 +318,7 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 					}
 
 					/* Write the chunk to the Flash */
-					ex = write_data_to_slot(buf+4, data_len, is_first_block);
+					ex = write_data_to_flash(buf+4, data_len, is_first_block);
 					if( ex == HAL_OK)
 					{
 						printf("[%ld/%ld]\r\n", ota_fw_received_size/OTA_DATA_MAX_SIZE,
@@ -348,7 +347,7 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 
 						printf("Validating the received Binary....\r\n");
 
-						uint32_t cal_crc = ota_calcCRC((uint8_t *) OTA_SLOT_FLASH_ADDR
+						uint32_t cal_crc = ota_calcCRC((uint8_t *) OTA_APP_FLASH_ADDR
 																, ota_fw_total_size);
 
 						if(cal_crc != ota_fw_crc)
@@ -360,7 +359,6 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 
 						printf("Validated Successfully!\r\n");
 
-						// TODO: Update CFG
 
 						OTA_GNRL_CFG_ cfg;
 						memcpy(&cfg, cfg_flash, sizeof(OTA_GNRL_CFG_));
@@ -373,7 +371,7 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 						cfg.slot_table.is_this_slot_active		= 0u;
 
 						// update the reboot reason
-						cfg.reboot_cause = OTA_UPDATE_APP;
+						cfg.reboot_cause = OTA_NORMAL_BOOT;
 
 						// Write config to flash
 						ret = write_cfg_to_flash( &cfg );
@@ -406,7 +404,7 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
  * @param is_first_block true if this is first block, false not first block
  * @retval HAL_StatusTypeDef
  */
-static HAL_StatusTypeDef write_data_to_slot(uint8_t *data,
+static HAL_StatusTypeDef write_data_to_flash(uint8_t *data,
 											uint32_t data_len,
 											bool is_first_block)
 {
@@ -430,8 +428,8 @@ static HAL_StatusTypeDef write_data_to_slot(uint8_t *data,
 			uint32_t SectorError;
 
 			EraseInitStruct.TypeErase			= FLASH_TYPEERASE_SECTORS;
-			EraseInitStruct.Sector				= OTA_SLOT_SECTOR;
-			EraseInitStruct.NbSectors			= OTA_SLOT_NB_SECTOR;
+			EraseInitStruct.Sector				= OTA_APP_SECTOR;
+			EraseInitStruct.NbSectors			= OTA_APP_NB_SECTOR;
 			EraseInitStruct.VoltageRange		= FLASH_VOLTAGE_RANGE_3;
 
 			ret = HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError);
@@ -442,7 +440,7 @@ static HAL_StatusTypeDef write_data_to_slot(uint8_t *data,
 			}
 		}
 
-		uint32_t flash_addr = OTA_SLOT_FLASH_ADDR;
+		uint32_t flash_addr = OTA_APP_FLASH_ADDR;
 
 		for( int i = 0; i < data_len; i++)
 		{

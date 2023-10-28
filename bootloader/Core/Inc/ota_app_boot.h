@@ -30,6 +30,10 @@
 #define OTA_SLOT_SECTOR			FLASH_SECTOR_17			// First Sector Of Slot
 #define OTA_SLOT_NB_SECTOR		(    7 ) 				// Number Of sectors to be erased
 
+#define OTA_APP_FLASH_ADDR		0x08020000				// First Block base address APP
+#define OTA_APP_SECTOR			FLASH_SECTOR_5			// First Sector Of APP
+#define OTA_APP_NB_SECTOR		(    7 ) 				// Number Of sectors to be erased
+
 #define OTA_CFG_FLASH_ADDR		0x08010000				// Configuration's Base Address
 #define OTA_CFG_SECTOR			FLASH_SECTOR_4			// Configuration's Sector
 

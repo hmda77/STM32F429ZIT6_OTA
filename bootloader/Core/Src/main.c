@@ -141,7 +141,7 @@ int main(void)
 
 	  case OTA_NORMAL_BOOT:
 	  {
-		  printf("Normal Boot, Validate Application...\r\n");
+		  printf("Normal Boot\r\n");
 	  }
 	  break;
 
@@ -158,6 +158,21 @@ int main(void)
 
 	  }
 	  break;
+  }
+
+  if (goto_ota_mode){
+	printf("OTA Update Requested...\r\n");
+	HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_SET);
+	if (cfg->reboot_cause == OTA_UPDATE_APP)
+	{
+		// TODO:
+		// backup_old_version();
+	}
+  	go_to_ota_app(&huart5);
+  	HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
+  	HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_RESET);
+  	goto_ota_mode = false;
   }
 
 
@@ -691,7 +706,7 @@ int fputc(int ch, FILE *f)
 
 static void go_to_application (void){
 	printf("Gonna Jump to Application ...\n");
-	void (*app_reset_handler) (void) = (void*) (*(volatile uint32_t *) (0x08040000 + 4));
+	void (*app_reset_handler) (void) = (void*) (*(volatile uint32_t *) (0x08020000 + 4));
 
 //	__set_MSP((*(volatile uint32_t *) (0x08040000)));
 	HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_RESET);
