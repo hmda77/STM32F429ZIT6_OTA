@@ -221,6 +221,7 @@ typedef struct
  */
 void go_to_ota_app(UART_HandleTypeDef *huart);
 void app_validation();
+HAL_StatusTypeDef restore_old_version();
 
 
 /* -------------------------------------------- *

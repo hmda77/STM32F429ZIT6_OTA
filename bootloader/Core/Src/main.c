@@ -156,7 +156,20 @@ int main(void)
 
 	  case OTA_LOAD_PREV_APP:
 	  {
+		  HAL_StatusTypeDef ret;
 		  printf("Update Unsuccessful, Back to previous APP if Available\r\n");
+		  ret = restore_old_version();
+		  if (ret == HAL_OK)
+		  {
+			  printf("Updated Successfully!!!Rebooting...");
+		  }
+		  else
+		  {
+			  //HALT
+			  while(1);
+		  }
+
+
 
 	  }
 	  break;

@@ -321,7 +321,7 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 						memcpy(&cfg, cfg_flash, sizeof(OTA_GNRL_CFG_));
 
 						cfg.backup_table.is_this_slot_not_valid = 1u;
-
+						cfg.backup_table.is_this_slot_active 	= 0u;
 						/* write back the updated config */
 			            ret = write_cfg_to_flash( &cfg );
 			            if( ret != OTA_EX_OK )
@@ -343,7 +343,7 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 
 						cfg.backup_table.fw_crc 				= cfg.app_table.fw_crc;
 						cfg.backup_table.fw_size				= cfg.app_table.fw_size;
-						cfg.backup_table.is_this_slot_active 	= 0u;
+						cfg.backup_table.is_this_slot_active 	= 1u;
 						cfg.backup_table.is_this_slot_not_valid = 0u;
 
 						/* write back the updated configuration */
@@ -658,7 +658,7 @@ void app_validation()
  * @param none
  * @retval HAL_StatusTypeDef
  */
-HAL_StatusTypeDef backup_old_version()
+static HAL_StatusTypeDef backup_old_version()
 {
 	HAL_StatusTypeDef ret = HAL_ERROR;
 
@@ -726,6 +726,119 @@ HAL_StatusTypeDef backup_old_version()
 
 	return ret;
 }
+
+
+
+/**
+ * @brief Restore APP in backup slot
+ */
+
+HAL_StatusTypeDef restore_old_version()
+{
+	HAL_StatusTypeDef ret = HAL_ERROR;
+
+	do
+	{
+		OTA_GNRL_CFG_ cfg;
+		memcpy(&cfg, cfg_flash, sizeof(OTA_GNRL_CFG_));
+
+		if(cfg.app_table.is_this_slot_active != 1u)
+		{
+			printf("No backup FW found\r\n");
+			break;
+		}
+
+		//Validate Backup
+		printf("Validation DONE!!!\r\n");
+		uint32_t cal_crc = ota_calcCRC((uint8_t *) OTA_SLOT_FLASH_ADDR,
+				 	 	 	 	 	 	 	 	 cfg.backup_table.fw_size);
+
+		if( cal_crc != cfg.backup_table.fw_crc)
+		{
+			printf("CRC Mismatch!!! cal_crc = [0x%08lx], rec_CRC = [0x%08lx]\r\n",
+												cal_crc,
+												cfg.backup_table.fw_size);
+			break;
+		}
+
+		printf("Validation DONE!!!\r\nRestore...\r\n");
+
+		ret = HAL_FLASH_Unlock();
+		if( ret != HAL_OK )
+		{
+			break;
+		}
+
+		// Check if the FLASH_FLAG_BSY
+		FLASH_WaitForLastOperation(HAL_MAX_DELAY);
+
+		// Erase the flash backup sector
+		FLASH_EraseInitTypeDef EraseInitStruct;
+		uint32_t SectorError;
+
+		EraseInitStruct.TypeErase		= FLASH_TYPEERASE_SECTORS;
+		EraseInitStruct.Sector			= OTA_APP_SECTOR;
+		EraseInitStruct.NbSectors		= OTA_APP_NB_SECTOR;
+		EraseInitStruct.VoltageRange	= FLASH_VOLTAGE_RANGE_3;
+
+		// clear all flags before you write it to flash
+		    __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_EOP | FLASH_FLAG_OPERR |
+		                FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR);
+
+		ret = HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError);
+		if( ret != HAL_OK )
+		{
+			break;
+		}
+
+		// Write the old app
+		uint8_t *data = (uint8_t *) OTA_SLOT_FLASH_ADDR;
+		for( uint32_t i = 0u; i<cfg.backup_table.fw_size; i++ )
+		{
+			ret = HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE,
+									OTA_APP_FLASH_ADDR + i,
+									data[i]);
+			if( ret != HAL_OK )
+			{
+				printf("APP Flash Write Error\r\n");
+				break;
+			}
+		}
+
+	    //Check if the FLASH_FLAG_BSY.
+	    FLASH_WaitForLastOperation( HAL_MAX_DELAY );
+
+	    if( ret != HAL_OK )
+	    {
+	      break;
+	    }
+
+	    ret = HAL_FLASH_Lock();
+	    if( ret != HAL_OK )
+	    {
+	      break;
+	    }
+
+	    // UPDATE APP Configuration
+
+		// update information
+		cfg.app_table.fw_crc					= cal_crc;
+		cfg.app_table.fw_size					= cfg.backup_table.fw_size;
+		cfg.app_table.is_this_slot_not_valid	= 0u;
+		cfg.app_table.is_this_slot_active		= 0u;
+
+		// update the reboot reason
+		cfg.reboot_cause = OTA_NORMAL_BOOT;
+
+		// Write configuration to flash
+		ret = write_cfg_to_flash( &cfg );
+
+	}while(false);
+
+	return ret;
+}
+
+
 
 /**
  * @brief send response to host
