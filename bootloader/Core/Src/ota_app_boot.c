@@ -52,7 +52,8 @@ void go_to_ota_app(UART_HandleTypeDef *huart)
       /* Error. Don't process. */
       printf("OTA Update : ERROR!!! HALT!!!\r\n");
       // TODO: Restore previous APP if APP Updated failed
-      HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
+      printf("Reboot...\r\n");
+      HAL_NVIC_SystemReset();
     }
     else
     {

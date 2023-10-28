@@ -7,19 +7,19 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
   1 .text         0000bf08  080001b0  080001b0  000101b0  2**4
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .rodata       00000a10  0800c0b8  0800c0b8  0001c0b8  2**2
+  2 .rodata       00000a1c  0800c0b8  0800c0b8  0001c0b8  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  3 .ARM.extab    00000000  0800cac8  0800cac8  00020094  2**0
+  3 .ARM.extab    00000000  0800cad4  0800cad4  00020094  2**0
                   CONTENTS
-  4 .ARM          00000008  0800cac8  0800cac8  0001cac8  2**2
+  4 .ARM          00000008  0800cad4  0800cad4  0001cad4  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  5 .preinit_array 00000000  0800cad0  0800cad0  00020094  2**0
+  5 .preinit_array 00000000  0800cadc  0800cadc  00020094  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  6 .init_array   00000004  0800cad0  0800cad0  0001cad0  2**2
+  6 .init_array   00000004  0800cadc  0800cadc  0001cadc  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  7 .fini_array   00000004  0800cad4  0800cad4  0001cad4  2**2
+  7 .fini_array   00000004  0800cae0  0800cae0  0001cae0  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  8 .data         00000094  20000000  0800cad8  00020000  2**2
+  8 .data         00000094  20000000  0800cae4  00020000  2**2
                   CONTENTS, ALLOC, LOAD, DATA
   9 .ccmram       00000000  10000000  10000000  00020094  2**0
                   CONTENTS
@@ -29,23 +29,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  12 .ARM.attributes 00000030  00000000  00000000  00020094  2**0
                   CONTENTS, READONLY
- 13 .debug_info   000266db  00000000  00000000  000200c4  2**0
+ 13 .debug_info   000265e7  00000000  00000000  000200c4  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_abbrev 000052f6  00000000  00000000  0004679f  2**0
+ 14 .debug_abbrev 000052e1  00000000  00000000  000466ab  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_aranges 00001f18  00000000  00000000  0004ba98  2**3
+ 15 .debug_aranges 00001f18  00000000  00000000  0004b990  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_ranges 00001d78  00000000  00000000  0004d9b0  2**3
+ 16 .debug_ranges 00001d78  00000000  00000000  0004d8a8  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  0002b135  00000000  00000000  0004f728  2**0
+ 17 .debug_macro  0002b135  00000000  00000000  0004f620  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   00028858  00000000  00000000  0007a85d  2**0
+ 18 .debug_line   00027aba  00000000  00000000  0007a755  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    000ed9e9  00000000  00000000  000a30b5  2**0
+ 19 .debug_str    000ed9e9  00000000  00000000  000a220f  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .comment      00000050  00000000  00000000  00190a9e  2**0
+ 20 .comment      00000050  00000000  00000000  0018fbf8  2**0
                   CONTENTS, READONLY
- 21 .debug_frame  00008c9c  00000000  00000000  00190af0  2**2
+ 21 .debug_frame  00008c9c  00000000  00000000  0018fc48  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -2043,39 +2043,40 @@ void go_to_ota_app(UART_HandleTypeDef *huart)
  8000ec8:	f000 f81e 	bl	8000f08 <ota_download_and_flash>
  8000ecc:	4603      	mov	r3, r0
  8000ece:	2b00      	cmp	r3, #0
- 8000ed0:	d009      	beq.n	8000ee6 <go_to_ota_app+0x2e>
+ 8000ed0:	d008      	beq.n	8000ee4 <go_to_ota_app+0x2c>
     {
       /* Error. Don't process. */
       printf("OTA Update : ERROR!!! HALT!!!\r\n");
  8000ed2:	480a      	ldr	r0, [pc, #40]	; (8000efc <go_to_ota_app+0x44>)
  8000ed4:	f00a fa46 	bl	800b364 <puts>
       // TODO: Restore previous APP if APP Updated failed
-      HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
- 8000ed8:	2200      	movs	r2, #0
- 8000eda:	f44f 5100 	mov.w	r1, #8192	; 0x2000
- 8000ede:	4808      	ldr	r0, [pc, #32]	; (8000f00 <go_to_ota_app+0x48>)
- 8000ee0:	f002 fb78 	bl	80035d4 <HAL_GPIO_WritePin>
+      printf("Reboot...\r\n");
+ 8000ed8:	4809      	ldr	r0, [pc, #36]	; (8000f00 <go_to_ota_app+0x48>)
+ 8000eda:	f00a fa43 	bl	800b364 <puts>
+      HAL_NVIC_SystemReset();
+ 8000ede:	f001 fcbc 	bl	800285a <HAL_NVIC_SystemReset>
     {
       /* Reset to load the new application */
       printf("Firmware update is done!!! Rebooting...\r\n");
       HAL_NVIC_SystemReset();
     }
 }
- 8000ee4:	e004      	b.n	8000ef0 <go_to_ota_app+0x38>
+ 8000ee2:	e004      	b.n	8000eee <go_to_ota_app+0x36>
       printf("Firmware update is done!!! Rebooting...\r\n");
- 8000ee6:	4807      	ldr	r0, [pc, #28]	; (8000f04 <go_to_ota_app+0x4c>)
- 8000ee8:	f00a fa3c 	bl	800b364 <puts>
+ 8000ee4:	4807      	ldr	r0, [pc, #28]	; (8000f04 <go_to_ota_app+0x4c>)
+ 8000ee6:	f00a fa3d 	bl	800b364 <puts>
       HAL_NVIC_SystemReset();
- 8000eec:	f001 fcb5 	bl	800285a <HAL_NVIC_SystemReset>
+ 8000eea:	f001 fcb6 	bl	800285a <HAL_NVIC_SystemReset>
 }
- 8000ef0:	bf00      	nop
- 8000ef2:	3708      	adds	r7, #8
- 8000ef4:	46bd      	mov	sp, r7
- 8000ef6:	bd80      	pop	{r7, pc}
+ 8000eee:	bf00      	nop
+ 8000ef0:	3708      	adds	r7, #8
+ 8000ef2:	46bd      	mov	sp, r7
+ 8000ef4:	bd80      	pop	{r7, pc}
+ 8000ef6:	bf00      	nop
  8000ef8:	0800c1cc 	.word	0x0800c1cc
  8000efc:	0800c1ec 	.word	0x0800c1ec
- 8000f00:	40021800 	.word	0x40021800
- 8000f04:	0800c20c 	.word	0x0800c20c
+ 8000f00:	0800c20c 	.word	0x0800c20c
+ 8000f04:	0800c218 	.word	0x0800c218
 
 08000f08 <ota_download_and_flash>:
   * @param huart uart handler
@@ -2191,13 +2192,13 @@ OTA_EX_ ota_download_and_flash(UART_HandleTypeDef *huart)
  8000f92:	3710      	adds	r7, #16
  8000f94:	46bd      	mov	sp, r7
  8000f96:	bd80      	pop	{r7, pc}
- 8000f98:	0800c238 	.word	0x0800c238
+ 8000f98:	0800c244 	.word	0x0800c244
  8000f9c:	20000354 	.word	0x20000354
  8000fa0:	2000035c 	.word	0x2000035c
  8000fa4:	20000358 	.word	0x20000358
  8000fa8:	20000350 	.word	0x20000350
  8000fac:	20000360 	.word	0x20000360
- 8000fb0:	0800c254 	.word	0x0800c254
+ 8000fb0:	0800c260 	.word	0x0800c260
 
 08000fb4 <ota_receive_chunk>:
   * @param buf buffer to store the received data
@@ -2515,8 +2516,8 @@ static uint16_t ota_receive_chunk(UART_HandleTypeDef *huart, uint8_t *buf, uint1
  800116a:	46bd      	mov	sp, r7
  800116c:	bd80      	pop	{r7, pc}
  800116e:	bf00      	nop
- 8001170:	0800c264 	.word	0x0800c264
- 8001174:	0800c2a4 	.word	0x0800c2a4
+ 8001170:	0800c270 	.word	0x0800c270
+ 8001174:	0800c2b0 	.word	0x0800c2b0
 
 08001178 <ota_process_data>:
   * @param buf buffer to store the received data
@@ -3019,22 +3020,22 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
  800145c:	bdf0      	pop	{r4, r5, r6, r7, pc}
  800145e:	bf00      	nop
  8001460:	20000350 	.word	0x20000350
- 8001464:	0800c2e8 	.word	0x0800c2e8
- 8001468:	0800c2fc 	.word	0x0800c2fc
+ 8001464:	0800c2f4 	.word	0x0800c2f4
+ 8001468:	0800c308 	.word	0x0800c308
  800146c:	20000354 	.word	0x20000354
  8001470:	20000358 	.word	0x20000358
- 8001474:	0800c318 	.word	0x0800c318
+ 8001474:	0800c324 	.word	0x0800c324
  8001478:	2000035c 	.word	0x2000035c
  800147c:	20000000 	.word	0x20000000
- 8001480:	0800c354 	.word	0x0800c354
- 8001484:	0800c37c 	.word	0x0800c37c
- 8001488:	0800c394 	.word	0x0800c394
- 800148c:	0800c3a0 	.word	0x0800c3a0
- 8001490:	0800c3ac 	.word	0x0800c3ac
- 8001494:	0800c3c8 	.word	0x0800c3c8
+ 8001480:	0800c360 	.word	0x0800c360
+ 8001484:	0800c388 	.word	0x0800c388
+ 8001488:	0800c3a0 	.word	0x0800c3a0
+ 800148c:	0800c3ac 	.word	0x0800c3ac
+ 8001490:	0800c3b8 	.word	0x0800c3b8
+ 8001494:	0800c3d4 	.word	0x0800c3d4
  8001498:	08020000 	.word	0x08020000
- 800149c:	0800c3ec 	.word	0x0800c3ec
- 80014a0:	0800c430 	.word	0x0800c430
+ 800149c:	0800c3f8 	.word	0x0800c3f8
+ 80014a0:	0800c43c 	.word	0x0800c43c
 
 080014a4 <write_data_to_flash>:
  * @retval HAL_StatusTypeDef
@@ -3216,11 +3217,11 @@ static HAL_StatusTypeDef write_data_to_flash(uint8_t *data,
  8001592:	3738      	adds	r7, #56	; 0x38
  8001594:	46bd      	mov	sp, r7
  8001596:	bdb0      	pop	{r4, r5, r7, pc}
- 8001598:	0800c44c 	.word	0x0800c44c
- 800159c:	0800c470 	.word	0x0800c470
+ 8001598:	0800c458 	.word	0x0800c458
+ 800159c:	0800c47c 	.word	0x0800c47c
  80015a0:	08020000 	.word	0x08020000
  80015a4:	2000035c 	.word	0x2000035c
- 80015a8:	0800c498 	.word	0x0800c498
+ 80015a8:	0800c4a4 	.word	0x0800c4a4
 
 080015ac <write_cfg_to_flash>:
   * @brief Write the configuration to flash
@@ -3400,7 +3401,7 @@ static HAL_StatusTypeDef write_cfg_to_flash( OTA_GNRL_CFG_ *cfg )
  8001698:	bdb0      	pop	{r4, r5, r7, pc}
  800169a:	bf00      	nop
  800169c:	40023c00 	.word	0x40023c00
- 80016a0:	0800c4ac 	.word	0x0800c4ac
+ 80016a0:	0800c4b8 	.word	0x0800c4b8
 
 080016a4 <app_validation>:
  * @brief Validate Current APP in APP SLOT
@@ -3549,12 +3550,12 @@ void app_validation()
  8001778:	46bd      	mov	sp, r7
  800177a:	bdf0      	pop	{r4, r5, r6, r7, pc}
  800177c:	20000000 	.word	0x20000000
- 8001780:	0800c4cc 	.word	0x0800c4cc
- 8001784:	0800c4e4 	.word	0x0800c4e4
+ 8001780:	0800c4d8 	.word	0x0800c4d8
+ 8001784:	0800c4f0 	.word	0x0800c4f0
  8001788:	08020000 	.word	0x08020000
- 800178c:	0800c4f4 	.word	0x0800c4f4
- 8001790:	0800c53c 	.word	0x0800c53c
- 8001794:	0800c560 	.word	0x0800c560
+ 800178c:	0800c500 	.word	0x0800c500
+ 8001790:	0800c548 	.word	0x0800c548
+ 8001794:	0800c56c 	.word	0x0800c56c
 
 08001798 <backup_old_version>:
  * @brief backup current APP slot to backup Slot
@@ -3728,7 +3729,7 @@ static HAL_StatusTypeDef backup_old_version()
  8001880:	40023c00 	.word	0x40023c00
  8001884:	08010000 	.word	0x08010000
  8001888:	08020000 	.word	0x08020000
- 800188c:	0800c574 	.word	0x0800c574
+ 800188c:	0800c580 	.word	0x0800c580
 
 08001890 <restore_old_version>:
 /**
@@ -3993,13 +3994,13 @@ HAL_StatusTypeDef restore_old_version()
  80019fe:	46bd      	mov	sp, r7
  8001a00:	e8bd 83f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, pc}
  8001a04:	20000000 	.word	0x20000000
- 8001a08:	0800c58c 	.word	0x0800c58c
- 8001a0c:	0800c560 	.word	0x0800c560
+ 8001a08:	0800c598 	.word	0x0800c598
+ 8001a0c:	0800c56c 	.word	0x0800c56c
  8001a10:	08120000 	.word	0x08120000
- 8001a14:	0800c5a0 	.word	0x0800c5a0
- 8001a18:	0800c5dc 	.word	0x0800c5dc
+ 8001a14:	0800c5ac 	.word	0x0800c5ac
+ 8001a18:	0800c5e8 	.word	0x0800c5e8
  8001a1c:	40023c00 	.word	0x40023c00
- 8001a20:	0800c5fc 	.word	0x0800c5fc
+ 8001a20:	0800c608 	.word	0x0800c608
 
 08001a24 <ota_send_resp>:
  * @brief send response to host
@@ -4116,7 +4117,7 @@ uint32_t ota_calcCRC(uint8_t * pData, uint32_t DataLength)
  8001acc:	f85d 7b04 	ldr.w	r7, [sp], #4
  8001ad0:	4770      	bx	lr
  8001ad2:	bf00      	nop
- 8001ad4:	0800c618 	.word	0x0800c618
+ 8001ad4:	0800c624 	.word	0x0800c624
 
 08001ad8 <HAL_MspInit>:
 /* USER CODE END 0 */
@@ -6121,7 +6122,7 @@ LoopFillZerobss:
   ldr r1, =_edata
  8002588:	20000094 	.word	0x20000094
   ldr r2, =_sidata
- 800258c:	0800cad8 	.word	0x0800cad8
+ 800258c:	0800cae4 	.word	0x0800cae4
   ldr r2, =_sbss
  8002590:	20000094 	.word	0x20000094
   ldr r4, =_ebss
@@ -15559,7 +15560,7 @@ HAL_StatusTypeDef HAL_RCC_ClockConfig(RCC_ClkInitTypeDef  *RCC_ClkInitStruct, ui
  8005f12:	bf00      	nop
  8005f14:	40023c00 	.word	0x40023c00
  8005f18:	40023800 	.word	0x40023800
- 8005f1c:	0800ca18 	.word	0x0800ca18
+ 8005f1c:	0800ca24 	.word	0x0800ca24
  8005f20:	20000004 	.word	0x20000004
  8005f24:	20000008 	.word	0x20000008
 
@@ -15861,7 +15862,7 @@ uint32_t HAL_RCC_GetPCLK1Freq(void)
  8006168:	4618      	mov	r0, r3
  800616a:	bd80      	pop	{r7, pc}
  800616c:	40023800 	.word	0x40023800
- 8006170:	0800ca28 	.word	0x0800ca28
+ 8006170:	0800ca34 	.word	0x0800ca34
 
 08006174 <HAL_RCC_GetPCLK2Freq>:
   * @note   Each time PCLK2 changes, this function must be called to update the
@@ -15887,7 +15888,7 @@ uint32_t HAL_RCC_GetPCLK2Freq(void)
  8006190:	4618      	mov	r0, r3
  8006192:	bd80      	pop	{r7, pc}
  8006194:	40023800 	.word	0x40023800
- 8006198:	0800ca28 	.word	0x0800ca28
+ 8006198:	0800ca34 	.word	0x0800ca34
 
 0800619c <HAL_RCC_GetClockConfig>:
   * will be configured.
@@ -29648,10 +29649,10 @@ void MX_DriverVbusHS(uint8_t state)
  800b052:	4798      	blx	r3
  800b054:	3601      	adds	r6, #1
  800b056:	e7f2      	b.n	800b03e <__libc_init_array+0x1e>
- 800b058:	0800cad0 	.word	0x0800cad0
- 800b05c:	0800cad0 	.word	0x0800cad0
- 800b060:	0800cad0 	.word	0x0800cad0
- 800b064:	0800cad4 	.word	0x0800cad4
+ 800b058:	0800cadc 	.word	0x0800cadc
+ 800b05c:	0800cadc 	.word	0x0800cadc
+ 800b060:	0800cadc 	.word	0x0800cadc
+ 800b064:	0800cae0 	.word	0x0800cae0
 
 0800b068 <malloc>:
  800b068:	4b02      	ldr	r3, [pc, #8]	; (800b074 <malloc+0xc>)
@@ -30000,9 +30001,9 @@ void MX_DriverVbusHS(uint8_t state)
  800b352:	6022      	str	r2, [r4, #0]
  800b354:	701d      	strb	r5, [r3, #0]
  800b356:	e7db      	b.n	800b310 <_puts_r+0x88>
- 800b358:	0800ca54 	.word	0x0800ca54
- 800b35c:	0800ca74 	.word	0x0800ca74
- 800b360:	0800ca34 	.word	0x0800ca34
+ 800b358:	0800ca60 	.word	0x0800ca60
+ 800b35c:	0800ca80 	.word	0x0800ca80
+ 800b360:	0800ca40 	.word	0x0800ca40
 
 0800b364 <puts>:
  800b364:	4b02      	ldr	r3, [pc, #8]	; (800b370 <puts+0xc>)
@@ -30100,9 +30101,9 @@ void MX_DriverVbusHS(uint8_t state)
  800b424:	f04f 37ff 	mov.w	r7, #4294967295
  800b428:	e7ea      	b.n	800b400 <__swbuf_r+0x6c>
  800b42a:	bf00      	nop
- 800b42c:	0800ca54 	.word	0x0800ca54
- 800b430:	0800ca74 	.word	0x0800ca74
- 800b434:	0800ca34 	.word	0x0800ca34
+ 800b42c:	0800ca60 	.word	0x0800ca60
+ 800b430:	0800ca80 	.word	0x0800ca80
+ 800b434:	0800ca40 	.word	0x0800ca40
 
 0800b438 <__swsetup_r>:
  800b438:	4b32      	ldr	r3, [pc, #200]	; (800b504 <__swsetup_r+0xcc>)
@@ -30194,9 +30195,9 @@ void MX_DriverVbusHS(uint8_t state)
  800b500:	e7f7      	b.n	800b4f2 <__swsetup_r+0xba>
  800b502:	bf00      	nop
  800b504:	20000030 	.word	0x20000030
- 800b508:	0800ca54 	.word	0x0800ca54
- 800b50c:	0800ca74 	.word	0x0800ca74
- 800b510:	0800ca34 	.word	0x0800ca34
+ 800b508:	0800ca60 	.word	0x0800ca60
+ 800b50c:	0800ca80 	.word	0x0800ca80
+ 800b510:	0800ca40 	.word	0x0800ca40
 
 0800b514 <__sflush_r>:
  800b514:	898a      	ldrh	r2, [r1, #12]
@@ -30372,9 +30373,9 @@ void MX_DriverVbusHS(uint8_t state)
  800b686:	bf08      	it	eq
  800b688:	68ec      	ldreq	r4, [r5, #12]
  800b68a:	e7da      	b.n	800b642 <_fflush_r+0x22>
- 800b68c:	0800ca54 	.word	0x0800ca54
- 800b690:	0800ca74 	.word	0x0800ca74
- 800b694:	0800ca34 	.word	0x0800ca34
+ 800b68c:	0800ca60 	.word	0x0800ca60
+ 800b690:	0800ca80 	.word	0x0800ca80
+ 800b694:	0800ca40 	.word	0x0800ca40
 
 0800b698 <std>:
  800b698:	2300      	movs	r3, #0
@@ -30499,7 +30500,7 @@ void MX_DriverVbusHS(uint8_t state)
  800b7aa:	61a3      	str	r3, [r4, #24]
  800b7ac:	e7d2      	b.n	800b754 <__sinit+0xc>
  800b7ae:	bf00      	nop
- 800b7b0:	0800ca30 	.word	0x0800ca30
+ 800b7b0:	0800ca3c 	.word	0x0800ca3c
  800b7b4:	0800b6e1 	.word	0x0800b6e1
 
 0800b7b8 <__sfp>:
@@ -30554,7 +30555,7 @@ void MX_DriverVbusHS(uint8_t state)
  800b836:	603b      	str	r3, [r7, #0]
  800b838:	e7ee      	b.n	800b818 <__sfp+0x60>
  800b83a:	bf00      	nop
- 800b83c:	0800ca30 	.word	0x0800ca30
+ 800b83c:	0800ca3c 	.word	0x0800ca3c
  800b840:	ffff0001 	.word	0xffff0001
 
 0800b844 <_fwalk_reent>:
@@ -30974,14 +30975,14 @@ void MX_DriverVbusHS(uint8_t state)
  800bbf8:	f000 f880 	bl	800bcfc <_printf_i>
  800bbfc:	e7e4      	b.n	800bbc8 <_vfiprintf_r+0x208>
  800bbfe:	bf00      	nop
- 800bc00:	0800ca54 	.word	0x0800ca54
- 800bc04:	0800ca74 	.word	0x0800ca74
- 800bc08:	0800ca34 	.word	0x0800ca34
- 800bc0c:	0800ca94 	.word	0x0800ca94
- 800bc10:	0800ca9e 	.word	0x0800ca9e
+ 800bc00:	0800ca60 	.word	0x0800ca60
+ 800bc04:	0800ca80 	.word	0x0800ca80
+ 800bc08:	0800ca40 	.word	0x0800ca40
+ 800bc0c:	0800caa0 	.word	0x0800caa0
+ 800bc10:	0800caaa 	.word	0x0800caaa
  800bc14:	00000000 	.word	0x00000000
  800bc18:	0800b99b 	.word	0x0800b99b
- 800bc1c:	0800ca9a 	.word	0x0800ca9a
+ 800bc1c:	0800caa6 	.word	0x0800caa6
 
 0800bc20 <_printf_common>:
  800bc20:	e92d 47f0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, sl, lr}
@@ -31317,8 +31318,8 @@ void MX_DriverVbusHS(uint8_t state)
  800bf38:	f104 0619 	add.w	r6, r4, #25
  800bf3c:	e7f5      	b.n	800bf2a <_printf_i+0x22e>
  800bf3e:	bf00      	nop
- 800bf40:	0800caa5 	.word	0x0800caa5
- 800bf44:	0800cab6 	.word	0x0800cab6
+ 800bf40:	0800cab1 	.word	0x0800cab1
+ 800bf44:	0800cac2 	.word	0x0800cac2
 
 0800bf48 <__sread>:
  800bf48:	b510      	push	{r4, lr}
