@@ -2,9 +2,10 @@
 
 ## To-Do:
 
-- [ ] Write Bootloader an Application For Update
-- [ ] Write A PC Tool for fownload Application Binary File (ABF)
-- [ ] Write An Application For NodeMCU Get and Store the ABF From Internet
+- [ ] Write Bootloader and Application with OTA supported
+- [ ] Write A Protocol between host and client for requesting and handling OTA_Stage
+- [ ] Write A PC Tool for download Application Binary File
+- [ ] Write An Application For NodeMCU to Get and Store the Binary File From Internet
 - [ ] Write An Application For NodeMCU to Upgrade STM32 IC
 
 ## Requirements:
