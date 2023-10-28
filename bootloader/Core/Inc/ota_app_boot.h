@@ -219,7 +219,7 @@ typedef struct
  *												*
  * -------------------------------------------- *
  */
-void go_to_ota_app(UART_HandleTypeDef *huart);
+void go_to_ota_app(UART_HandleTypeDef *huart, bool backup);
 
 
 

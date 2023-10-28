@@ -31,6 +31,7 @@ static uint16_t ota_receive_chunk(UART_HandleTypeDef *huart, uint8_t *buf, uint1
 static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len );
 static void ota_send_resp(UART_HandleTypeDef *huart, uint8_t rsp);
 static HAL_StatusTypeDef write_cfg_to_flash( OTA_GNRL_CFG_ *cfg );
+HAL_StatusTypeDef backup_old_version();
 static HAL_StatusTypeDef write_data_to_flash(uint8_t *data, uint32_t data_len, bool is_first_block);
 uint32_t ota_calcCRC(uint8_t * pData, uint32_t DataLength);
 
@@ -39,11 +40,27 @@ uint32_t ota_calcCRC(uint8_t * pData, uint32_t DataLength);
 /**
  * @brief run ota application
  * @param hurat uart handler receive ota
+ * @param backup should back up?
  * @retval None
  */
-void go_to_ota_app(UART_HandleTypeDef *huart)
+void go_to_ota_app(UART_HandleTypeDef *huart, bool backup)
 {
   /*Start the Firmware or Application update */
+	if(backup)
+	{
+		HAL_StatusTypeDef ret;
+		printf("Backing up from previous FW version\r\n");
+		ret = backup_old_version();
+
+		if ( ret != HAL_OK )
+		{
+			printf("Backing up unsuccessful! Rebooting...\r\n");
+			HAL_NVIC_SystemReset();
+		}
+		printf("Done!!!\r\n");
+
+	}
+
     printf("Starting Firmware Download!!!\r\n");
     if( ota_download_and_flash(huart) != OTA_EX_OK )
     {
@@ -548,6 +565,75 @@ static HAL_StatusTypeDef write_cfg_to_flash( OTA_GNRL_CFG_ *cfg )
 	    {
 	      break;
 	    }
+	}while(false);
+
+	return ret;
+}
+
+HAL_StatusTypeDef backup_old_version()
+{
+	HAL_StatusTypeDef ret = HAL_ERROR;
+
+	do
+	{
+		ret = HAL_FLASH_Unlock();
+		if( ret != HAL_OK )
+		{
+			break;
+		}
+
+		// Check if the FLASH_FLAG_BSY
+		FLASH_WaitForLastOperation(HAL_MAX_DELAY);
+
+		// Erase the flash backup sector
+		FLASH_EraseInitTypeDef EraseInitStruct;
+		uint32_t SectorError;
+
+		EraseInitStruct.TypeErase		= FLASH_TYPEERASE_SECTORS;
+		EraseInitStruct.Sector			= OTA_SLOT_SECTOR;
+		EraseInitStruct.NbSectors		= OTA_SLOT_NB_SECTOR;
+		EraseInitStruct.VoltageRange	= FLASH_VOLTAGE_RANGE_3;
+
+		// clear all flags before you write it to flash
+		    __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_EOP | FLASH_FLAG_OPERR |
+		                FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR);
+
+		ret = HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError);
+		if( ret != HAL_OK )
+		{
+			break;
+		}
+
+		// Write the old app
+		OTA_GNRL_CFG_ *cfg = (OTA_GNRL_CFG_ *)OTA_CFG_FLASH_ADDR;
+		uint8_t *data = (uint8_t *) OTA_APP_FLASH_ADDR;
+		for( uint32_t i = 0u; i<cfg->slot_table.fw_size; i++ )
+		{
+			ret = HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE,
+									OTA_SLOT_FLASH_ADDR + i,
+									data[i]);
+			if( ret != HAL_OK )
+			{
+				printf("Slot Flash Write Error\r\n");
+				break;
+			}
+		}
+
+	    //Check if the FLASH_FLAG_BSY.
+	    FLASH_WaitForLastOperation( HAL_MAX_DELAY );
+
+	    if( ret != HAL_OK )
+	    {
+	      break;
+	    }
+
+	    ret = HAL_FLASH_Lock();
+	    if( ret != HAL_OK )
+	    {
+	      break;
+	    }
+
+
 	}while(false);
 
 	return ret;
