@@ -3,8 +3,8 @@
 ## To-Do:
 
 - [ ] Write Bootloader and Application with OTA supported
-- [*] Write A PC Tool for download Application Binary File
-- [ ] Write A Protocol between host and client for requesting and handling OTA_Stage
+- [x] Write A PC Tool for download Application Binary File
+- [ ] Write A Protocol between host and client for requesting and handling OTA state
 - [ ] Write An Application For NodeMCU to Get and Store the Binary File From Internet
 - [ ] Write An Application For NodeMCU to Upgrade STM32 IC
 
