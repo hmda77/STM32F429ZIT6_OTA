@@ -320,6 +320,15 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 						OTA_GNRL_CFG_ cfg;
 						memcpy(&cfg, cfg_flash, sizeof(OTA_GNRL_CFG_));
 
+						cfg.backup_table.is_this_slot_not_valid = 1u;
+
+						/* write back the updated config */
+			            ret = write_cfg_to_flash( &cfg );
+			            if( ret != OTA_EX_OK )
+			            {
+			              break;
+			            }
+
 						if( cfg.reboot_cause == OTA_UPDATE_APP)
 						{
 							printf("Backing up from previous FW version\r\n");
@@ -332,6 +341,17 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 							printf("Done!!!\r\n");
 						}
 
+						cfg.backup_table.fw_crc 				= cfg.app_table.fw_crc;
+						cfg.backup_table.fw_size				= cfg.app_table.fw_size;
+						cfg.backup_table.is_this_slot_active 	= 0u;
+						cfg.backup_table.is_this_slot_not_valid = 0u;
+
+						/* write back the updated config */
+			            ret = write_cfg_to_flash( &cfg );
+			            if( ret != OTA_EX_OK )
+			            {
+			              break;
+			            }
 
 					}
 
@@ -382,11 +402,10 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 						memcpy(&cfg, cfg_flash, sizeof(OTA_GNRL_CFG_));
 
 						// update information
-						cfg.slot_table.fw_crc					= cal_crc;
-						cfg.slot_table.fw_size					= ota_fw_total_size;
-						cfg.slot_table.is_this_slot_not_valid	= 0u;
-						cfg.slot_table.should_we_run_this_fw	= 1u;
-						cfg.slot_table.is_this_slot_active		= 0u;
+						cfg.app_table.fw_crc					= cal_crc;
+						cfg.app_table.fw_size					= ota_fw_total_size;
+						cfg.app_table.is_this_slot_not_valid	= 0u;
+						cfg.app_table.is_this_slot_active		= 0u;
 
 						// update the reboot reason
 						cfg.reboot_cause = OTA_NORMAL_BOOT;
@@ -608,7 +627,7 @@ HAL_StatusTypeDef backup_old_version()
 		// Write the old app
 		OTA_GNRL_CFG_ *cfg = (OTA_GNRL_CFG_ *)OTA_CFG_FLASH_ADDR;
 		uint8_t *data = (uint8_t *) OTA_APP_FLASH_ADDR;
-		for( uint32_t i = 0u; i<cfg->slot_table.fw_size; i++ )
+		for( uint32_t i = 0u; i<cfg->app_table.fw_size; i++ )
 		{
 			ret = HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE,
 									OTA_SLOT_FLASH_ADDR + i,

@@ -116,7 +116,6 @@ typedef struct
 {
     uint8_t  is_this_slot_not_valid;  //Is this slot has a valid firmware/application?
     uint8_t  is_this_slot_active;     //Is this slot's firmware is currently running?
-    uint8_t  should_we_run_this_fw;   //Do we have to run this slot's firmware?
     uint32_t fw_size;                 //Slot's firmware/application size
     uint32_t fw_crc;                  //Slot's firmware/application CRC
     uint32_t reserved1;
@@ -131,7 +130,8 @@ typedef struct
 typedef struct
 {
     uint32_t  reboot_cause;
-    OTA_SLOT_ slot_table;
+    OTA_SLOT_ app_table;
+    OTA_SLOT_ backup_table;
 }__attribute__((packed)) OTA_GNRL_CFG_;
 
 
