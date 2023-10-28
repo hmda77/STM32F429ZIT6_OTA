@@ -128,41 +128,57 @@ int main(void)
   printf("Starting Bootloader (%d.%d)\r\n", BL_Version[0], BL_Version[1]);
 
   OTA_GNRL_CFG_ *cfg = (OTA_GNRL_CFG_ *)OTA_CFG_FLASH_ADDR;
+  bool goto_ota_mode = false;
+  bool should_backup = false;
 
   switch(cfg->reboot_cause)
   {
 	  case OTA_FIRST_TIME_BOOT:
 	  {
-		  printf("First Time Boot\r\n, No Configuration was found\r\n");
-		  while(1){
-			  // HALT
-		  }
+		  printf("First Time Boot\r\nNo Configuration was found\r\n");
+		  goto_ota_mode = true;
 	  }
 	  break;
 
 	  case OTA_NORMAL_BOOT:
 	  {
-		  printf("Normal Boot, Validate Application...\r\n");
-		  validate_app();
+		  printf("Normal Boot\r\n");
 	  }
 	  break;
 
 	  case OTA_UPDATE_APP:
 	  {
 		  printf("New Firmware was found!\r\n");
-//		  update_application();
+		  goto_ota_mode = true;
+		  should_backup = true;
 	  }
 	  break;
 
 	  case OTA_LOAD_PREV_APP:
 	  {
-		  printf("Update Unsuccessful, Back to previous App if Available\r\n");
+		  printf("Update Unsuccessful, Back to previous APP if Available\r\n");
+
 	  }
 	  break;
   }
 
+  do
+  {
+	  if (goto_ota_mode){
+		printf("OTA Update Requested...\r\n");
+		HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_SET);
+		go_to_ota_app(&huart5);
+		HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_RESET);
+		goto_ota_mode = false;
+	  }
+  }while(false);
 
-  HAL_Delay(2000);
+  // Validate application
+  app_validation();
+
+  // Jump to Application
   go_to_application();
   /* USER CODE END 2 */
 
@@ -692,9 +708,9 @@ int fputc(int ch, FILE *f)
 
 static void go_to_application (void){
 	printf("Gonna Jump to Application ...\n");
-	void (*app_reset_handler) (void) = (void*) (*(volatile uint32_t *) (0x08040000 + 4));
+	void (*app_reset_handler) (void) = (void*) (*(volatile uint32_t *) (OTA_APP_FLASH_ADDR + 4));
 
-//	__set_MSP((*(volatile uint32_t *) (0x08040000)));
+//	__set_MSP((*(volatile uint32_t *) (OTA_APP_FLASH_ADDR)));
 	HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_RESET);
 
 	app_reset_handler();
