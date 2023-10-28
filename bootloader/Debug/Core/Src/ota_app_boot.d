@@ -1,8 +1,5 @@
-Middlewares/ST/STM32_USB_Host_Library/Core/Src/usbh_ctlreq.o: \
- ../Middlewares/ST/STM32_USB_Host_Library/Core/Src/usbh_ctlreq.c \
- ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_ctlreq.h \
- ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_core.h \
- ../USB_HOST/Target/usbh_conf.h ../Core/Inc/main.h \
+Core/Src/ota_app_boot.o: ../Core/Src/ota_app_boot.c \
+ ../Core/Inc/ota_app_boot.h ../Core/Inc/main.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
@@ -42,14 +39,8 @@ Middlewares/ST/STM32_USB_Host_Library/Core/Src/usbh_ctlreq.o: \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h \
- ../Core/Inc/ota_app_boot.h ../Core/Inc/main.h \
- ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_def.h \
- ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_ioreq.h \
- ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_pipes.h \
- ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_ctlreq.h
-../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_ctlreq.h:
-../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_core.h:
-../USB_HOST/Target/usbh_conf.h:
+ ../Core/Inc/ota_app_boot.h
+../Core/Inc/ota_app_boot.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -91,8 +82,3 @@ Middlewares/ST/STM32_USB_Host_Library/Core/Src/usbh_ctlreq.o: \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_hcd.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h:
 ../Core/Inc/ota_app_boot.h:
-../Core/Inc/main.h:
-../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_def.h:
-../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_ioreq.h:
-../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_pipes.h:
-../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_ctlreq.h:

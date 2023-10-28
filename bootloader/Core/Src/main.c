@@ -126,6 +126,42 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_SET);
   printf("Starting Bootloader (%d.%d)\r\n", BL_Version[0], BL_Version[1]);
+
+  OTA_GNRL_CFG_ *cfg = (OTA_GNRL_CFG_ *)OTA_CFG_FLASH_ADDR;
+
+  switch(cfg->reboot_cause)
+  {
+	  case OTA_FIRST_TIME_BOOT:
+	  {
+		  printf("First Time Boot\r\n, No Configuration was found\r\n");
+		  while(1){
+			  // HALT
+		  }
+	  }
+	  break;
+
+	  case OTA_NORMAL_BOOT:
+	  {
+		  printf("Normal Boot, Validate Application...\r\n");
+		  validate_app();
+	  }
+	  break;
+
+	  case OTA_UPDATE_APP:
+	  {
+		  printf("New Firmware was found!\r\n");
+//		  update_application();
+	  }
+	  break;
+
+	  case OTA_LOAD_PREV_APP:
+	  {
+		  printf("Update Unsuccessful, Back to previous App if Available\r\n");
+	  }
+	  break;
+  }
+
+
   HAL_Delay(2000);
   go_to_application();
   /* USER CODE END 2 */

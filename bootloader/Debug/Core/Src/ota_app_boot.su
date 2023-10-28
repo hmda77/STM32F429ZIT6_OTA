@@ -1,0 +1,3 @@
+../Core/Src/ota_app_boot.c:22:6:validate_app	48	static
+../Core/Src/ota_app_boot.c:50:26:write_cfg_to_flash	64	static
+../Core/Src/ota_app_boot.c:129:10:ota_calcCRC	32	static
