@@ -168,7 +168,7 @@ int main(void)
 		printf("OTA Update Requested...\r\n");
 		HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
 		HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_SET);
-		go_to_ota_app(&huart5, cfg->reboot_cause);
+		go_to_ota_app(&huart5);
 		HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_RESET);
 		goto_ota_mode = false;

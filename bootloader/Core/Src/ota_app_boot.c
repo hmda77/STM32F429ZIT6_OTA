@@ -31,7 +31,7 @@ static uint16_t ota_receive_chunk(UART_HandleTypeDef *huart, uint8_t *buf, uint1
 static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len );
 static void ota_send_resp(UART_HandleTypeDef *huart, uint8_t rsp);
 static HAL_StatusTypeDef write_cfg_to_flash( OTA_GNRL_CFG_ *cfg );
-HAL_StatusTypeDef backup_old_version();
+static HAL_StatusTypeDef backup_old_version();
 static HAL_StatusTypeDef write_data_to_flash(uint8_t *data, uint32_t data_len, bool is_first_block);
 uint32_t ota_calcCRC(uint8_t * pData, uint32_t DataLength);
 
@@ -43,24 +43,9 @@ uint32_t ota_calcCRC(uint8_t * pData, uint32_t DataLength);
  * @param backup should back up?
  * @retval None
  */
-void go_to_ota_app(UART_HandleTypeDef *huart, bool backup)
+void go_to_ota_app(UART_HandleTypeDef *huart)
 {
   /*Start the Firmware or Application update */
-	if(backup)
-	{
-		HAL_StatusTypeDef ret;
-		printf("Backing up from previous FW version\r\n");
-		ret = backup_old_version();
-
-		if ( ret != HAL_OK )
-		{
-			printf("Backing up unsuccessful! Rebooting...\r\n");
-			HAL_NVIC_SystemReset();
-		}
-		printf("Done!!!\r\n");
-
-	}
-
     printf("Starting Firmware Download!!!\r\n");
     if( ota_download_and_flash(huart) != OTA_EX_OK )
     {
@@ -308,7 +293,7 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 					ota_fw_total_size = header->meta_data.package_size;
 					ota_fw_crc 		  = header->meta_data.package_crc;
 					printf("Received OTA Header. FW size = %ld, FW crc = [0x%08lX]\r\n",
-													ota_fw_received_size, ota_fw_crc);
+													ota_fw_total_size, ota_fw_crc);
 
 					ota_state = OTA_STATE_DATA;
 					ret = OTA_EX_OK;
@@ -330,7 +315,23 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 					if( ota_fw_received_size == 0){
 						// This is the first block
 						is_first_block = true;
-						//TODO: CFG if needed
+
+						/* Read the configuration */
+						OTA_GNRL_CFG_ cfg;
+						memcpy(&cfg, cfg_flash, sizeof(OTA_GNRL_CFG_));
+
+						if( cfg.reboot_cause == OTA_UPDATE_APP)
+						{
+							printf("Backing up from previous FW version\r\n");
+							ex = backup_old_version();
+
+							if (ex != HAL_OK){
+								printf("Unsuccessful Backup \r\n");
+								break;
+							}
+							printf("Done!!!\r\n");
+						}
+
 
 					}
 
