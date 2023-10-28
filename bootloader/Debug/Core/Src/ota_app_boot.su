@@ -4,6 +4,7 @@
 ../Core/Src/ota_app_boot.c:243:16:ota_process_data	112	static
 ../Core/Src/ota_app_boot.c:444:26:write_data_to_flash	72	static
 ../Core/Src/ota_app_boot.c:522:26:write_cfg_to_flash	64	static
-../Core/Src/ota_app_boot.c:593:19:backup_old_version	56	static
-../Core/Src/ota_app_boot.c:668:13:ota_send_resp	32	static
-../Core/Src/ota_app_boot.c:693:10:ota_calcCRC	32	static
+../Core/Src/ota_app_boot.c:598:6:app_validation	88	static
+../Core/Src/ota_app_boot.c:661:19:backup_old_version	56	static
+../Core/Src/ota_app_boot.c:736:13:ota_send_resp	32	static
+../Core/Src/ota_app_boot.c:761:10:ota_calcCRC	32	static

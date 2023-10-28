@@ -346,7 +346,7 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 						cfg.backup_table.is_this_slot_active 	= 0u;
 						cfg.backup_table.is_this_slot_not_valid = 0u;
 
-						/* write back the updated config */
+						/* write back the updated configuration */
 			            ret = write_cfg_to_flash( &cfg );
 			            if( ret != OTA_EX_OK )
 			            {
@@ -590,6 +590,74 @@ static HAL_StatusTypeDef write_cfg_to_flash( OTA_GNRL_CFG_ *cfg )
 	return ret;
 }
 
+/**
+ * @brief Validate Current APP in APP SLOT
+ * @param none
+ * @retval none
+ */
+void app_validation()
+{
+	bool is_app_updated = false;
+	HAL_StatusTypeDef ret;
+
+	/* read configuration */
+	OTA_GNRL_CFG_ cfg;
+	memcpy(&cfg, cfg_flash, sizeof(OTA_GNRL_CFG_));
+
+	if(cfg.app_table.is_this_slot_active == 0)
+	{
+		printf("New Application found!\r\n");
+		is_app_updated = true;
+	}
+
+	// Validating
+	printf("Validating...\r\n");
+
+	FLASH_WaitForLastOperation( HAL_MAX_DELAY );
+
+	// Check CRC
+	uint32_t cal_data_crc = ota_calcCRC((uint8_t *)OTA_APP_FLASH_ADDR, cfg.app_table.fw_size);
+
+	FLASH_WaitForLastOperation( HAL_MAX_DELAY );
+
+	// Verify the CRC
+	if( cal_data_crc != cfg.app_table.fw_crc)
+	{
+		printf("CRC Mismatch!!! calc_crc = [0x%08lx], rec_crc = [0x%08lx]\r\nHALT...\r\n",
+										cal_data_crc, cfg.app_table.fw_crc);
+
+		cfg.app_table.is_this_slot_not_valid = 1u;
+		ret = write_cfg_to_flash( &cfg );
+		if( ret != HAL_OK )
+		{
+			printf("Configuration Flash write Error\r\n");
+		}
+
+		// TODO: Restore previous APP if APP Updated
+		// At this time:
+		while(1); //HALT
+	}
+	printf("Validation DONE!!!\r\n");
+
+	if( is_app_updated ){
+		cfg.app_table.is_this_slot_active = 1u;
+		cfg.app_table.is_this_slot_not_valid = 0u;
+
+		ret = write_cfg_to_flash( &cfg );
+		if( ret != HAL_OK )
+		{
+			printf("Configuration Flash write Error\r\n");
+		}
+
+	}
+
+}
+
+/**
+ * @brief backup current APP slot to backup Slot
+ * @param none
+ * @retval HAL_StatusTypeDef
+ */
 HAL_StatusTypeDef backup_old_version()
 {
 	HAL_StatusTypeDef ret = HAL_ERROR;

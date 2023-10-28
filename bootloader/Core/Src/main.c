@@ -175,8 +175,10 @@ int main(void)
 	  }
   }while(false);
 
+  // Validate application
+  app_validation();
 
-  HAL_Delay(2000);
+  // Jump to Application
   go_to_application();
   /* USER CODE END 2 */
 
