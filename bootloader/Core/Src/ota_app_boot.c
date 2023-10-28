@@ -51,7 +51,6 @@ void go_to_ota_app(UART_HandleTypeDef *huart)
     {
       /* Error. Don't process. */
       printf("OTA Update : ERROR!!! HALT!!!\r\n");
-      // TODO: Restore previous APP if APP Updated failed
       printf("Reboot...\r\n");
       HAL_NVIC_SystemReset();
     }
@@ -348,6 +347,9 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 						cfg.backup_table.is_this_slot_active 	= 1u;
 						cfg.backup_table.is_this_slot_not_valid = 0u;
 
+						/* Reboot cause set to LOAD_PREV_APP so that if an error occurs*/
+						cfg.reboot_cause = OTA_LOAD_PREV_APP;
+
 						/* write back the updated configuration */
 			            ret = write_cfg_to_flash( &cfg );
 			            if( ret != OTA_EX_OK )
@@ -629,15 +631,19 @@ void app_validation()
 										cal_data_crc, cfg.app_table.fw_crc);
 
 		cfg.app_table.is_this_slot_not_valid = 1u;
+		cfg.reboot_cause = OTA_LOAD_PREV_APP;
+
 		ret = write_cfg_to_flash( &cfg );
 		if( ret != HAL_OK )
 		{
 			printf("Configuration Flash write Error\r\n");
+			// HALT
+			while(1);
 		}
 
-		// TODO: Restore previous APP if APP Updated failed
-		// At this time:
-		while(1); //HALT
+		// reset for loading previous app
+		HAL_NVIC_SystemReset();
+
 	}
 	printf("Validation DONE!!!\r\n");
 
