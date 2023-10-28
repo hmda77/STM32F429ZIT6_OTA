@@ -51,6 +51,7 @@ void go_to_ota_app(UART_HandleTypeDef *huart)
     {
       /* Error. Don't process. */
       printf("OTA Update : ERROR!!! HALT!!!\r\n");
+      // TODO: Restore previous APP if APP Updated failed
       HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
     }
     else
@@ -633,7 +634,7 @@ void app_validation()
 			printf("Configuration Flash write Error\r\n");
 		}
 
-		// TODO: Restore previous APP if APP Updated
+		// TODO: Restore previous APP if APP Updated failed
 		// At this time:
 		while(1); //HALT
 	}
@@ -692,6 +693,7 @@ static HAL_StatusTypeDef backup_old_version()
 			break;
 		}
 
+		// TODO: Find a solution to write sector instead of byte
 		// Write the old app
 		OTA_GNRL_CFG_ *cfg = (OTA_GNRL_CFG_ *)OTA_CFG_FLASH_ADDR;
 		uint8_t *data = (uint8_t *) OTA_APP_FLASH_ADDR;
@@ -791,6 +793,7 @@ HAL_StatusTypeDef restore_old_version()
 			break;
 		}
 
+		// TODO: Find a solution to write sector instead of byte
 		// Write the old app
 		uint8_t *data = (uint8_t *) OTA_SLOT_FLASH_ADDR;
 		for( uint32_t i = 0u; i<cfg.backup_table.fw_size; i++ )

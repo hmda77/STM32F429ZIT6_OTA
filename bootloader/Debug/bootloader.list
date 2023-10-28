@@ -29,9 +29,9 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  12 .ARM.attributes 00000030  00000000  00000000  00020094  2**0
                   CONTENTS, READONLY
- 13 .debug_info   000266da  00000000  00000000  000200c4  2**0
+ 13 .debug_info   000266db  00000000  00000000  000200c4  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_abbrev 000052f6  00000000  00000000  0004679e  2**0
+ 14 .debug_abbrev 000052f6  00000000  00000000  0004679f  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  15 .debug_aranges 00001f18  00000000  00000000  0004ba98  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
@@ -2049,6 +2049,7 @@ void go_to_ota_app(UART_HandleTypeDef *huart)
       printf("OTA Update : ERROR!!! HALT!!!\r\n");
  8000ed2:	480a      	ldr	r0, [pc, #40]	; (8000efc <go_to_ota_app+0x44>)
  8000ed4:	f00a fa46 	bl	800b364 <puts>
+      // TODO: Restore previous APP if APP Updated failed
       HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
  8000ed8:	2200      	movs	r2, #0
  8000eda:	f44f 5100 	mov.w	r1, #8192	; 0x2000
@@ -3504,7 +3505,7 @@ void app_validation()
  800173c:	f009 fe12 	bl	800b364 <puts>
 		}
 
-		// TODO: Restore previous APP if APP Updated
+		// TODO: Restore previous APP if APP Updated failed
 		// At this time:
 		while(1); //HALT
  8001740:	e7fe      	b.n	8001740 <app_validation+0x9c>
@@ -3624,10 +3625,10 @@ static HAL_StatusTypeDef backup_old_version()
  80017e6:	f897 3027 	ldrb.w	r3, [r7, #39]	; 0x27
  80017ea:	2b00      	cmp	r3, #0
  80017ec:	d13f      	bne.n	800186e <backup_old_version+0xd6>
-		{
 			break;
 		}
 
+		// TODO: Find a solution to write sector instead of byte
 		// Write the old app
 		OTA_GNRL_CFG_ *cfg = (OTA_GNRL_CFG_ *)OTA_CFG_FLASH_ADDR;
  80017ee:	4b25      	ldr	r3, [pc, #148]	; (8001884 <backup_old_version+0xec>)
@@ -3863,10 +3864,10 @@ HAL_StatusTypeDef restore_old_version()
  8001942:	f897 3057 	ldrb.w	r3, [r7, #87]	; 0x57
  8001946:	2b00      	cmp	r3, #0
  8001948:	d150      	bne.n	80019ec <restore_old_version+0x15c>
-		{
 			break;
 		}
 
+		// TODO: Find a solution to write sector instead of byte
 		// Write the old app
 		uint8_t *data = (uint8_t *) OTA_SLOT_FLASH_ADDR;
  800194a:	4b31      	ldr	r3, [pc, #196]	; (8001a10 <restore_old_version+0x180>)
