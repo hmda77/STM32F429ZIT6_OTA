@@ -7,9 +7,7 @@
 
 #ifndef SRC_OTA_APP_BOOT_H_
 #define SRC_OTA_APP_BOOT_H_
-
 #include "main.h"
-
 
 /* -------------------------------------------- *
  *												*
@@ -17,7 +15,16 @@
  *												*
  * -------------------------------------------- *
  */
-#define OTA_APP_FLASH_ADDR		0x08020000				// Flash Address
+
+#define OTA_DATA_MAX_SIZE   ( 1024 )  //Maximum data Size
+#define OTA_DATA_ENDBYTES   (    5 )  //data CRC and EOF
+#define OTA_DATA_STARTBYTES (    4 )  //data SOF, TYPE, DATA LEN
+#define OTA_PACKET_MAX_SIZE ( OTA_DATA_MAX_SIZE + OTA_DATA_ENDBYTES + OTA_DATA_STARTBYTES )
+
+#define OTA_SOF  0xAA    // Start of Frame
+#define OTA_EOF  0xBB    // End of Frame
+#define OTA_NACK 0x01    // NACK
+#define OTA_ACK  0x00    // ACK
 
 #define OTA_SLOT_FLASH_ADDR		0x08120000				// First Block base address
 #define OTA_SLOT_SECTOR			FLASH_SECTOR_17			// First Sector Of Slot
@@ -41,6 +48,62 @@
  *												*
  * -------------------------------------------- *
  */
+/*
+ * Exception codes
+ */
+typedef enum
+{
+  OTA_EX_OK       = 0,    // Success
+  OTA_EX_ERR      = 1,    // Failure
+}OTA_EX_;
+
+
+/*
+ * OTA process state
+ */
+typedef enum
+{
+  OTA_STATE_IDLE    = 0,
+  OTA_STATE_START   = 1,
+  OTA_STATE_HEADER  = 2,
+  OTA_STATE_DATA    = 3,
+  OTA_STATE_END     = 4,
+}OTA_STATE_;
+
+/*
+ * Packet type
+ */
+typedef enum
+{
+  OTA_PACKET_TYPE_CMD       = 0,    // Command
+  OTA_PACKET_TYPE_DATA      = 1,    // Data
+  OTA_PACKET_TYPE_HEADER    = 2,    // Header
+  OTA_PACKET_TYPE_RESPONSE  = 3,    // Response
+}OTA_PACKET_TYPE_;
+
+/*
+ * OTA Commands
+ */
+typedef enum
+{
+  OTA_CMD_START = 0,    // OTA Start command
+  OTA_CMD_END   = 1,    // OTA End command
+  OTA_CMD_ABORT = 2,    // OTA Abort command
+}OTA_CMD_;
+
+
+/*
+ * OTA meta info
+ */
+typedef struct
+{
+  uint32_t package_size;
+  uint32_t package_crc;
+  uint32_t reserved1;
+  uint32_t reserved2;
+}__attribute__((packed)) meta_info;
+
+
 
 /*
  * Slot table
@@ -67,14 +130,92 @@ typedef struct
     OTA_SLOT_ slot_table;
 }__attribute__((packed)) OTA_GNRL_CFG_;
 
+
+
+
+/*
+ * OTA Command format
+ *
+ * ________________________________________
+ * |     | Packet |     |     |     |     |
+ * | SOF | Type   | Len | CMD | CRC | EOF |
+ * |_____|________|_____|_____|_____|_____|
+ *   1B      1B     2B    1B     4B    1B
+ */
+typedef struct
+{
+  uint8_t   sof;
+  uint8_t   packet_type;
+  uint16_t  data_len;
+  uint8_t   cmd;
+  uint32_t  crc;
+  uint8_t   eof;
+}__attribute__((packed)) OTA_COMMAND_;
+
+
+/*
+ * OTA Header format
+ *
+ * __________________________________________
+ * |     | Packet |     | Header |     |     |
+ * | SOF | Type   | Len |  Data  | CRC | EOF |
+ * |_____|________|_____|________|_____|_____|
+ *   1B      1B     2B     16B     4B    1B
+ */
+typedef struct
+{
+  uint8_t     sof;
+  uint8_t     packet_type;
+  uint16_t    data_len;
+  meta_info   meta_data;
+  uint32_t    crc;
+  uint8_t     eof;
+}__attribute__((packed)) OTA_HEADER_;
+
+/*
+ * OTA Data format
+ *
+ * __________________________________________
+ * |     | Packet |     |        |     |     |
+ * | SOF | Type   | Len |  Data  | CRC | EOF |
+ * |_____|________|_____|________|_____|_____|
+ *   1B      1B     2B    nBytes   4B    1B
+ */
+typedef struct
+{
+  uint8_t     sof;
+  uint8_t     packet_type;
+  uint16_t    data_len;
+  uint8_t     *data;
+}__attribute__((packed)) OTA_DATA_;
+
+/*
+ * OTA Response format
+ *
+ * __________________________________________
+ * |     | Packet |     |        |     |     |
+ * | SOF | Type   | Len | Status | CRC | EOF |
+ * |_____|________|_____|________|_____|_____|
+ *   1B      1B     2B      1B     4B    1B
+ */
+typedef struct
+{
+  uint8_t   sof;
+  uint8_t   packet_type;
+  uint16_t  data_len;
+  uint8_t   status;
+  uint32_t  crc;
+  uint8_t   eof;
+}__attribute__((packed)) OTA_RESP_;
+
+
 /* -------------------------------------------- *
  *												*
  * 				Function References				*
  *												*
  * -------------------------------------------- *
  */
-void validate_app();
-void update_app();
+void go_to_ota_app(UART_HandleTypeDef *huart);
 
 
 
@@ -102,6 +243,5 @@ static const uint32_t crc_table[0x100] = {
   0xC5A92679, 0xC1683BCE, 0xCC2B1D17, 0xC8EA00A0, 0xD6AD50A5, 0xD26C4D12, 0xDF2F6BCB, 0xDBEE767C, 0xE3A1CBC1, 0xE760D676, 0xEA23F0AF, 0xEEE2ED18, 0xF0A5BD1D, 0xF464A0AA, 0xF9278673, 0xFDE69BC4,
   0x89B8FD09, 0x8D79E0BE, 0x803AC667, 0x84FBDBD0, 0x9ABC8BD5, 0x9E7D9662, 0x933EB0BB, 0x97FFAD0C, 0xAFB010B1, 0xAB710D06, 0xA6322BDF, 0xA2F33668, 0xBCB4666D, 0xB8757BDA, 0xB5365D03, 0xB1F740B4,
 };
-
 
 #endif /* SRC_OTA_APP_BOOT_H_ */

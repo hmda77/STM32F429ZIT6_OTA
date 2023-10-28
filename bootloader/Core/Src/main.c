@@ -128,35 +128,34 @@ int main(void)
   printf("Starting Bootloader (%d.%d)\r\n", BL_Version[0], BL_Version[1]);
 
   OTA_GNRL_CFG_ *cfg = (OTA_GNRL_CFG_ *)OTA_CFG_FLASH_ADDR;
+  bool goto_ota_mode = false;
 
   switch(cfg->reboot_cause)
   {
 	  case OTA_FIRST_TIME_BOOT:
 	  {
-		  printf("First Time Boot\r\n, No Configuration was found\r\n");
-		  while(1){
-			  // HALT
-		  }
+		  printf("First Time Boot\r\nNo Configuration was found\r\n");
+		  goto_ota_mode = true;
 	  }
 	  break;
 
 	  case OTA_NORMAL_BOOT:
 	  {
 		  printf("Normal Boot, Validate Application...\r\n");
-		  validate_app();
 	  }
 	  break;
 
 	  case OTA_UPDATE_APP:
 	  {
 		  printf("New Firmware was found!\r\n");
-//		  update_application();
+		  goto_ota_mode = true;
 	  }
 	  break;
 
 	  case OTA_LOAD_PREV_APP:
 	  {
 		  printf("Update Unsuccessful, Back to previous App if Available\r\n");
+
 	  }
 	  break;
   }
