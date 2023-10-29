@@ -46,7 +46,6 @@ USB_HOST/Target/usbh_conf.o: ../USB_HOST/Target/usbh_conf.c \
  c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\utilities\fonts\fonts.h \
  c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\drivers\bsp\components\ili9341\ili9341.h \
  c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\drivers\bsp\components\common\lcd.h \
- ../Core/Inc/ota_app.h ../Core/Inc/main.h \
  ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_def.h \
  ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_ioreq.h \
  ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_core.h \
@@ -101,8 +100,6 @@ USB_HOST/Target/usbh_conf.o: ../USB_HOST/Target/usbh_conf.c \
 c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\utilities\fonts\fonts.h:
 c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\drivers\bsp\components\ili9341\ili9341.h:
 c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\drivers\bsp\components\common\lcd.h:
-../Core/Inc/ota_app.h:
-../Core/Inc/main.h:
 ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_def.h:
 ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_ioreq.h:
 ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_core.h:

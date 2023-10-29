@@ -35,7 +35,6 @@ extern "C" {
 #include <stdbool.h>
 #include <string.h>
 #include "../../../Drivers/BSP/STM32F429I-Discovery/stm32f429i_discovery_lcd.h"
-#include "ota_app.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

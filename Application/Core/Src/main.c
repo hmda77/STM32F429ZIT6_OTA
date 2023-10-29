@@ -170,9 +170,7 @@ int main(void)
   BSP_LCD_SetFont(&Font12);
   BSP_LCD_DisplayStringAt(0, 0, (uint8_t*)buffch, CENTER_MODE);
   BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
-  BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2 - 27, (uint8_t*)"MUST'V BEEN THE", CENTER_MODE);
-  BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2 - 12, (uint8_t*)"DEADLY", CENTER_MODE);
-  BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2 + 3, (uint8_t*)"KISS", CENTER_MODE);
+  BSP_LCD_DisplayStringAt(0, BSP_LCD_GetYSize()/2 - 12, (uint8_t*)"APPLICATION", CENTER_MODE);
 
 
 
@@ -191,13 +189,7 @@ int main(void)
     HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
     HAL_Delay(1000);
     if (ota_update_request){
-    	printf("OTA Update Requested...\r\n");
-    	HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
-    	HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_SET);
-    	go_to_ota_app(&huart5);
-    	HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
-    	HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_RESET);
-    	ota_update_request = false;
+    	//TODO : ota update request handler
     }
 
   }
