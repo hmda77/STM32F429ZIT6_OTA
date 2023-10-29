@@ -43,7 +43,8 @@ Core/Src/stm32f4xx_hal_msp.o: ../Core/Src/stm32f4xx_hal_msp.c \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/../../../Drivers/BSP/STM32F429I-Discovery/stm32f429i_discovery_sdram.h \
  c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\utilities\fonts\fonts.h \
  c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\drivers\bsp\components\ili9341\ili9341.h \
- c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\drivers\bsp\components\common\lcd.h
+ c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\drivers\bsp\components\common\lcd.h \
+ ../Core/Inc/serial_com.h ../Core/Inc/main.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -90,3 +91,5 @@ Core/Src/stm32f4xx_hal_msp.o: ../Core/Src/stm32f4xx_hal_msp.c \
 c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\utilities\fonts\fonts.h:
 c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\drivers\bsp\components\ili9341\ili9341.h:
 c:\users\hamid\stm32cubeide\stm32f429zit6_ota\application\drivers\bsp\components\common\lcd.h:
+../Core/Inc/serial_com.h:
+../Core/Inc/main.h:

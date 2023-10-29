@@ -35,6 +35,7 @@ extern "C" {
 #include <stdbool.h>
 #include <string.h>
 #include "../../../Drivers/BSP/STM32F429I-Discovery/stm32f429i_discovery_lcd.h"
+#include "serial_com.h" // Serial Communication Library
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -251,10 +252,6 @@ void Error_Handler(void);
 #define LCD_FRAME_BUFFER_LAYER1					LCD_FRAME_BUFFER
 #define CONVERTED_FRAME_BUFFER					(LCD_FRAME_BUFFER+0x260000)
 
-#define MAX_SERIAL_DATA_LENGTH					( 1024 )	// Max Data frame can have
-#define MAX_SERIAL_OVERHEAD						( 9 )		// frame overhead like SOF, data length, ...
-#define MAX_SERIAL_SIZE 						1024 + 9	// Maximum serial frame
-#define EOF_SERIAL								0xBB		// end of serial frame indicator
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
