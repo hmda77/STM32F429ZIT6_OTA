@@ -37,15 +37,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_ranges 00001f60  00000000  00000000  00062410  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  0002be1d  00000000  00000000  00064370  2**0
+ 17 .debug_macro  0002be2b  00000000  00000000  00064370  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   0002b30a  00000000  00000000  0009018d  2**0
+ 18 .debug_line   0002b30a  00000000  00000000  0009019b  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    000f019a  00000000  00000000  000bb497  2**0
+ 19 .debug_str    000f01d4  00000000  00000000  000bb4a5  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .comment      00000050  00000000  00000000  001ab631  2**0
+ 20 .comment      00000050  00000000  00000000  001ab679  2**0
                   CONTENTS, READONLY
- 21 .debug_frame  000097e0  00000000  00000000  001ab684  2**2
+ 21 .debug_frame  000097e0  00000000  00000000  001ab6cc  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -3777,11 +3777,14 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
  802184e:	b082      	sub	sp, #8
  8021850:	af00      	add	r7, sp, #0
  8021852:	6078      	str	r0, [r7, #4]
+	// check serial interruption
 	if(huart==&huart5){
  8021854:	687b      	ldr	r3, [r7, #4]
  8021856:	4a18      	ldr	r2, [pc, #96]	; (80218b8 <HAL_UART_RxCpltCallback+0x6c>)
  8021858:	4293      	cmp	r3, r2
  802185a:	d128      	bne.n	80218ae <HAL_UART_RxCpltCallback+0x62>
+
+		//check whether last serial process end
 		if(!eof_flag){
  802185c:	4b17      	ldr	r3, [pc, #92]	; (80218bc <HAL_UART_RxCpltCallback+0x70>)
  802185e:	781b      	ldrb	r3, [r3, #0]
@@ -3789,6 +3792,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
  8021864:	b2db      	uxtb	r3, r3
  8021866:	2b00      	cmp	r3, #0
  8021868:	d017      	beq.n	802189a <HAL_UART_RxCpltCallback+0x4e>
+
+			// Add Received Byte to buffer
 			buf[idx++] = Rx_data[0];
  802186a:	4b15      	ldr	r3, [pc, #84]	; (80218c0 <HAL_UART_RxCpltCallback+0x74>)
  802186c:	681b      	ldr	r3, [r3, #0]
@@ -3799,16 +3804,20 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
  8021876:	7811      	ldrb	r1, [r2, #0]
  8021878:	4a13      	ldr	r2, [pc, #76]	; (80218c8 <HAL_UART_RxCpltCallback+0x7c>)
  802187a:	54d1      	strb	r1, [r2, r3]
-			if( (idx >= 1024) || (Rx_data[0] == EOF_SERIAL))
+
+			// frame Received complete conditions
+			if( (idx >= MAX_SERIAL_SIZE) || (Rx_data[0] == EOF_SERIAL))
  802187c:	4b10      	ldr	r3, [pc, #64]	; (80218c0 <HAL_UART_RxCpltCallback+0x74>)
  802187e:	681b      	ldr	r3, [r3, #0]
- 8021880:	f5b3 6f80 	cmp.w	r3, #1024	; 0x400
- 8021884:	d203      	bcs.n	802188e <HAL_UART_RxCpltCallback+0x42>
+ 8021880:	f5b3 6f81 	cmp.w	r3, #1032	; 0x408
+ 8021884:	d803      	bhi.n	802188e <HAL_UART_RxCpltCallback+0x42>
  8021886:	4b0f      	ldr	r3, [pc, #60]	; (80218c4 <HAL_UART_RxCpltCallback+0x78>)
  8021888:	781b      	ldrb	r3, [r3, #0]
  802188a:	2bbb      	cmp	r3, #187	; 0xbb
  802188c:	d105      	bne.n	802189a <HAL_UART_RxCpltCallback+0x4e>
 			{
+
+				// show that receive a frame completed
 				eof_flag = true;
  802188e:	4b0b      	ldr	r3, [pc, #44]	; (80218bc <HAL_UART_RxCpltCallback+0x70>)
  8021890:	2201      	movs	r2, #1
@@ -3819,11 +3828,15 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
  8021898:	601a      	str	r2, [r3, #0]
 			}
 		}
+
+		//clear Byte Buffer for the next Reception
 		memset(Rx_data, 0, sizeof(Rx_data));
  802189a:	2202      	movs	r2, #2
  802189c:	2100      	movs	r1, #0
  802189e:	4809      	ldr	r0, [pc, #36]	; (80218c4 <HAL_UART_RxCpltCallback+0x78>)
  80218a0:	f00b fd16 	bl	802d2d0 <memset>
+
+		// Enable receive Interrupt again
 		HAL_UART_Receive_IT(huart, Rx_data, 1);
  80218a4:	2201      	movs	r2, #1
  80218a6:	4907      	ldr	r1, [pc, #28]	; (80218c4 <HAL_UART_RxCpltCallback+0x78>)

@@ -308,16 +308,29 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
+	// check serial interruption
 	if(huart==&huart5){
+
+		//check whether last serial process end
 		if(!eof_flag){
+
+			// Add Received Byte to buffer
 			buf[idx++] = Rx_data[0];
-			if( (idx >= 1024) || (Rx_data[0] == EOF_SERIAL))
+
+			// frame Received complete conditions
+			if( (idx >= MAX_SERIAL_SIZE) || (Rx_data[0] == EOF_SERIAL))
 			{
+
+				// show that receive a frame completed
 				eof_flag = true;
 				idx = 0;
 			}
 		}
+
+		//clear Byte Buffer for the next Reception
 		memset(Rx_data, 0, sizeof(Rx_data));
+
+		// Enable receive Interrupt again
 		HAL_UART_Receive_IT(huart, Rx_data, 1);
 	}
 }
