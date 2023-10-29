@@ -250,6 +250,9 @@ void Error_Handler(void);
 #define LCD_FRAME_BUFFER_LAYER0                  (LCD_FRAME_BUFFER+0x130000)
 #define LCD_FRAME_BUFFER_LAYER1                  LCD_FRAME_BUFFER
 #define CONVERTED_FRAME_BUFFER                   (LCD_FRAME_BUFFER+0x260000)
+
+#define MAX_SERIAL_SIZE 1024 + 9
+#define EOF_SERIAL		0xBB
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

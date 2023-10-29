@@ -41,7 +41,15 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
+extern UART_HandleTypeDef huart5;
+extern uint8_t Rx_data[2];
 extern bool ota_update_request;
+
+extern uint8_t buf[MAX_SERIAL_SIZE];
+extern bool eof_flag;
+
+uint32_t idx = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -58,6 +66,7 @@ extern bool ota_update_request;
 extern HCD_HandleTypeDef hhcd_USB_OTG_HS;
 extern DMA2D_HandleTypeDef hdma2d;
 extern LTDC_HandleTypeDef hltdc;
+extern UART_HandleTypeDef huart5;
 extern TIM_HandleTypeDef htim6;
 
 /* USER CODE BEGIN EV */
@@ -217,6 +226,20 @@ void EXTI0_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles UART5 global interrupt.
+  */
+void UART5_IRQHandler(void)
+{
+  /* USER CODE BEGIN UART5_IRQn 0 */
+
+  /* USER CODE END UART5_IRQn 0 */
+  HAL_UART_IRQHandler(&huart5);
+  /* USER CODE BEGIN UART5_IRQn 1 */
+
+  /* USER CODE END UART5_IRQn 1 */
+}
+
+/**
   * @brief This function handles TIM6 global interrupt, DAC1 and DAC2 underrun error interrupts.
   */
 void TIM6_DAC_IRQHandler(void)
@@ -279,6 +302,23 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	case B1_Pin: //Blue Button Interrupt
 		ota_update_request = true;
 
+	}
+}
+
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	if(huart==&huart5){
+		if(!eof_flag){
+			buf[idx++] = Rx_data[0];
+			if( (idx >= 1024) || (Rx_data[0] == EOF_SERIAL))
+			{
+				eof_flag = true;
+				idx = 0;
+			}
+		}
+		memset(Rx_data, 0, sizeof(Rx_data));
+		HAL_UART_Receive_IT(huart, Rx_data, 1);
 	}
 }
 /* USER CODE END 1 */

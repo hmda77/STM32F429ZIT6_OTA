@@ -65,8 +65,12 @@ SDRAM_HandleTypeDef hsdram1;
 
 const uint8_t BL_Version[2] =  {V_MAJOR, V_MINOR}; //App Version
 char buffch[100];
+
+uint8_t Rx_data[2];
 bool ota_update_request = false;
 
+uint8_t buf[MAX_SERIAL_SIZE];
+bool eof_flag;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -132,6 +136,8 @@ int main(void)
   MX_UART5_Init();
   /* USER CODE BEGIN 2 */
 
+  HAL_UART_Receive_IT(&huart5, Rx_data, 1);
+
 
   sprintf(buffch,"Starting Application (%d.%d)", BL_Version[0], BL_Version[1]);
   printf("Starting Application (%d.%d)\r\n", BL_Version[0], BL_Version[1]);
@@ -185,9 +191,11 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
-    HAL_Delay(1000);
-    HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
-    HAL_Delay(1000);
+    if(eof_flag){
+    	printf("%s\r\n", buf);
+    	eof_flag= false;
+    	memset(buf, 0, sizeof(buf));
+    }
     if (ota_update_request){
     	//TODO : ota update request handler
     }
@@ -220,7 +228,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLM = 16;
   RCC_OscInitStruct.PLL.PLLN = 336;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 7;
+  RCC_OscInitStruct.PLL.PLLQ = 3;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
