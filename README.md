@@ -15,11 +15,11 @@
 ### Hardware:
 - STM32F429ZIT6 Discovery Board
 - NodeMCU
-- CH340G USB to TTL Module
+- CH340G (or Any USB to TTL Module)
 
 ### Software:
 - STM32CubeIDE V1.11.2
-- Any Serial Communication Like PuTTY, Docklight, ...
+- Any Serial Communication Software Like PuTTY, Docklight, ...
 - STM32CubeProgrammer (Optional)
 
 ## Usage:
