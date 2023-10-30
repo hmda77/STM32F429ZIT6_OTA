@@ -38,6 +38,29 @@
  */
 
 /*
+ * Serial Communication chunk state
+ */
+typedef enum
+{
+  CUN_STATE_SOF			= 0,
+  CUN_STATE_PKT_TYPE    = 1,
+  CUN_STATE_LENGTH  	= 2,
+  CUN_STATE_DATA    	= 3,
+  CUN_STATE_CRC     	= 4,
+  CUN_STATE_EOF			= 5,
+}CUN_STATE_; //chunk state
+
+/*
+ * chunk Status definition
+ */
+typedef enum{
+  CUN_EMPTY				= 0,
+  CUN_READY				= 1,
+  CUN_BUSY				= 2,
+  CUN_ERROR				= 3,
+}CUN_RDY_;
+
+/*
  * Serial Communication process state
  */
 typedef enum
@@ -206,7 +229,7 @@ typedef struct
 
 
 /*
- * OTA Response format
+ * Serial Response format
  *
  * __________________________________________
  * |     | Packet |     |        |     |     |
@@ -222,7 +245,7 @@ typedef struct
   uint8_t   status;
   uint32_t  crc;
   uint8_t   eof;
-}__attribute__((packed)) OTA_RESP_;
+}__attribute__((packed)) SER_RESP_;
 
 
 /* -------------------------------------------- *
@@ -232,7 +255,7 @@ typedef struct
  * -------------------------------------------- *
  */
 
-
+void serial_app();
 
 /* -------------------------------------------- *
  *												*

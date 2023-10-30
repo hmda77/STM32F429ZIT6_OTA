@@ -41,14 +41,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-extern UART_HandleTypeDef huart5;
-extern uint8_t Rx_data[2];
-extern bool ota_update_request;
 
-extern uint8_t buf[MAX_SERIAL_SIZE];
-extern bool eof_flag;
-
-uint32_t idx = 0;
 
 /* USER CODE END PV */
 
@@ -297,41 +290,13 @@ void DMA2D_IRQHandler(void)
 
 /* USER CODE BEGIN 1 */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-	switch(GPIO_Pin){
-
-	case B1_Pin: //Blue Button Interrupt
-		ota_update_request = true;
-
-	}
+//	switch(GPIO_Pin){
+//
+//	case B1_Pin: //Blue Button Interrupt
+//		ota_update_request = true;
+//
+//	}
 }
 
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-	// check serial interruption
-	if(huart==&huart5){
-
-		//check whether last serial process end
-		if(!eof_flag){
-
-			// Add Received Byte to buffer
-			buf[idx++] = Rx_data[0];
-
-			// frame Received complete conditions
-			if( (idx >= MAX_SERIAL_SIZE) || (Rx_data[0] == EOF_SERIAL))
-			{
-
-				// show that receive a frame completed
-				eof_flag = true;
-				idx = 0;
-			}
-		}
-
-		//clear Byte Buffer for the next Reception
-		memset(Rx_data, 0, sizeof(Rx_data));
-
-		// Enable receive Interrupt again
-		HAL_UART_Receive_IT(huart, Rx_data, 1);
-	}
-}
 /* USER CODE END 1 */

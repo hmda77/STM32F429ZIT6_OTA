@@ -1,0 +1,4 @@
+../Core/Src/serial_com.c:38:6:serial_app	8	static
+../Core/Src/serial_com.c:52:6:HAL_UART_RxCpltCallback	16	static
+../Core/Src/serial_com.c:65:13:ser_receive_chunk	24	static
+../Core/Src/serial_com.c:183:10:ser_calcCRC	32	static

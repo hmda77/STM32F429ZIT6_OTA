@@ -66,11 +66,9 @@ SDRAM_HandleTypeDef hsdram1;
 const uint8_t BL_Version[2] =  {V_MAJOR, V_MINOR}; //App Version
 char buffch[100];
 
-uint8_t Rx_data[2];
 bool ota_update_request = false;
 
-uint8_t buf[MAX_SERIAL_SIZE];
-bool eof_flag;
+uint8_t Rx_Byte[2];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -136,7 +134,8 @@ int main(void)
   MX_UART5_Init();
   /* USER CODE BEGIN 2 */
 
-  HAL_UART_Receive_IT(&huart5, Rx_data, 1);
+  // Start Receiving data from modem
+  HAL_UART_Receive_IT(&huart5, Rx_Byte, 1);
 
 
   sprintf(buffch,"Starting Application (%d.%d)", BL_Version[0], BL_Version[1]);
@@ -191,14 +190,11 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
-    if(eof_flag){
-    	printf("%s\r\n", buf);
-    	eof_flag= false;
-    	memset(buf, 0, sizeof(buf));
-    }
     if (ota_update_request){
+
     	//TODO : ota update request handler
     }
+	serial_app();
 
   }
   /* USER CODE END 3 */
