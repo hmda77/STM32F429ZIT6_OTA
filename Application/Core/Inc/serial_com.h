@@ -60,6 +60,15 @@ typedef enum{
   CUN_ERROR				= 3,
 }CUN_RDY_;
 
+
+typedef struct{
+	CUN_STATE_	chunk_state; 	// chunk state machine
+	CUN_RDY_	chunk_ready;	// chunk ready state
+	uint16_t	index;			// received byte index
+	uint16_t	data_len;		// packet chunk data length
+	uint32_t	rec_data_crc;	// received CRC
+}__attribute__((packed))CHUNK_HANDL_;
+
 /*
  * Serial Communication process state
  */

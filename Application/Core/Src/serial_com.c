@@ -8,23 +8,20 @@
 
 #include "serial_com.h"
 
-/* chunk state */
-static CUN_STATE_ chunk_state = CUN_STATE_SOF;
 
-/* chunk status */
-static CUN_RDY_ chunk_ready = CUN_EMPTY;
 
 /* Buffer to hold the received data */
 static uint8_t Rx_Buffer[MAX_SERIAL_SIZE];
 
-/* received byte index */
-static uint16_t idx;
-
-/* packet chunk data length */
-static uint16_t data_len;
-
-/* received CRC */
-static uint32_t rec_data_crc;
+/* chunk handler */
+static CHUNK_HANDL_ hchunk =
+{
+	.chunk_ready  = CUN_EMPTY,
+	.chunk_state  = CUN_STATE_SOF,
+	.index		  = 0u,
+	.data_len	  = 0u,
+	.rec_data_crc = 0u,
+};
 
 extern UART_HandleTypeDef huart5;
 extern uint8_t Rx_Byte[2];
@@ -37,15 +34,15 @@ uint32_t ser_calcCRC(uint8_t * pData, uint32_t DataLength);
 
 void serial_app(){
 
-	if(chunk_ready == CUN_READY)
+	if(hchunk.chunk_ready == CUN_READY)
 	{
 		printf("Chunk Received!!!\r\n");
-		chunk_ready = CUN_EMPTY;
+		hchunk.chunk_ready = CUN_EMPTY;
 	}
-	if(chunk_ready == CUN_ERROR)
+	if(hchunk.chunk_ready == CUN_ERROR)
 	{
 		printf("Receive Chunk Error\r\n");
-		chunk_ready = CUN_EMPTY;
+		hchunk.chunk_ready = CUN_EMPTY;
 	}
 }
 
@@ -53,7 +50,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	// check serial interruption
 	if(huart==&huart5){
-		if((chunk_ready == CUN_EMPTY) || (chunk_ready == CUN_BUSY))
+		if((hchunk.chunk_ready == CUN_EMPTY) || (hchunk.chunk_ready == CUN_BUSY))
 		{
 			ser_receive_chunk(Rx_Byte[0]);
 		}
@@ -66,23 +63,23 @@ static void ser_receive_chunk(uint8_t rx_byte)
 {
 	uint32_t	cal_data_crc = 0u;
 
-	switch(chunk_state){
+	switch(hchunk.chunk_state){
 
 		// receive SOF byte (1byte)
 		case CUN_STATE_SOF:
 		{
 			/* initial variable again */
 			memset(Rx_Buffer, 0, sizeof(Rx_Buffer));
-			idx 		 = 0u;
-			data_len 	 = 0u;
-			rec_data_crc = 0u;
+			hchunk.index 		 = 0u;
+			hchunk.data_len 	 = 0u;
+			hchunk.rec_data_crc  = 0u;
 
 
 			if(rx_byte == SER_SOF)
 			{
-				Rx_Buffer[idx++] = rx_byte;
-				chunk_state = CUN_STATE_PKT_TYPE;
-				chunk_ready = CUN_BUSY;
+				Rx_Buffer[hchunk.index++] = rx_byte;
+				hchunk.chunk_state = CUN_STATE_PKT_TYPE;
+				hchunk.chunk_ready = CUN_BUSY;
 			}
 		}
 		break;
@@ -93,13 +90,13 @@ static void ser_receive_chunk(uint8_t rx_byte)
 			if( rx_byte == SER_SOF ){
 				/* initial variable again */
 				memset(Rx_Buffer, 0, sizeof(Rx_Buffer));
-				idx 		 = 0u;
-				data_len 	 = 0u;
-				rec_data_crc = 0u;
+				hchunk.index 		 = 0u;
+				hchunk.data_len 	 = 0u;
+				hchunk.rec_data_crc  = 0u;
 			}else
 			{
-				Rx_Buffer[idx++] = rx_byte;
-				chunk_state = CUN_STATE_LENGTH;
+				Rx_Buffer[hchunk.index++] = rx_byte;
+				hchunk.chunk_state = CUN_STATE_LENGTH;
 			}
 		}
 		break;
@@ -107,15 +104,15 @@ static void ser_receive_chunk(uint8_t rx_byte)
 		// Get the data length
 		case CUN_STATE_LENGTH:
 		{
-			Rx_Buffer[idx++] = rx_byte;
+			Rx_Buffer[hchunk.index++] = rx_byte;
 
-			if( idx >=4 ){
-				data_len = *(uint16_t *) &Rx_Buffer[2];
-				if(data_len <= MAX_SERIAL_DATA_LENGTH){
-					chunk_state = CUN_STATE_DATA;
+			if( hchunk.index >=4 ){
+				hchunk.data_len = *(uint16_t *) &Rx_Buffer[2];
+				if(hchunk.data_len <= MAX_SERIAL_DATA_LENGTH){
+					hchunk.chunk_state = CUN_STATE_DATA;
 				}
 				else {
-					chunk_state = CUN_STATE_SOF;
+					hchunk.chunk_state = CUN_STATE_SOF;
 				}
 			}
 		}
@@ -124,21 +121,21 @@ static void ser_receive_chunk(uint8_t rx_byte)
 		// Receive data
 		case CUN_STATE_DATA:
 		{
-			Rx_Buffer[idx++] = rx_byte;
-			if( idx >= 4+data_len )
+			Rx_Buffer[hchunk.index++] = rx_byte;
+			if( hchunk.index >= 4+hchunk.data_len )
 			{
-				chunk_state = CUN_STATE_CRC;
+				hchunk.chunk_state = CUN_STATE_CRC;
 			}
 		}
 		break;
 
 		// Get the CRC
 		case CUN_STATE_CRC:
-			Rx_Buffer[idx++] = rx_byte;
-			if( idx >= 8+data_len)
+			Rx_Buffer[hchunk.index++] = rx_byte;
+			if( hchunk.index >= 8+hchunk.data_len)
 			{
-				rec_data_crc = *(uint32_t *) &Rx_Buffer[4+data_len];
-				chunk_state = CUN_STATE_EOF;
+				hchunk.rec_data_crc = *(uint32_t *) &Rx_Buffer[4+hchunk.data_len];
+				hchunk.chunk_state = CUN_STATE_EOF;
 			}
 		break;
 
@@ -147,24 +144,25 @@ static void ser_receive_chunk(uint8_t rx_byte)
 		{
 			do
 			{
-				Rx_Buffer[idx] = rx_byte;
-				chunk_ready = CUN_ERROR;
-				chunk_state = CUN_STATE_SOF;
+				Rx_Buffer[hchunk.index] = rx_byte;
+				hchunk.chunk_ready = CUN_ERROR;
+				hchunk.chunk_state = CUN_STATE_SOF;
 
-				if(Rx_Buffer[idx] != SER_EOF)
+				if(Rx_Buffer[hchunk.index] != SER_EOF)
 				{
 					break;
 				}
 
-				cal_data_crc = ser_calcCRC(&Rx_Buffer[4], data_len);
-				if(cal_data_crc != rec_data_crc)
+				cal_data_crc = ser_calcCRC(&Rx_Buffer[4], hchunk.data_len);
+				if(cal_data_crc != hchunk.rec_data_crc)
 				{
 					printf("CHUNK CRC MISMATCH!!! [Calc CRC = 0x%08lX] [Rec CRC = 0x%08lX]\r\n",
-												                   cal_data_crc, rec_data_crc );
+												                   cal_data_crc,
+																   hchunk.rec_data_crc );
 					break;
 				}
 
-				chunk_ready = CUN_READY;
+				hchunk.chunk_ready = CUN_READY;
 
 			}while(false);
 		}
