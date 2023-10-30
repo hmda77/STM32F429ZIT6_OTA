@@ -107,6 +107,16 @@ typedef enum
 
 
 /*
+ *  Serial Return value
+ */
+typedef enum
+{
+	SER_EX_OK	 = 0,
+	SER_EX_ERROR = 1,
+}SER_EX_;
+
+
+/*
  * Serial data type
  */
 typedef enum

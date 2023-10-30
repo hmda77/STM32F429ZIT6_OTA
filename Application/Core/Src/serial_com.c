@@ -29,21 +29,43 @@ extern uint8_t Rx_Byte[2];
 
 
 static void ser_receive_chunk(uint8_t rx_byte);
+static void ser_send_resp(UART_HandleTypeDef *huart, uint8_t rsp);
 uint32_t ser_calcCRC(uint8_t * pData, uint32_t DataLength);
 
 
 void serial_app(){
+	do{
+		// no Byte received or chunk reception in progress
+		if( (hchunk.chunk_ready == CUN_EMPTY) ||
+			(hchunk.chunk_ready == CUN_BUSY)){
+			break;
+		}
 
-	if(hchunk.chunk_ready == CUN_READY)
-	{
-		printf("Chunk Received!!!\r\n");
+		SER_EX_ ret = SER_EX_OK;
+		// An Error occur in during receive chunk
+		if(hchunk.chunk_ready == CUN_ERROR)
+		{
+			printf("Receive Chunk Error\r\n");
+			ret = SER_EX_ERROR;
+		}
+		else
+		{
+			printf("Chunk Received!!!\r\n");
+			//TODO: Processing data
+		}
+
+		// Send ACK or NACK
+		if( ret != SER_EX_OK){
+			printf("Sending NACK\r\n");
+			ser_send_resp(&huart5, SER_NACK);
+		}
+		else
+		{
+			ser_send_resp(&huart5, SER_ACK);
+		}
+
 		hchunk.chunk_ready = CUN_EMPTY;
-	}
-	if(hchunk.chunk_ready == CUN_ERROR)
-	{
-		printf("Receive Chunk Error\r\n");
-		hchunk.chunk_ready = CUN_EMPTY;
-	}
+	}while(false);
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
@@ -168,6 +190,30 @@ static void ser_receive_chunk(uint8_t rx_byte)
 		}
 		break;
 	}
+}
+
+
+/**
+ * @brief send response to host
+ * @param huart uart handler
+ * @param rsp ACK or NACK response
+ * @retval none
+ */
+static void ser_send_resp(UART_HandleTypeDef *huart, uint8_t rsp){
+	SER_RESP_ pack =
+	{
+		.sof 			= SER_SOF,
+		.packet_type	= SER_PACKET_TYPE_RESPONSE,
+		.data_len		= 1u,
+		.status			= rsp,
+		.eof			= SER_EOF
+	};
+
+	pack.crc = ser_calcCRC(&pack.status, 1);
+
+	//send respond
+	HAL_UART_Transmit(huart, (uint8_t *)&pack, sizeof(SER_RESP_),HAL_MAX_DELAY);
+
 }
 
 
