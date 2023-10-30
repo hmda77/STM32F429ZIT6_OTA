@@ -39,12 +39,12 @@ void serial_app(){
 
 	if(chunk_ready == CUN_READY)
 	{
-		printf("%s\r\n",Rx_Buffer);
+		printf("Chunk Received!!!\r\n");
 		chunk_ready = CUN_EMPTY;
 	}
 	if(chunk_ready == CUN_ERROR)
 	{
-		printf("Receive Chunk Error\r\n",Rx_Buffer);
+		printf("Receive Chunk Error\r\n");
 		chunk_ready = CUN_EMPTY;
 	}
 }
