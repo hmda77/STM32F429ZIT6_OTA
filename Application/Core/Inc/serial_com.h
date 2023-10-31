@@ -12,9 +12,9 @@
 
 
 /* -------------------------------------------- *
- *												*
- * 					Defines						*
- *												*
+ *																							*
+ * 									Defines											*
+ *																							*
  * -------------------------------------------- *
  */
 
@@ -31,9 +31,9 @@
 
 
 /* -------------------------------------------- *
- *												*
- * 				Type Definitions				*
- *												*
+ *																							*
+ * 								Type Definitions							*
+ *																							*
  * -------------------------------------------- *
  */
 
@@ -59,15 +59,6 @@ typedef enum{
   CUN_BUSY				= 2,
   CUN_ERROR				= 3,
 }CUN_RDY_;
-
-
-typedef struct{
-	CUN_STATE_	chunk_state; 	// chunk state machine
-	CUN_RDY_	chunk_ready;	// chunk ready state
-	uint16_t	index;			// received byte index
-	uint16_t	data_len;		// packet chunk data length
-	uint32_t	rec_data_crc;	// received CRC
-}__attribute__((packed))CHUNK_HANDL_;
 
 /*
  * Serial Communication process state
@@ -166,6 +157,18 @@ typedef struct
 }__attribute__((packed)) ota_info;
 
 
+/*
+ * chunk handler
+ */
+
+typedef struct{
+	CUN_STATE_	chunk_state; 	// chunk state machine
+	CUN_RDY_	chunk_ready;	// chunk ready state
+	uint16_t	index;			// received byte index
+	uint16_t	data_len;		// packet chunk data length
+	uint32_t	rec_data_crc;	// received CRC
+}__attribute__((packed))CHUNK_HANDL_;
+
 
 /*
  * Serial Command format
@@ -225,10 +228,6 @@ typedef struct
   uint8_t     *data;
 }__attribute__((packed)) SER_DATA_;
 
-
-/*
- *
- */
 
 /*
  * Serial Status Data format

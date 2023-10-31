@@ -271,7 +271,7 @@ static SER_EX_ ser_proccess_data( uint8_t *buf, uint16_t len)
 					data_info.data_size = header->meta_data.data_size;
 					data_info.data_crc	 = header->meta_data.data_crc;
 
-					printf("Received Data Header. type=[%d], size=[%ld], crc=[0x%08lX]\r\n",
+					printf("Received Data Header. type=[%d], size=[%d], crc=[0x%08lX]\r\n",
 																									data_info.data_type,
 																									data_info.data_size,
 																									data_info.data_crc);
@@ -305,10 +305,10 @@ static SER_EX_ ser_proccess_data( uint8_t *buf, uint16_t len)
 
 						case OTA_INFO_DATA:
 						{
-								ota_data = *(ota_info *)data->data;
+								ota_data = *(ota_info *)&buf[4];
 								ota_data.ota_valid = 0;
-								data_received_size = data_len;
-								data_calc_crc			 = ser_calcCRC(data->data, data_len);
+								data_received_size 			= data_len;
+								data_calc_crc			 			= ser_calcCRC(data->data, data_len);
 								ret = SER_EX_OK;
 
 						}
@@ -358,6 +358,8 @@ static SER_EX_ ser_proccess_data( uint8_t *buf, uint16_t len)
 							if(data_info.data_type == OTA_INFO_DATA)
 							{
 								ota_data.ota_valid = 1u;
+								printf("A NEW FIRMWARE FOUND!!! VERSION = [%d,%ld]\r\n", ota_data.ota_major,
+																																				 ota_data.ota_minor);
 							}
 						}
 						printf("Validated Successfully!\r\n");
