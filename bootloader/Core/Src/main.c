@@ -129,7 +129,6 @@ int main(void)
 
   OTA_GNRL_CFG_ *cfg = (OTA_GNRL_CFG_ *)OTA_CFG_FLASH_ADDR;
   bool goto_ota_mode = false;
-  bool should_backup = false;
 
   switch(cfg->reboot_cause)
   {
@@ -150,7 +149,6 @@ int main(void)
 	  {
 		  printf("New Firmware was found!\r\n");
 		  goto_ota_mode = true;
-		  should_backup = true;
 	  }
 	  break;
 
