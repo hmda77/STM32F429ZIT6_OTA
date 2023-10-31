@@ -34,7 +34,7 @@
 
 // MINOR AND MAJOR VERSION Definition
 #define V_MAJOR 0
-#define V_MINOR 2
+#define V_MINOR 3
 
 /* USER CODE END PD */
 
@@ -65,8 +65,6 @@ SDRAM_HandleTypeDef hsdram1;
 
 const uint8_t BL_Version[2] =  {V_MAJOR, V_MINOR}; //App Version
 char buffch[100];
-
-bool ota_update_request = false;
 
 uint8_t Rx_Byte[2];
 
@@ -199,11 +197,9 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
-    if (ota_update_request){
 
-    	//TODO : ota update request handler
-    }
-	serial_app();
+    /* check serial communication process */
+    serial_app();
 
   }
   /* USER CODE END 3 */

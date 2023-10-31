@@ -1,6 +1,8 @@
-../Core/Src/serial_com.c:53:6:serial_app	16	static
-../Core/Src/serial_com.c:90:6:HAL_UART_RxCpltCallback	16	static
-../Core/Src/serial_com.c:103:13:ser_receive_chunk	24	static
-../Core/Src/serial_com.c:215:16:ser_proccess_data	56	static
-../Core/Src/serial_com.c:394:13:ser_send_resp	32	static
-../Core/Src/serial_com.c:419:10:ser_calcCRC	32	static
+../Core/Src/serial_com.c:61:6:serial_app	16	static
+../Core/Src/serial_com.c:104:6:HAL_UART_RxCpltCallback	16	static
+../Core/Src/serial_com.c:117:13:ser_receive_chunk	24	static
+../Core/Src/serial_com.c:229:16:ser_proccess_data	56	static
+../Core/Src/serial_com.c:408:13:ser_send_resp	32	static
+../Core/Src/serial_com.c:430:6:ser_ota_requsted	80	static
+../Core/Src/serial_com.c:465:26:write_cfg_to_flash	64	static
+../Core/Src/serial_com.c:543:10:ser_calcCRC	32	static

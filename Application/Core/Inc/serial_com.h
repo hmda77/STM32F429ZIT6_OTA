@@ -29,6 +29,24 @@
 #define SER_NACK 0x01    // NACK
 #define SER_ACK  0x00    // ACK
 
+#define OTA_CFG_FLASH_ADDR		0x08010000				// Configuration's Base Address
+#define OTA_CFG_SECTOR			FLASH_SECTOR_4			// Configuration's Sector
+
+/*
+ * Reboot reason
+ */
+#define OTA_FIRST_TIME_BOOT			( 0xFFFFFFFF )		// First time Boot
+#define OTA_NORMAL_BOOT				( 0xABABABAB )		// Normal Boot
+#define OTA_UPDATE_APP				( 0xCDCDCDCD )		// UPDATE REQUEST
+#define OTA_LOAD_PREV_APP			( 0xEFEFEFEF )		// Load previous APP
+
+/*
+ * Data types
+ */
+#define	NORMAL_DATA						 0x00	// NORMAL DATA
+#define	STATUS_DATA 					 0x01	// data include status information
+#define	OTA_INFO_DATA					 0x02	// information of OTA
+
 
 /* -------------------------------------------- *
  *																							*
@@ -103,16 +121,6 @@ typedef enum
 	SER_EX_ERROR	= 1,
 }SER_EX_;
 
-
-/*
- * Serial data type
- */
-typedef enum
-{
-	NORMAL_DATA		= 0x00,	// NORMAL DATA
-	STATUS_DATA 	= 0x01,	// data include status information
-	OTA_INFO_DATA	= 0x02,	// information of OTA
-}SER_DATA_TYPE;
 
 
 /*
@@ -282,6 +290,33 @@ typedef struct
   uint32_t  crc;
   uint8_t   eof;
 }__attribute__((packed)) SER_RESP_;
+
+
+
+/*
+ * Slot table
+ */
+typedef struct
+{
+    uint8_t  is_this_slot_not_valid;  //Is this slot has a valid firmware/application?
+    uint8_t  is_this_slot_active;     //Is this slot's firmware is currently running?
+    uint32_t fw_size;                 //Slot's firmware/application size
+    uint32_t fw_crc;                  //Slot's firmware/application CRC
+    uint32_t reserved1;
+    uint32_t reserved2;
+    uint32_t reserved3;
+}__attribute__((packed)) OTA_SLOT_;
+
+
+/*
+ * General configuration
+ */
+typedef struct
+{
+    uint32_t  reboot_cause;
+    OTA_SLOT_ app_table;
+    OTA_SLOT_ backup_table;
+}__attribute__((packed)) OTA_GNRL_CFG_;
 
 
 /* -------------------------------------------- *

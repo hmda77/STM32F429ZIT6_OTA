@@ -30,7 +30,10 @@ static CHUNK_HANDL_ hchunk =
 /* Incoming data meta information */
 static meta_info data_info;
 
+/* data received size */
 static uint16_t data_received_size = 0u;
+
+/* data calculated CRC*/
 static uint32_t data_calc_crc	= 0u;
 
 /* Serial OTA Information */
@@ -42,11 +45,16 @@ extern UART_HandleTypeDef huart5;
 /* Buffer to hold the received BYTE */
 extern uint8_t Rx_Byte[2];
 
+/*Configuration */
+OTA_GNRL_CFG_ *cfg_flash	=	(OTA_GNRL_CFG_*) (OTA_CFG_FLASH_ADDR);
+
 
 /*------------------- Defined Functions -------------- */
 static void ser_receive_chunk(uint8_t rx_byte);
 static SER_EX_ ser_proccess_data( uint8_t *buf, uint16_t len);
 static void ser_send_resp(UART_HandleTypeDef *huart, uint8_t rsp);
+static HAL_StatusTypeDef write_cfg_to_flash( OTA_GNRL_CFG_ *cfg );
+void ser_ota_requsted();
 uint32_t ser_calcCRC(uint8_t * pData, uint32_t DataLength);
 
 
@@ -81,6 +89,12 @@ void serial_app(){
 		else
 		{
 			ser_send_resp(&huart5, SER_ACK);
+		}
+
+		/* check ota request */
+		if(ota_data.ota_available & ota_data.ota_download & ota_data.ota_valid)
+		{
+			ser_ota_requsted();
 		}
 
 		hchunk.chunk_ready = CUN_EMPTY;
@@ -408,6 +422,116 @@ static void ser_send_resp(UART_HandleTypeDef *huart, uint8_t rsp){
 
 }
 
+
+/*
+ * @brief save boot reason to OTA update and save data in configuration
+ * sector patr
+ */
+void ser_ota_requsted()
+{
+	do
+	{
+		HAL_StatusTypeDef ret = HAL_ERROR;
+
+		/* read configuration */
+		OTA_GNRL_CFG_ cfg;
+		memcpy(&cfg, cfg_flash, sizeof(OTA_GNRL_CFG_));
+
+		/* set reboot cause to ota request */
+		cfg.reboot_cause = OTA_UPDATE_APP;
+
+		/* write back config */
+		ret = write_cfg_to_flash(&cfg);
+
+		if( ret != HAL_OK )
+		{
+			printf("Write configuratin Error!!!\r\n");
+			break;
+		}
+
+		printf("Reboot for Update...\r\n");
+
+		HAL_NVIC_SystemReset();
+
+	}while(false);
+}
+
+
+/**
+  * @brief Write the configuration to flash
+  * @param cfg config structure
+  * @retval none
+  */
+static HAL_StatusTypeDef write_cfg_to_flash( OTA_GNRL_CFG_ *cfg )
+{
+	HAL_StatusTypeDef ret = HAL_ERROR;
+
+	do
+	{
+		if( cfg == NULL )
+		{
+			break;
+		}
+
+		ret = HAL_FLASH_Unlock();
+		if( ret != HAL_OK )
+		{
+			break;
+		}
+
+		// Check if the FLASH_FLAG_BSY
+		FLASH_WaitForLastOperation(HAL_MAX_DELAY);
+
+		// Erase the flash configuration sector
+		FLASH_EraseInitTypeDef EraseInitStruct;
+		uint32_t SectorError;
+
+		EraseInitStruct.TypeErase		= FLASH_TYPEERASE_SECTORS;
+		EraseInitStruct.Sector			= OTA_CFG_SECTOR;
+		EraseInitStruct.NbSectors		= 1u;
+		EraseInitStruct.VoltageRange	= FLASH_VOLTAGE_RANGE_3;
+
+		// clear all flags before you write it to flash
+		    __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_EOP | FLASH_FLAG_OPERR |
+		                FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR);
+
+		ret = HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError);
+		if( ret != HAL_OK )
+		{
+			break;
+		}
+
+		// Write the configuration
+		uint8_t *data = (uint8_t*) cfg;
+		for( uint32_t i = 0u; i<sizeof(OTA_GNRL_CFG_); i++ )
+		{
+			ret = HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE,
+									OTA_CFG_FLASH_ADDR + i,
+									data[i]);
+			if( ret != HAL_OK )
+			{
+				printf("Slot table Flash Write Error\r\n");
+				break;
+			}
+		}
+
+	    //Check if the FLASH_FLAG_BSY.
+	    FLASH_WaitForLastOperation( HAL_MAX_DELAY );
+
+	    if( ret != HAL_OK )
+	    {
+	      break;
+	    }
+
+	    ret = HAL_FLASH_Lock();
+	    if( ret != HAL_OK )
+	    {
+	      break;
+	    }
+	}while(false);
+
+	return ret;
+}
 
 /**
  * @brief Calculate CRC32
