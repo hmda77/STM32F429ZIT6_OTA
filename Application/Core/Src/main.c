@@ -69,6 +69,15 @@ char buffch[100];
 bool ota_update_request = false;
 
 uint8_t Rx_Byte[2];
+
+ota_info ota_data =
+		{
+				.ota_available = 0u,
+				.ota_download	 = 0u,
+				.ota_major		 = 0u,
+				.ota_minor		 = 0u,
+				.ota_valid		 = 0u,
+		};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/

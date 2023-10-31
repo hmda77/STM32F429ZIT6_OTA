@@ -74,11 +74,10 @@ typedef struct{
  */
 typedef enum
 {
-  SER_STATE_IDLE    = 0,
-  SER_STATE_START   = 1,
-  SER_STATE_HEADER  = 2,
-  SER_STATE_DATA    = 3,
-  SER_STATE_END     = 4,
+  SER_STATE_START   = 0,
+  SER_STATE_HEADER  = 1,
+  SER_STATE_DATA    = 2,
+  SER_STATE_END     = 3,
 }SER_STATE_;
 
 
@@ -91,8 +90,6 @@ typedef enum
   SER_PACKET_TYPE_DATA      = 1,    // Data
   SER_PACKET_TYPE_HEADER    = 2,    // Header
   SER_PACKET_TYPE_RESPONSE  = 3,    // Response
-  SER_PACKET_TYPE_STATUS	= 4,	// Status
-  SER_PACKET_TYPE_OTA		= 5,	// OTA
 }SER_PACKET_TYPE_;
 
 /*
@@ -111,8 +108,8 @@ typedef enum
  */
 typedef enum
 {
-	SER_EX_OK	 = 0,
-	SER_EX_ERROR = 1,
+	SER_EX_OK	 		= 0,
+	SER_EX_ERROR	= 1,
 }SER_EX_;
 
 
@@ -121,9 +118,9 @@ typedef enum
  */
 typedef enum
 {
-	NORMAL_DATA		= 0,	// NORMAL DATA
-	STATUS_DATA 	= 1,	// data include status information
-	OTA_INFO_DATA	= 2,	// information of OTA
+	NORMAL_DATA		= 0x00,	// NORMAL DATA
+	STATUS_DATA 	= 0x01,	// data include status information
+	OTA_INFO_DATA	= 0x02,	// information of OTA
 }SER_DATA_TYPE;
 
 
@@ -155,19 +152,40 @@ typedef struct
 
 
 /*
- * serial ota data information
+ * serial data information
  */
 typedef struct
 {
 	uint8_t  ota_available;		// OTA availability Check
 	uint8_t  ota_download;		// OTA download complete
-	uint16_t ota_major;			// OTA Major version
-	uint32_t ota_minor;			// OTA Minor version
+	uint16_t ota_major;				// OTA Major version
+	uint32_t ota_minor;				// OTA Minor version
+	uint8_t	 ota_valid;				// OTA Valid Flag (Received byte is not affected)
 	uint32_t reserved1;
 	uint32_t reserved2;
 }__attribute__((packed)) ota_info;
 
 
+
+/*
+ * Serial Command format
+ *
+ * ________________________________________
+ * |     | Packet |     |     |     |     |
+ * | SOF | Type   | Len | CMD | CRC | EOF |
+ * |_____|________|_____|_____|_____|_____|
+ *   1B      1B     2B    1B     4B    1B
+ */
+
+typedef struct
+{
+	uint8_t		sof;
+	uint8_t		packet_type;
+	uint16_t	data_len;
+	uint8_t		cmd;
+	uint32_t	crc;
+	uint8_t		eof;
+}__attribute__((packed)) SER_COMMAND_;
 
 
 /*
@@ -230,7 +248,7 @@ typedef struct
 }__attribute__((packed)) SER_STAT_;
 
 /*
- * Serial Status Data format
+ * Serial OTA Data format
  *
  * ___________________________________________
  * |     | Packet |     |         |     |     |
