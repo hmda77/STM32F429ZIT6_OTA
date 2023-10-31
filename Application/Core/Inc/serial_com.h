@@ -42,12 +42,12 @@
  */
 typedef enum
 {
-  CUN_STATE_SOF			= 0,
+  CUN_STATE_SOF					= 0,
   CUN_STATE_PKT_TYPE    = 1,
-  CUN_STATE_LENGTH  	= 2,
-  CUN_STATE_DATA    	= 3,
-  CUN_STATE_CRC     	= 4,
-  CUN_STATE_EOF			= 5,
+  CUN_STATE_LENGTH  		= 2,
+  CUN_STATE_DATA    		= 3,
+  CUN_STATE_CRC     		= 4,
+  CUN_STATE_EOF					= 5,
 }CUN_STATE_; //chunk state
 
 /*
@@ -130,7 +130,7 @@ typedef enum
 typedef struct
 {
   uint8_t  data_type;		// refer to SER_DATA_TYPE
-  uint32_t data_size;		// size of incoming data
+  uint16_t data_size;		// size of incoming data
   uint32_t data_crc;		// CRC of incoming data
   uint32_t reserved1;
   uint32_t reserved2;

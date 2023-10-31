@@ -233,150 +233,150 @@ static SER_EX_ ser_proccess_data( uint8_t *buf, uint16_t len)
 				ser_state = SER_STATE_START;
 				break;
 			}
+		}
 
-			switch(ser_state)
+		switch(ser_state)
+		{
+
+			case SER_STATE_START:
 			{
 
-				case SER_STATE_START:
+				data_info.data_crc 	= 0u;
+				data_info.data_size	= 0u;
+				data_info.data_type	= 0u;
+				data_received_size	= 0u;
+				data_calc_crc				= 0u;
+
+				SER_COMMAND_ *cmd = (SER_COMMAND_ *)buf;
+				if( cmd->packet_type == SER_PACKET_TYPE_CMD )
 				{
-
-					data_info.data_crc 	= 0u;
-					data_info.data_size	= 0u;
-					data_info.data_type	= 0u;
-					data_received_size	= 0u;
-					data_calc_crc				= 0u;
-
-					SER_COMMAND_ *cmd = (SER_COMMAND_ *)buf;
-					if( cmd->packet_type == SER_PACKET_TYPE_CMD )
+					if( cmd->cmd == SER_CMD_START )
 					{
-						if( cmd->cmd == SER_CMD_START )
-						{
-							printf("Received Serial Start Command \r\n");
-							ser_state = SER_STATE_HEADER;
-							ret = SER_EX_OK;
-						}
-					}
-				}
-				break;
-
-
-				case SER_STATE_HEADER:
-				{
-					SER_HEADER_ *header = (SER_HEADER_ *)buf;
-
-					if( header->packet_type == SER_PACKET_TYPE_HEADER )
-					{
-						data_info.data_type = header->meta_data.data_type;
-						data_info.data_size = header->meta_data.data_size;
-						data_info.data_crc	 = header->meta_data.data_crc;
-
-						printf("Received Data Header. type=[%d], size=[%ld], crc=[0x%08lX]\r\n",
-																										data_info.data_type,
-																										data_info.data_size,
-																										data_info.data_crc);
-						ser_state = SER_STATE_DATA;
+						printf("Received Serial Start Command \r\n");
+						ser_state = SER_STATE_HEADER;
 						ret = SER_EX_OK;
 					}
 				}
-				break;
+			}
+			break;
 
 
-				case SER_STATE_DATA:
+			case SER_STATE_HEADER:
+			{
+				SER_HEADER_ *header = (SER_HEADER_ *)buf;
+
+				if( header->packet_type == SER_PACKET_TYPE_HEADER )
 				{
-					SER_DATA_				*data			= (SER_DATA_ *)buf;
-					uint16_t				data_len	=	data->data_len;
+					data_info.data_type = header->meta_data.data_type;
+					data_info.data_size = header->meta_data.data_size;
+					data_info.data_crc	 = header->meta_data.data_crc;
 
-					if( data->packet_type == SER_PACKET_TYPE_DATA )
+					printf("Received Data Header. type=[%d], size=[%ld], crc=[0x%08lX]\r\n",
+																									data_info.data_type,
+																									data_info.data_size,
+																									data_info.data_crc);
+					ser_state = SER_STATE_DATA;
+					ret = SER_EX_OK;
+				}
+			}
+			break;
+
+
+			case SER_STATE_DATA:
+			{
+				SER_DATA_				*data			= (SER_DATA_ *)buf;
+				uint16_t				data_len	=	data->data_len;
+
+				if( data->packet_type == SER_PACKET_TYPE_DATA )
+				{
+					switch(data_info.data_type)
 					{
-						switch(data_info.data_type)
+						case NORMAL_DATA:
 						{
-							case NORMAL_DATA:
-							{
-								// RESERVED: for incomming data
-							}
-							break;
-
-							case STATUS_DATA:
-							{
-								// RESERVED: for modem status
-							}
-							break;
-
-							case OTA_INFO_DATA:
-							{
-									ota_data = *(ota_info *)data->data;
-									ota_data.ota_valid = 0;
-									data_received_size = data_len;
-									data_calc_crc			 = ser_calcCRC(data->data, data_len);
-									ret = SER_EX_OK;
-
-							}
-							break;
-
-							default:
-							{
-								// shouldn't be here
-								ret = SER_EX_ERROR;
-							}
-							break;
+							// RESERVED: for incomming data
 						}
+						break;
 
-						if( data_received_size >= data_info.data_size )
+						case STATUS_DATA:
 						{
-							//Received All data, move to end
-							ser_state = SER_STATE_END;
+							// RESERVED: for modem status
 						}
+						break;
+
+						case OTA_INFO_DATA:
+						{
+								ota_data = *(ota_info *)data->data;
+								ota_data.ota_valid = 0;
+								data_received_size = data_len;
+								data_calc_crc			 = ser_calcCRC(data->data, data_len);
+								ret = SER_EX_OK;
+
+						}
+						break;
+
+						default:
+						{
+							// shouldn't be here
+							ret = SER_EX_ERROR;
+						}
+						break;
+					}
+
+					if( data_received_size >= data_info.data_size )
+					{
+						//Received All data, move to end
+						ser_state = SER_STATE_END;
 					}
 				}
-				break;
+			}
+			break;
 
 
-				case SER_STATE_END:
+			case SER_STATE_END:
+			{
+				SER_COMMAND_ *cmd = (SER_COMMAND_ *)buf;
+
+				if( cmd->packet_type == SER_PACKET_TYPE_CMD)
 				{
-					SER_COMMAND_ *cmd = (SER_COMMAND_ *)buf;
-
-					if( cmd->packet_type == SER_PACKET_TYPE_CMD)
+					if(cmd->cmd == SER_CMD_END)
 					{
-						if(cmd->cmd == SER_CMD_END)
+						printf("Receive SERIAL END COMMAND\r\nValidation...\r\n");
+
+						//Validation the received packets
+						//TODO: validation normal data
+
+						// one packet data so:
+						if( data_info.data_type == OTA_INFO_DATA ||  data_info.data_type == STATUS_DATA )
 						{
-							printf("Receive SERIAL END COMMAND\r\nValidation...\r\n");
-
-							//Validation the received packets
-							//TODO: validation normal data
-
-							// one packet data so:
-							if( data_info.data_type == OTA_INFO_DATA ||  data_info.data_type == STATUS_DATA )
+							if(data_calc_crc != data_info.data_crc)
 							{
-								if(data_calc_crc != data_info.data_crc)
-								{
-									printf("ERROR: FW CRC Mismatch: calculated: [0x%08lx] received: [0x%08lx]\r\n",
-													data_calc_crc, data_info.data_crc);
-									break;
-								}
-
-								if(data_info.data_type == OTA_INFO_DATA)
-								{
-									ota_data.ota_valid = 1u;
-								}
+								printf("ERROR: FW CRC Mismatch: calculated: [0x%08lx] received: [0x%08lx]\r\n",
+												data_calc_crc, data_info.data_crc);
+								break;
 							}
-							printf("Validated Successfully!\r\n");
 
-							ser_state = SER_STATE_START;
-							ret = SER_EX_OK;
-
+							if(data_info.data_type == OTA_INFO_DATA)
+							{
+								ota_data.ota_valid = 1u;
+							}
 						}
+						printf("Validated Successfully!\r\n");
+
+						ser_state = SER_STATE_START;
+						ret = SER_EX_OK;
+
 					}
 				}
-				break;
+			}
+			break;
 
-				default:
-				{
-					ret = SER_EX_ERROR;
-				}
-				break;
-				// state cases end
-			};
-		}
+			default:
+			{
+				ret = SER_EX_ERROR;
+			}
+			break;
+			// state cases end
+		};
 
 	}while(false);
 

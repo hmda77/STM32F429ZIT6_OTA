@@ -39,13 +39,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  17 .debug_macro  0002c352  00000000  00000000  00065478  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   0002c367  00000000  00000000  000917ca  2**0
+ 18 .debug_line   0002c36e  00000000  00000000  000917ca  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    000f057e  00000000  00000000  000bdb31  2**0
+ 19 .debug_str    000f057e  00000000  00000000  000bdb38  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .comment      00000050  00000000  00000000  001ae0af  2**0
+ 20 .comment      00000050  00000000  00000000  001ae0b6  2**0
                   CONTENTS, READONLY
- 21 .debug_frame  000098ec  00000000  00000000  001ae100  2**2
+ 21 .debug_frame  000098ec  00000000  00000000  001ae108  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -2509,10 +2509,10 @@ static SER_EX_ ser_proccess_data( uint8_t *buf, uint16_t len)
 		if( (buf==NULL) || (len == 0u) )
  802117e:	687b      	ldr	r3, [r7, #4]
  8021180:	2b00      	cmp	r3, #0
- 8021182:	f000 8104 	beq.w	802138e <ser_proccess_data+0x222>
+ 8021182:	f000 8103 	beq.w	802138c <ser_proccess_data+0x220>
  8021186:	887b      	ldrh	r3, [r7, #2]
  8021188:	2b00      	cmp	r3, #0
- 802118a:	f000 8100 	beq.w	802138e <ser_proccess_data+0x222>
+ 802118a:	f000 80ff 	beq.w	802138c <ser_proccess_data+0x220>
 		{
 			break;
 		}
@@ -2525,396 +2525,398 @@ static SER_EX_ ser_proccess_data( uint8_t *buf, uint16_t len)
  8021192:	6a3b      	ldr	r3, [r7, #32]
  8021194:	785b      	ldrb	r3, [r3, #1]
  8021196:	2b00      	cmp	r3, #0
- 8021198:	f040 80f9 	bne.w	802138e <ser_proccess_data+0x222>
+ 8021198:	d107      	bne.n	80211aa <ser_proccess_data+0x3e>
 		{
 			if(cmd->cmd == SER_CMD_ABORT)
- 802119c:	6a3b      	ldr	r3, [r7, #32]
- 802119e:	791b      	ldrb	r3, [r3, #4]
- 80211a0:	2b02      	cmp	r3, #2
- 80211a2:	d103      	bne.n	80211ac <ser_proccess_data+0x40>
+ 802119a:	6a3b      	ldr	r3, [r7, #32]
+ 802119c:	791b      	ldrb	r3, [r3, #4]
+ 802119e:	2b02      	cmp	r3, #2
+ 80211a0:	d103      	bne.n	80211aa <ser_proccess_data+0x3e>
 			{
 				// Receive Serial Abort Command. stop process;
 				ser_state = SER_STATE_START;
- 80211a4:	4b81      	ldr	r3, [pc, #516]	; (80213ac <ser_proccess_data+0x240>)
- 80211a6:	2200      	movs	r2, #0
- 80211a8:	701a      	strb	r2, [r3, #0]
+ 80211a2:	4b82      	ldr	r3, [pc, #520]	; (80213ac <ser_proccess_data+0x240>)
+ 80211a4:	2200      	movs	r2, #0
+ 80211a6:	701a      	strb	r2, [r3, #0]
 				break;
- 80211aa:	e0f9      	b.n	80213a0 <ser_proccess_data+0x234>
+ 80211a8:	e0f9      	b.n	802139e <ser_proccess_data+0x232>
 			}
+		}
 
-			switch(ser_state)
- 80211ac:	4b7f      	ldr	r3, [pc, #508]	; (80213ac <ser_proccess_data+0x240>)
- 80211ae:	781b      	ldrb	r3, [r3, #0]
- 80211b0:	2b03      	cmp	r3, #3
- 80211b2:	f200 80e8 	bhi.w	8021386 <ser_proccess_data+0x21a>
- 80211b6:	a201      	add	r2, pc, #4	; (adr r2, 80211bc <ser_proccess_data+0x50>)
- 80211b8:	f852 f023 	ldr.w	pc, [r2, r3, lsl #2]
+		switch(ser_state)
+ 80211aa:	4b80      	ldr	r3, [pc, #512]	; (80213ac <ser_proccess_data+0x240>)
+ 80211ac:	781b      	ldrb	r3, [r3, #0]
+ 80211ae:	2b03      	cmp	r3, #3
+ 80211b0:	f200 80e8 	bhi.w	8021384 <ser_proccess_data+0x218>
+ 80211b4:	a201      	add	r2, pc, #4	; (adr r2, 80211bc <ser_proccess_data+0x50>)
+ 80211b6:	f852 f023 	ldr.w	pc, [r2, r3, lsl #2]
+ 80211ba:	bf00      	nop
  80211bc:	080211cd 	.word	0x080211cd
- 80211c0:	0802122f 	.word	0x0802122f
- 80211c4:	08021283 	.word	0x08021283
- 80211c8:	08021319 	.word	0x08021319
+ 80211c0:	08021227 	.word	0x08021227
+ 80211c4:	08021281 	.word	0x08021281
+ 80211c8:	08021317 	.word	0x08021317
+		{
+
+			case SER_STATE_START:
 			{
 
-				case SER_STATE_START:
-				{
-
-					data_info.data_crc 	= 0u;
+				data_info.data_crc 	= 0u;
  80211cc:	4b78      	ldr	r3, [pc, #480]	; (80213b0 <ser_proccess_data+0x244>)
  80211ce:	2200      	movs	r2, #0
- 80211d0:	715a      	strb	r2, [r3, #5]
+ 80211d0:	70da      	strb	r2, [r3, #3]
  80211d2:	2200      	movs	r2, #0
- 80211d4:	719a      	strb	r2, [r3, #6]
+ 80211d4:	711a      	strb	r2, [r3, #4]
  80211d6:	2200      	movs	r2, #0
- 80211d8:	71da      	strb	r2, [r3, #7]
+ 80211d8:	715a      	strb	r2, [r3, #5]
  80211da:	2200      	movs	r2, #0
- 80211dc:	721a      	strb	r2, [r3, #8]
-					data_info.data_size	= 0u;
+ 80211dc:	719a      	strb	r2, [r3, #6]
+				data_info.data_size	= 0u;
  80211de:	4b74      	ldr	r3, [pc, #464]	; (80213b0 <ser_proccess_data+0x244>)
  80211e0:	2200      	movs	r2, #0
  80211e2:	705a      	strb	r2, [r3, #1]
  80211e4:	2200      	movs	r2, #0
  80211e6:	709a      	strb	r2, [r3, #2]
- 80211e8:	2200      	movs	r2, #0
- 80211ea:	70da      	strb	r2, [r3, #3]
- 80211ec:	2200      	movs	r2, #0
- 80211ee:	711a      	strb	r2, [r3, #4]
-					data_info.data_type	= 0u;
- 80211f0:	4b6f      	ldr	r3, [pc, #444]	; (80213b0 <ser_proccess_data+0x244>)
- 80211f2:	2200      	movs	r2, #0
- 80211f4:	701a      	strb	r2, [r3, #0]
-					data_received_size	= 0u;
- 80211f6:	4b6f      	ldr	r3, [pc, #444]	; (80213b4 <ser_proccess_data+0x248>)
- 80211f8:	2200      	movs	r2, #0
- 80211fa:	801a      	strh	r2, [r3, #0]
-					data_calc_crc				= 0u;
- 80211fc:	4b6e      	ldr	r3, [pc, #440]	; (80213b8 <ser_proccess_data+0x24c>)
- 80211fe:	2200      	movs	r2, #0
- 8021200:	601a      	str	r2, [r3, #0]
+				data_info.data_type	= 0u;
+ 80211e8:	4b71      	ldr	r3, [pc, #452]	; (80213b0 <ser_proccess_data+0x244>)
+ 80211ea:	2200      	movs	r2, #0
+ 80211ec:	701a      	strb	r2, [r3, #0]
+				data_received_size	= 0u;
+ 80211ee:	4b71      	ldr	r3, [pc, #452]	; (80213b4 <ser_proccess_data+0x248>)
+ 80211f0:	2200      	movs	r2, #0
+ 80211f2:	801a      	strh	r2, [r3, #0]
+				data_calc_crc				= 0u;
+ 80211f4:	4b70      	ldr	r3, [pc, #448]	; (80213b8 <ser_proccess_data+0x24c>)
+ 80211f6:	2200      	movs	r2, #0
+ 80211f8:	601a      	str	r2, [r3, #0]
 
-					SER_COMMAND_ *cmd = (SER_COMMAND_ *)buf;
- 8021202:	687b      	ldr	r3, [r7, #4]
- 8021204:	60fb      	str	r3, [r7, #12]
-					if( cmd->packet_type == SER_PACKET_TYPE_CMD )
- 8021206:	68fb      	ldr	r3, [r7, #12]
- 8021208:	785b      	ldrb	r3, [r3, #1]
- 802120a:	2b00      	cmp	r3, #0
- 802120c:	f040 80c1 	bne.w	8021392 <ser_proccess_data+0x226>
-					{
-						if( cmd->cmd == SER_CMD_START )
- 8021210:	68fb      	ldr	r3, [r7, #12]
- 8021212:	791b      	ldrb	r3, [r3, #4]
- 8021214:	2b00      	cmp	r3, #0
- 8021216:	f040 80bc 	bne.w	8021392 <ser_proccess_data+0x226>
-						{
-							printf("Received Serial Start Command \r\n");
- 802121a:	4868      	ldr	r0, [pc, #416]	; (80213bc <ser_proccess_data+0x250>)
- 802121c:	f00c fc66 	bl	802daec <puts>
-							ser_state = SER_STATE_HEADER;
- 8021220:	4b62      	ldr	r3, [pc, #392]	; (80213ac <ser_proccess_data+0x240>)
- 8021222:	2201      	movs	r2, #1
- 8021224:	701a      	strb	r2, [r3, #0]
-							ret = SER_EX_OK;
- 8021226:	2300      	movs	r3, #0
- 8021228:	f887 3027 	strb.w	r3, [r7, #39]	; 0x27
-						}
-					}
-				}
-				break;
- 802122c:	e0b1      	b.n	8021392 <ser_proccess_data+0x226>
-
-
-				case SER_STATE_HEADER:
+				SER_COMMAND_ *cmd = (SER_COMMAND_ *)buf;
+ 80211fa:	687b      	ldr	r3, [r7, #4]
+ 80211fc:	60fb      	str	r3, [r7, #12]
+				if( cmd->packet_type == SER_PACKET_TYPE_CMD )
+ 80211fe:	68fb      	ldr	r3, [r7, #12]
+ 8021200:	785b      	ldrb	r3, [r3, #1]
+ 8021202:	2b00      	cmp	r3, #0
+ 8021204:	f040 80c4 	bne.w	8021390 <ser_proccess_data+0x224>
 				{
-					SER_HEADER_ *header = (SER_HEADER_ *)buf;
- 802122e:	687b      	ldr	r3, [r7, #4]
- 8021230:	613b      	str	r3, [r7, #16]
-
-					if( header->packet_type == SER_PACKET_TYPE_HEADER )
- 8021232:	693b      	ldr	r3, [r7, #16]
- 8021234:	785b      	ldrb	r3, [r3, #1]
- 8021236:	2b02      	cmp	r3, #2
- 8021238:	f040 80ad 	bne.w	8021396 <ser_proccess_data+0x22a>
+					if( cmd->cmd == SER_CMD_START )
+ 8021208:	68fb      	ldr	r3, [r7, #12]
+ 802120a:	791b      	ldrb	r3, [r3, #4]
+ 802120c:	2b00      	cmp	r3, #0
+ 802120e:	f040 80bf 	bne.w	8021390 <ser_proccess_data+0x224>
 					{
-						data_info.data_type = header->meta_data.data_type;
- 802123c:	693b      	ldr	r3, [r7, #16]
- 802123e:	791a      	ldrb	r2, [r3, #4]
- 8021240:	4b5b      	ldr	r3, [pc, #364]	; (80213b0 <ser_proccess_data+0x244>)
- 8021242:	701a      	strb	r2, [r3, #0]
-						data_info.data_size = header->meta_data.data_size;
- 8021244:	693b      	ldr	r3, [r7, #16]
- 8021246:	f8d3 3005 	ldr.w	r3, [r3, #5]
- 802124a:	4a59      	ldr	r2, [pc, #356]	; (80213b0 <ser_proccess_data+0x244>)
- 802124c:	f8c2 3001 	str.w	r3, [r2, #1]
-						data_info.data_crc	 = header->meta_data.data_crc;
- 8021250:	693b      	ldr	r3, [r7, #16]
- 8021252:	f8d3 3009 	ldr.w	r3, [r3, #9]
- 8021256:	4a56      	ldr	r2, [pc, #344]	; (80213b0 <ser_proccess_data+0x244>)
- 8021258:	f8c2 3005 	str.w	r3, [r2, #5]
-
-						printf("Received Data Header. type=[%d], size=[%ld], crc=[0x%08lX]\r\n",
-																										data_info.data_type,
- 802125c:	4b54      	ldr	r3, [pc, #336]	; (80213b0 <ser_proccess_data+0x244>)
- 802125e:	781b      	ldrb	r3, [r3, #0]
-						printf("Received Data Header. type=[%d], size=[%ld], crc=[0x%08lX]\r\n",
- 8021260:	4619      	mov	r1, r3
- 8021262:	4b53      	ldr	r3, [pc, #332]	; (80213b0 <ser_proccess_data+0x244>)
- 8021264:	f8d3 2001 	ldr.w	r2, [r3, #1]
- 8021268:	4b51      	ldr	r3, [pc, #324]	; (80213b0 <ser_proccess_data+0x244>)
- 802126a:	f8d3 3005 	ldr.w	r3, [r3, #5]
- 802126e:	4854      	ldr	r0, [pc, #336]	; (80213c0 <ser_proccess_data+0x254>)
- 8021270:	f00c fbb6 	bl	802d9e0 <iprintf>
-																										data_info.data_size,
-																										data_info.data_crc);
-						ser_state = SER_STATE_DATA;
- 8021274:	4b4d      	ldr	r3, [pc, #308]	; (80213ac <ser_proccess_data+0x240>)
- 8021276:	2202      	movs	r2, #2
- 8021278:	701a      	strb	r2, [r3, #0]
+						printf("Received Serial Start Command \r\n");
+ 8021212:	486a      	ldr	r0, [pc, #424]	; (80213bc <ser_proccess_data+0x250>)
+ 8021214:	f00c fc6a 	bl	802daec <puts>
+						ser_state = SER_STATE_HEADER;
+ 8021218:	4b64      	ldr	r3, [pc, #400]	; (80213ac <ser_proccess_data+0x240>)
+ 802121a:	2201      	movs	r2, #1
+ 802121c:	701a      	strb	r2, [r3, #0]
 						ret = SER_EX_OK;
- 802127a:	2300      	movs	r3, #0
- 802127c:	f887 3027 	strb.w	r3, [r7, #39]	; 0x27
+ 802121e:	2300      	movs	r3, #0
+ 8021220:	f887 3027 	strb.w	r3, [r7, #39]	; 0x27
 					}
 				}
-				break;
- 8021280:	e089      	b.n	8021396 <ser_proccess_data+0x22a>
+			}
+			break;
+ 8021224:	e0b4      	b.n	8021390 <ser_proccess_data+0x224>
 
 
-				case SER_STATE_DATA:
+			case SER_STATE_HEADER:
+			{
+				SER_HEADER_ *header = (SER_HEADER_ *)buf;
+ 8021226:	687b      	ldr	r3, [r7, #4]
+ 8021228:	613b      	str	r3, [r7, #16]
+
+				if( header->packet_type == SER_PACKET_TYPE_HEADER )
+ 802122a:	693b      	ldr	r3, [r7, #16]
+ 802122c:	785b      	ldrb	r3, [r3, #1]
+ 802122e:	2b02      	cmp	r3, #2
+ 8021230:	f040 80b0 	bne.w	8021394 <ser_proccess_data+0x228>
 				{
-					SER_DATA_				*data			= (SER_DATA_ *)buf;
- 8021282:	687b      	ldr	r3, [r7, #4]
- 8021284:	61bb      	str	r3, [r7, #24]
-					uint16_t				data_len	=	data->data_len;
- 8021286:	69bb      	ldr	r3, [r7, #24]
- 8021288:	789a      	ldrb	r2, [r3, #2]
- 802128a:	78db      	ldrb	r3, [r3, #3]
- 802128c:	021b      	lsls	r3, r3, #8
- 802128e:	4313      	orrs	r3, r2
- 8021290:	82fb      	strh	r3, [r7, #22]
+					data_info.data_type = header->meta_data.data_type;
+ 8021234:	693b      	ldr	r3, [r7, #16]
+ 8021236:	791a      	ldrb	r2, [r3, #4]
+ 8021238:	4b5d      	ldr	r3, [pc, #372]	; (80213b0 <ser_proccess_data+0x244>)
+ 802123a:	701a      	strb	r2, [r3, #0]
+					data_info.data_size = header->meta_data.data_size;
+ 802123c:	693b      	ldr	r3, [r7, #16]
+ 802123e:	f8b3 3005 	ldrh.w	r3, [r3, #5]
+ 8021242:	b29a      	uxth	r2, r3
+ 8021244:	4b5a      	ldr	r3, [pc, #360]	; (80213b0 <ser_proccess_data+0x244>)
+ 8021246:	f8a3 2001 	strh.w	r2, [r3, #1]
+					data_info.data_crc	 = header->meta_data.data_crc;
+ 802124a:	693b      	ldr	r3, [r7, #16]
+ 802124c:	f8d3 3007 	ldr.w	r3, [r3, #7]
+ 8021250:	4a57      	ldr	r2, [pc, #348]	; (80213b0 <ser_proccess_data+0x244>)
+ 8021252:	f8c2 3003 	str.w	r3, [r2, #3]
 
-					if( data->packet_type == SER_PACKET_TYPE_DATA )
- 8021292:	69bb      	ldr	r3, [r7, #24]
- 8021294:	785b      	ldrb	r3, [r3, #1]
- 8021296:	2b01      	cmp	r3, #1
- 8021298:	d17f      	bne.n	802139a <ser_proccess_data+0x22e>
-					{
-						switch(data_info.data_type)
- 802129a:	4b45      	ldr	r3, [pc, #276]	; (80213b0 <ser_proccess_data+0x244>)
- 802129c:	781b      	ldrb	r3, [r3, #0]
- 802129e:	2b02      	cmp	r3, #2
- 80212a0:	d006      	beq.n	80212b0 <ser_proccess_data+0x144>
- 80212a2:	2b02      	cmp	r3, #2
- 80212a4:	dc25      	bgt.n	80212f2 <ser_proccess_data+0x186>
- 80212a6:	2b00      	cmp	r3, #0
- 80212a8:	d027      	beq.n	80212fa <ser_proccess_data+0x18e>
- 80212aa:	2b01      	cmp	r3, #1
- 80212ac:	d027      	beq.n	80212fe <ser_proccess_data+0x192>
- 80212ae:	e020      	b.n	80212f2 <ser_proccess_data+0x186>
-							}
-							break;
+					printf("Received Data Header. type=[%d], size=[%ld], crc=[0x%08lX]\r\n",
+																									data_info.data_type,
+ 8021256:	4b56      	ldr	r3, [pc, #344]	; (80213b0 <ser_proccess_data+0x244>)
+ 8021258:	781b      	ldrb	r3, [r3, #0]
+					printf("Received Data Header. type=[%d], size=[%ld], crc=[0x%08lX]\r\n",
+ 802125a:	4619      	mov	r1, r3
+																									data_info.data_size,
+ 802125c:	4b54      	ldr	r3, [pc, #336]	; (80213b0 <ser_proccess_data+0x244>)
+ 802125e:	f8b3 3001 	ldrh.w	r3, [r3, #1]
+ 8021262:	b29b      	uxth	r3, r3
+					printf("Received Data Header. type=[%d], size=[%ld], crc=[0x%08lX]\r\n",
+ 8021264:	461a      	mov	r2, r3
+ 8021266:	4b52      	ldr	r3, [pc, #328]	; (80213b0 <ser_proccess_data+0x244>)
+ 8021268:	f8d3 3003 	ldr.w	r3, [r3, #3]
+ 802126c:	4854      	ldr	r0, [pc, #336]	; (80213c0 <ser_proccess_data+0x254>)
+ 802126e:	f00c fbb7 	bl	802d9e0 <iprintf>
+																									data_info.data_crc);
+					ser_state = SER_STATE_DATA;
+ 8021272:	4b4e      	ldr	r3, [pc, #312]	; (80213ac <ser_proccess_data+0x240>)
+ 8021274:	2202      	movs	r2, #2
+ 8021276:	701a      	strb	r2, [r3, #0]
+					ret = SER_EX_OK;
+ 8021278:	2300      	movs	r3, #0
+ 802127a:	f887 3027 	strb.w	r3, [r7, #39]	; 0x27
+				}
+			}
+			break;
+ 802127e:	e089      	b.n	8021394 <ser_proccess_data+0x228>
 
-							case OTA_INFO_DATA:
-							{
-									ota_data = *(ota_info *)data->data;
- 80212b0:	69bb      	ldr	r3, [r7, #24]
- 80212b2:	685a      	ldr	r2, [r3, #4]
- 80212b4:	4b43      	ldr	r3, [pc, #268]	; (80213c4 <ser_proccess_data+0x258>)
- 80212b6:	6815      	ldr	r5, [r2, #0]
- 80212b8:	6854      	ldr	r4, [r2, #4]
- 80212ba:	6890      	ldr	r0, [r2, #8]
- 80212bc:	68d1      	ldr	r1, [r2, #12]
- 80212be:	601d      	str	r5, [r3, #0]
- 80212c0:	605c      	str	r4, [r3, #4]
- 80212c2:	6098      	str	r0, [r3, #8]
- 80212c4:	60d9      	str	r1, [r3, #12]
- 80212c6:	7c12      	ldrb	r2, [r2, #16]
- 80212c8:	741a      	strb	r2, [r3, #16]
-									ota_data.ota_valid = 0;
- 80212ca:	4b3e      	ldr	r3, [pc, #248]	; (80213c4 <ser_proccess_data+0x258>)
- 80212cc:	2200      	movs	r2, #0
- 80212ce:	721a      	strb	r2, [r3, #8]
-									data_received_size = data_len;
- 80212d0:	4a38      	ldr	r2, [pc, #224]	; (80213b4 <ser_proccess_data+0x248>)
- 80212d2:	8afb      	ldrh	r3, [r7, #22]
- 80212d4:	8013      	strh	r3, [r2, #0]
-									data_calc_crc			 = ser_calcCRC(data->data, data_len);
- 80212d6:	69bb      	ldr	r3, [r7, #24]
- 80212d8:	685b      	ldr	r3, [r3, #4]
- 80212da:	8afa      	ldrh	r2, [r7, #22]
- 80212dc:	4611      	mov	r1, r2
- 80212de:	4618      	mov	r0, r3
- 80212e0:	f000 f8a4 	bl	802142c <ser_calcCRC>
- 80212e4:	4603      	mov	r3, r0
- 80212e6:	4a34      	ldr	r2, [pc, #208]	; (80213b8 <ser_proccess_data+0x24c>)
- 80212e8:	6013      	str	r3, [r2, #0]
-									ret = SER_EX_OK;
- 80212ea:	2300      	movs	r3, #0
- 80212ec:	f887 3027 	strb.w	r3, [r7, #39]	; 0x27
 
-							}
-							break;
- 80212f0:	e006      	b.n	8021300 <ser_proccess_data+0x194>
+			case SER_STATE_DATA:
+			{
+				SER_DATA_				*data			= (SER_DATA_ *)buf;
+ 8021280:	687b      	ldr	r3, [r7, #4]
+ 8021282:	61bb      	str	r3, [r7, #24]
+				uint16_t				data_len	=	data->data_len;
+ 8021284:	69bb      	ldr	r3, [r7, #24]
+ 8021286:	789a      	ldrb	r2, [r3, #2]
+ 8021288:	78db      	ldrb	r3, [r3, #3]
+ 802128a:	021b      	lsls	r3, r3, #8
+ 802128c:	4313      	orrs	r3, r2
+ 802128e:	82fb      	strh	r3, [r7, #22]
 
-							default:
-							{
-								// shouldn't be here
-								ret = SER_EX_ERROR;
- 80212f2:	2301      	movs	r3, #1
- 80212f4:	f887 3027 	strb.w	r3, [r7, #39]	; 0x27
-							}
-							break;
- 80212f8:	e002      	b.n	8021300 <ser_proccess_data+0x194>
-							break;
- 80212fa:	bf00      	nop
- 80212fc:	e000      	b.n	8021300 <ser_proccess_data+0x194>
-							break;
- 80212fe:	bf00      	nop
+				if( data->packet_type == SER_PACKET_TYPE_DATA )
+ 8021290:	69bb      	ldr	r3, [r7, #24]
+ 8021292:	785b      	ldrb	r3, [r3, #1]
+ 8021294:	2b01      	cmp	r3, #1
+ 8021296:	d17f      	bne.n	8021398 <ser_proccess_data+0x22c>
+				{
+					switch(data_info.data_type)
+ 8021298:	4b45      	ldr	r3, [pc, #276]	; (80213b0 <ser_proccess_data+0x244>)
+ 802129a:	781b      	ldrb	r3, [r3, #0]
+ 802129c:	2b02      	cmp	r3, #2
+ 802129e:	d006      	beq.n	80212ae <ser_proccess_data+0x142>
+ 80212a0:	2b02      	cmp	r3, #2
+ 80212a2:	dc25      	bgt.n	80212f0 <ser_proccess_data+0x184>
+ 80212a4:	2b00      	cmp	r3, #0
+ 80212a6:	d027      	beq.n	80212f8 <ser_proccess_data+0x18c>
+ 80212a8:	2b01      	cmp	r3, #1
+ 80212aa:	d027      	beq.n	80212fc <ser_proccess_data+0x190>
+ 80212ac:	e020      	b.n	80212f0 <ser_proccess_data+0x184>
 						}
+						break;
 
-						if( data_received_size >= data_info.data_size )
- 8021300:	4b2c      	ldr	r3, [pc, #176]	; (80213b4 <ser_proccess_data+0x248>)
- 8021302:	881b      	ldrh	r3, [r3, #0]
- 8021304:	461a      	mov	r2, r3
- 8021306:	4b2a      	ldr	r3, [pc, #168]	; (80213b0 <ser_proccess_data+0x244>)
- 8021308:	f8d3 3001 	ldr.w	r3, [r3, #1]
- 802130c:	429a      	cmp	r2, r3
- 802130e:	d344      	bcc.n	802139a <ser_proccess_data+0x22e>
+						case OTA_INFO_DATA:
 						{
-							//Received All data, move to end
-							ser_state = SER_STATE_END;
- 8021310:	4b26      	ldr	r3, [pc, #152]	; (80213ac <ser_proccess_data+0x240>)
- 8021312:	2203      	movs	r2, #3
- 8021314:	701a      	strb	r2, [r3, #0]
+								ota_data = *(ota_info *)data->data;
+ 80212ae:	69bb      	ldr	r3, [r7, #24]
+ 80212b0:	685a      	ldr	r2, [r3, #4]
+ 80212b2:	4b44      	ldr	r3, [pc, #272]	; (80213c4 <ser_proccess_data+0x258>)
+ 80212b4:	6815      	ldr	r5, [r2, #0]
+ 80212b6:	6854      	ldr	r4, [r2, #4]
+ 80212b8:	6890      	ldr	r0, [r2, #8]
+ 80212ba:	68d1      	ldr	r1, [r2, #12]
+ 80212bc:	601d      	str	r5, [r3, #0]
+ 80212be:	605c      	str	r4, [r3, #4]
+ 80212c0:	6098      	str	r0, [r3, #8]
+ 80212c2:	60d9      	str	r1, [r3, #12]
+ 80212c4:	7c12      	ldrb	r2, [r2, #16]
+ 80212c6:	741a      	strb	r2, [r3, #16]
+								ota_data.ota_valid = 0;
+ 80212c8:	4b3e      	ldr	r3, [pc, #248]	; (80213c4 <ser_proccess_data+0x258>)
+ 80212ca:	2200      	movs	r2, #0
+ 80212cc:	721a      	strb	r2, [r3, #8]
+								data_received_size = data_len;
+ 80212ce:	4a39      	ldr	r2, [pc, #228]	; (80213b4 <ser_proccess_data+0x248>)
+ 80212d0:	8afb      	ldrh	r3, [r7, #22]
+ 80212d2:	8013      	strh	r3, [r2, #0]
+								data_calc_crc			 = ser_calcCRC(data->data, data_len);
+ 80212d4:	69bb      	ldr	r3, [r7, #24]
+ 80212d6:	685b      	ldr	r3, [r3, #4]
+ 80212d8:	8afa      	ldrh	r2, [r7, #22]
+ 80212da:	4611      	mov	r1, r2
+ 80212dc:	4618      	mov	r0, r3
+ 80212de:	f000 f8a5 	bl	802142c <ser_calcCRC>
+ 80212e2:	4603      	mov	r3, r0
+ 80212e4:	4a34      	ldr	r2, [pc, #208]	; (80213b8 <ser_proccess_data+0x24c>)
+ 80212e6:	6013      	str	r3, [r2, #0]
+								ret = SER_EX_OK;
+ 80212e8:	2300      	movs	r3, #0
+ 80212ea:	f887 3027 	strb.w	r3, [r7, #39]	; 0x27
+
 						}
-					}
-				}
-				break;
- 8021316:	e040      	b.n	802139a <ser_proccess_data+0x22e>
+						break;
+ 80212ee:	e006      	b.n	80212fe <ser_proccess_data+0x192>
 
-
-				case SER_STATE_END:
-				{
-					SER_COMMAND_ *cmd = (SER_COMMAND_ *)buf;
- 8021318:	687b      	ldr	r3, [r7, #4]
- 802131a:	61fb      	str	r3, [r7, #28]
-
-					if( cmd->packet_type == SER_PACKET_TYPE_CMD)
- 802131c:	69fb      	ldr	r3, [r7, #28]
- 802131e:	785b      	ldrb	r3, [r3, #1]
- 8021320:	2b00      	cmp	r3, #0
- 8021322:	d13c      	bne.n	802139e <ser_proccess_data+0x232>
-					{
-						if(cmd->cmd == SER_CMD_END)
- 8021324:	69fb      	ldr	r3, [r7, #28]
- 8021326:	791b      	ldrb	r3, [r3, #4]
- 8021328:	2b01      	cmp	r3, #1
- 802132a:	d138      	bne.n	802139e <ser_proccess_data+0x232>
+						default:
 						{
-							printf("Receive SERIAL END COMMAND\r\nValidation...\r\n");
- 802132c:	4826      	ldr	r0, [pc, #152]	; (80213c8 <ser_proccess_data+0x25c>)
- 802132e:	f00c fbdd 	bl	802daec <puts>
-
-							//Validation the received packets
-							//TODO: validation normal data
-
-							// one packet data so:
-							if( data_info.data_type == OTA_INFO_DATA ||  data_info.data_type == STATUS_DATA )
- 8021332:	4b1f      	ldr	r3, [pc, #124]	; (80213b0 <ser_proccess_data+0x244>)
- 8021334:	781b      	ldrb	r3, [r3, #0]
- 8021336:	2b02      	cmp	r3, #2
- 8021338:	d003      	beq.n	8021342 <ser_proccess_data+0x1d6>
- 802133a:	4b1d      	ldr	r3, [pc, #116]	; (80213b0 <ser_proccess_data+0x244>)
- 802133c:	781b      	ldrb	r3, [r3, #0]
- 802133e:	2b01      	cmp	r3, #1
- 8021340:	d117      	bne.n	8021372 <ser_proccess_data+0x206>
-							{
-								if(data_calc_crc != data_info.data_crc)
- 8021342:	4b1b      	ldr	r3, [pc, #108]	; (80213b0 <ser_proccess_data+0x244>)
- 8021344:	f8d3 2005 	ldr.w	r2, [r3, #5]
- 8021348:	4b1b      	ldr	r3, [pc, #108]	; (80213b8 <ser_proccess_data+0x24c>)
- 802134a:	681b      	ldr	r3, [r3, #0]
- 802134c:	429a      	cmp	r2, r3
- 802134e:	d009      	beq.n	8021364 <ser_proccess_data+0x1f8>
-								{
-									printf("ERROR: FW CRC Mismatch: calculated: [0x%08lx] received: [0x%08lx]\r\n",
- 8021350:	4b19      	ldr	r3, [pc, #100]	; (80213b8 <ser_proccess_data+0x24c>)
- 8021352:	681b      	ldr	r3, [r3, #0]
- 8021354:	4a16      	ldr	r2, [pc, #88]	; (80213b0 <ser_proccess_data+0x244>)
- 8021356:	f8d2 2005 	ldr.w	r2, [r2, #5]
- 802135a:	4619      	mov	r1, r3
- 802135c:	481b      	ldr	r0, [pc, #108]	; (80213cc <ser_proccess_data+0x260>)
- 802135e:	f00c fb3f 	bl	802d9e0 <iprintf>
-													data_calc_crc, data_info.data_crc);
-									break;
- 8021362:	e01d      	b.n	80213a0 <ser_proccess_data+0x234>
-								}
-
-								if(data_info.data_type == OTA_INFO_DATA)
- 8021364:	4b12      	ldr	r3, [pc, #72]	; (80213b0 <ser_proccess_data+0x244>)
- 8021366:	781b      	ldrb	r3, [r3, #0]
- 8021368:	2b02      	cmp	r3, #2
- 802136a:	d102      	bne.n	8021372 <ser_proccess_data+0x206>
-								{
-									ota_data.ota_valid = 1u;
- 802136c:	4b15      	ldr	r3, [pc, #84]	; (80213c4 <ser_proccess_data+0x258>)
- 802136e:	2201      	movs	r2, #1
- 8021370:	721a      	strb	r2, [r3, #8]
-								}
-							}
-							printf("Validated Successfully!\r\n");
- 8021372:	4817      	ldr	r0, [pc, #92]	; (80213d0 <ser_proccess_data+0x264>)
- 8021374:	f00c fbba 	bl	802daec <puts>
-
-							ser_state = SER_STATE_START;
- 8021378:	4b0c      	ldr	r3, [pc, #48]	; (80213ac <ser_proccess_data+0x240>)
- 802137a:	2200      	movs	r2, #0
- 802137c:	701a      	strb	r2, [r3, #0]
-							ret = SER_EX_OK;
- 802137e:	2300      	movs	r3, #0
- 8021380:	f887 3027 	strb.w	r3, [r7, #39]	; 0x27
-
+							// shouldn't be here
+							ret = SER_EX_ERROR;
+ 80212f0:	2301      	movs	r3, #1
+ 80212f2:	f887 3027 	strb.w	r3, [r7, #39]	; 0x27
 						}
+						break;
+ 80212f6:	e002      	b.n	80212fe <ser_proccess_data+0x192>
+						break;
+ 80212f8:	bf00      	nop
+ 80212fa:	e000      	b.n	80212fe <ser_proccess_data+0x192>
+						break;
+ 80212fc:	bf00      	nop
+					}
+
+					if( data_received_size >= data_info.data_size )
+ 80212fe:	4b2c      	ldr	r3, [pc, #176]	; (80213b0 <ser_proccess_data+0x244>)
+ 8021300:	f8b3 3001 	ldrh.w	r3, [r3, #1]
+ 8021304:	b29a      	uxth	r2, r3
+ 8021306:	4b2b      	ldr	r3, [pc, #172]	; (80213b4 <ser_proccess_data+0x248>)
+ 8021308:	881b      	ldrh	r3, [r3, #0]
+ 802130a:	429a      	cmp	r2, r3
+ 802130c:	d844      	bhi.n	8021398 <ser_proccess_data+0x22c>
+					{
+						//Received All data, move to end
+						ser_state = SER_STATE_END;
+ 802130e:	4b27      	ldr	r3, [pc, #156]	; (80213ac <ser_proccess_data+0x240>)
+ 8021310:	2203      	movs	r2, #3
+ 8021312:	701a      	strb	r2, [r3, #0]
 					}
 				}
-				break;
- 8021384:	e00b      	b.n	802139e <ser_proccess_data+0x232>
+			}
+			break;
+ 8021314:	e040      	b.n	8021398 <ser_proccess_data+0x22c>
 
-				default:
+
+			case SER_STATE_END:
+			{
+				SER_COMMAND_ *cmd = (SER_COMMAND_ *)buf;
+ 8021316:	687b      	ldr	r3, [r7, #4]
+ 8021318:	61fb      	str	r3, [r7, #28]
+
+				if( cmd->packet_type == SER_PACKET_TYPE_CMD)
+ 802131a:	69fb      	ldr	r3, [r7, #28]
+ 802131c:	785b      	ldrb	r3, [r3, #1]
+ 802131e:	2b00      	cmp	r3, #0
+ 8021320:	d13c      	bne.n	802139c <ser_proccess_data+0x230>
 				{
-					ret = SER_EX_ERROR;
- 8021386:	2301      	movs	r3, #1
- 8021388:	f887 3027 	strb.w	r3, [r7, #39]	; 0x27
+					if(cmd->cmd == SER_CMD_END)
+ 8021322:	69fb      	ldr	r3, [r7, #28]
+ 8021324:	791b      	ldrb	r3, [r3, #4]
+ 8021326:	2b01      	cmp	r3, #1
+ 8021328:	d138      	bne.n	802139c <ser_proccess_data+0x230>
+					{
+						printf("Receive SERIAL END COMMAND\r\nValidation...\r\n");
+ 802132a:	4827      	ldr	r0, [pc, #156]	; (80213c8 <ser_proccess_data+0x25c>)
+ 802132c:	f00c fbde 	bl	802daec <puts>
+
+						//Validation the received packets
+						//TODO: validation normal data
+
+						// one packet data so:
+						if( data_info.data_type == OTA_INFO_DATA ||  data_info.data_type == STATUS_DATA )
+ 8021330:	4b1f      	ldr	r3, [pc, #124]	; (80213b0 <ser_proccess_data+0x244>)
+ 8021332:	781b      	ldrb	r3, [r3, #0]
+ 8021334:	2b02      	cmp	r3, #2
+ 8021336:	d003      	beq.n	8021340 <ser_proccess_data+0x1d4>
+ 8021338:	4b1d      	ldr	r3, [pc, #116]	; (80213b0 <ser_proccess_data+0x244>)
+ 802133a:	781b      	ldrb	r3, [r3, #0]
+ 802133c:	2b01      	cmp	r3, #1
+ 802133e:	d117      	bne.n	8021370 <ser_proccess_data+0x204>
+						{
+							if(data_calc_crc != data_info.data_crc)
+ 8021340:	4b1b      	ldr	r3, [pc, #108]	; (80213b0 <ser_proccess_data+0x244>)
+ 8021342:	f8d3 2003 	ldr.w	r2, [r3, #3]
+ 8021346:	4b1c      	ldr	r3, [pc, #112]	; (80213b8 <ser_proccess_data+0x24c>)
+ 8021348:	681b      	ldr	r3, [r3, #0]
+ 802134a:	429a      	cmp	r2, r3
+ 802134c:	d009      	beq.n	8021362 <ser_proccess_data+0x1f6>
+							{
+								printf("ERROR: FW CRC Mismatch: calculated: [0x%08lx] received: [0x%08lx]\r\n",
+ 802134e:	4b1a      	ldr	r3, [pc, #104]	; (80213b8 <ser_proccess_data+0x24c>)
+ 8021350:	681b      	ldr	r3, [r3, #0]
+ 8021352:	4a17      	ldr	r2, [pc, #92]	; (80213b0 <ser_proccess_data+0x244>)
+ 8021354:	f8d2 2003 	ldr.w	r2, [r2, #3]
+ 8021358:	4619      	mov	r1, r3
+ 802135a:	481c      	ldr	r0, [pc, #112]	; (80213cc <ser_proccess_data+0x260>)
+ 802135c:	f00c fb40 	bl	802d9e0 <iprintf>
+												data_calc_crc, data_info.data_crc);
+								break;
+ 8021360:	e01d      	b.n	802139e <ser_proccess_data+0x232>
+							}
+
+							if(data_info.data_type == OTA_INFO_DATA)
+ 8021362:	4b13      	ldr	r3, [pc, #76]	; (80213b0 <ser_proccess_data+0x244>)
+ 8021364:	781b      	ldrb	r3, [r3, #0]
+ 8021366:	2b02      	cmp	r3, #2
+ 8021368:	d102      	bne.n	8021370 <ser_proccess_data+0x204>
+							{
+								ota_data.ota_valid = 1u;
+ 802136a:	4b16      	ldr	r3, [pc, #88]	; (80213c4 <ser_proccess_data+0x258>)
+ 802136c:	2201      	movs	r2, #1
+ 802136e:	721a      	strb	r2, [r3, #8]
+							}
+						}
+						printf("Validated Successfully!\r\n");
+ 8021370:	4817      	ldr	r0, [pc, #92]	; (80213d0 <ser_proccess_data+0x264>)
+ 8021372:	f00c fbbb 	bl	802daec <puts>
+
+						ser_state = SER_STATE_START;
+ 8021376:	4b0d      	ldr	r3, [pc, #52]	; (80213ac <ser_proccess_data+0x240>)
+ 8021378:	2200      	movs	r2, #0
+ 802137a:	701a      	strb	r2, [r3, #0]
+						ret = SER_EX_OK;
+ 802137c:	2300      	movs	r3, #0
+ 802137e:	f887 3027 	strb.w	r3, [r7, #39]	; 0x27
+
+					}
 				}
-				break;
- 802138c:	e008      	b.n	80213a0 <ser_proccess_data+0x234>
-				// state cases end
-			};
- 802138e:	bf00      	nop
- 8021390:	e006      	b.n	80213a0 <ser_proccess_data+0x234>
-				break;
- 8021392:	bf00      	nop
- 8021394:	e004      	b.n	80213a0 <ser_proccess_data+0x234>
-				break;
- 8021396:	bf00      	nop
- 8021398:	e002      	b.n	80213a0 <ser_proccess_data+0x234>
-				break;
- 802139a:	bf00      	nop
- 802139c:	e000      	b.n	80213a0 <ser_proccess_data+0x234>
-				break;
- 802139e:	bf00      	nop
-		}
+			}
+			break;
+ 8021382:	e00b      	b.n	802139c <ser_proccess_data+0x230>
+
+			default:
+			{
+				ret = SER_EX_ERROR;
+ 8021384:	2301      	movs	r3, #1
+ 8021386:	f887 3027 	strb.w	r3, [r7, #39]	; 0x27
+			}
+			break;
+ 802138a:	e008      	b.n	802139e <ser_proccess_data+0x232>
+			// state cases end
+		};
+ 802138c:	bf00      	nop
+ 802138e:	e006      	b.n	802139e <ser_proccess_data+0x232>
+			break;
+ 8021390:	bf00      	nop
+ 8021392:	e004      	b.n	802139e <ser_proccess_data+0x232>
+			break;
+ 8021394:	bf00      	nop
+ 8021396:	e002      	b.n	802139e <ser_proccess_data+0x232>
+			break;
+ 8021398:	bf00      	nop
+ 802139a:	e000      	b.n	802139e <ser_proccess_data+0x232>
+			break;
+ 802139c:	bf00      	nop
 
 	}while(false);
 
 	return ret;
- 80213a0:	f897 3027 	ldrb.w	r3, [r7, #39]	; 0x27
+ 802139e:	f897 3027 	ldrb.w	r3, [r7, #39]	; 0x27
 }
- 80213a4:	4618      	mov	r0, r3
- 80213a6:	3728      	adds	r7, #40	; 0x28
- 80213a8:	46bd      	mov	sp, r7
- 80213aa:	bdb0      	pop	{r4, r5, r7, pc}
+ 80213a2:	4618      	mov	r0, r3
+ 80213a4:	3728      	adds	r7, #40	; 0x28
+ 80213a6:	46bd      	mov	sp, r7
+ 80213a8:	bdb0      	pop	{r4, r5, r7, pc}
+ 80213aa:	bf00      	nop
  80213ac:	20000415 	.word	0x20000415
  80213b0:	20000830 	.word	0x20000830
- 80213b4:	20000842 	.word	0x20000842
+ 80213b4:	20000840 	.word	0x20000840
  80213b8:	20000844 	.word	0x20000844
  80213bc:	0802ecc4 	.word	0x0802ecc4
  80213c0:	0802ece4 	.word	0x0802ece4
