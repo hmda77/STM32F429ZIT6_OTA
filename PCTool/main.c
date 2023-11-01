@@ -179,7 +179,7 @@ int send_ota_start(int comport)
 }
 
 /* Build and Send the OTA END command */
-uint16_t send_ota_end(int comport)
+int send_ota_end(int comport)
 {
   uint16_t len;
   ETX_OTA_COMMAND_ *ota_end = (ETX_OTA_COMMAND_*)DATA_BUF;
@@ -399,7 +399,6 @@ int send_ser_ota_info(int comport, ser_ota_info *ota_req)
       break;
     }
   }
-
   if( ex >= 0 )
   {
     if( !is_ack_resp_received( comport ) )
@@ -469,7 +468,7 @@ int main(int argc, char *argv[])
     ota_req_data.ota_download   = 1u;
     ota_req_data.ota_major      = major;
     ota_req_data.ota_minor      = minor;
-    ota_req_data.ota_valid      = 0u; // Doesn't affect
+    ota_req_data.ota_valid      = 1u; // Doesn't affect
     ota_req_data.reserved1      = 0u; // Doesn't affect
     ota_req_data.reserved2      = 0u; // Doesn't affect
 
@@ -499,7 +498,6 @@ int main(int argc, char *argv[])
     }
 
     //send OTA END command
-    printf("ssssss ota end Err\n");
     ex = send_ota_end(comport);
 
     if( ex < 0 )
@@ -518,7 +516,7 @@ int main(int argc, char *argv[])
         break;
       }
     }
-    
+    printf("device Ready to get!\n");
     //------------------- OTA UPDATE ------------------//
 
     //send OTA Start command
@@ -605,7 +603,7 @@ int main(int argc, char *argv[])
     }    
 
   } while (false);
-
+  
   if(Fptr)
   {
     fclose(Fptr);
