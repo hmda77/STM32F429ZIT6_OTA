@@ -40,5 +40,5 @@
   ```
   ./<app_name>.exe -c <COM_port> -f <Application_bin_file> -v <ver_major>.<ver_minor>
   ```
-  ( `-b` Arguments use when device is on DFU mode.)
+  (Use the -b argument when the device is in DFU mode.)
 
