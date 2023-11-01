@@ -25,6 +25,7 @@
 #define OTA_EOF  0xBB    // End of Frame
 #define OTA_NACK 0x01    // NACK
 #define OTA_ACK  0x00    // ACK
+#define OTA_REQ	 0xEE		 // Command for request OTA from modem
 
 #define OTA_SLOT_FLASH_ADDR		0x08120000				// First Block base address
 #define OTA_SLOT_SECTOR			FLASH_SECTOR_17			// First Sector Of Slot

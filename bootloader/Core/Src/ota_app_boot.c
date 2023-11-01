@@ -29,6 +29,7 @@ OTA_GNRL_CFG_ *cfg_flash	=	(OTA_GNRL_CFG_*) (OTA_CFG_FLASH_ADDR);
 OTA_EX_ ota_download_and_flash(UART_HandleTypeDef *huart);
 static uint16_t ota_receive_chunk(UART_HandleTypeDef *huart, uint8_t *buf, uint16_t max_len );
 static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len );
+static void ota_req_send(UART_HandleTypeDef *huart);
 static void ota_send_resp(UART_HandleTypeDef *huart, uint8_t rsp);
 static HAL_StatusTypeDef write_cfg_to_flash( OTA_GNRL_CFG_ *cfg );
 static HAL_StatusTypeDef backup_old_version();
@@ -47,6 +48,10 @@ void go_to_ota_app(UART_HandleTypeDef *huart)
 {
   /*Start the Firmware or Application update */
     printf("Starting Firmware Download!!!\r\n");
+
+  	/* Send A request tell modem ready to get */
+  	ota_req_send(huart);
+
     if( ota_download_and_flash(huart) != OTA_EX_OK )
     {
       /* Error. Don't process. */
@@ -74,7 +79,6 @@ OTA_EX_ ota_download_and_flash(UART_HandleTypeDef *huart)
 	OTA_EX_ ret  = OTA_EX_OK;
 	uint16_t    len;
 
-	printf("Waiting for the OTA data\r\n");
 
 	/* Reset the variables */
 	ota_fw_total_size		= 0u;
@@ -848,6 +852,27 @@ HAL_StatusTypeDef restore_old_version()
 	return ret;
 }
 
+/**
+ * @brief send request to host
+ * @param huart uart handler
+ * @retval none
+ */
+static void ota_req_send(UART_HandleTypeDef *huart)
+{
+	OTA_COMMAND_ pack =
+	{
+		.sof					= OTA_SOF,
+		.packet_type	= OTA_PACKET_TYPE_CMD,
+		.data_len			= 1u,
+		.cmd					= OTA_REQ,
+		.eof					= OTA_EOF
+	};
+
+	pack.crc = ota_calcCRC(&pack.cmd, 1);
+
+	//send request
+	HAL_UART_Transmit(huart, (uint8_t *)&pack, sizeof(OTA_RESP_),HAL_MAX_DELAY);
+}
 
 
 /**
@@ -859,11 +884,11 @@ HAL_StatusTypeDef restore_old_version()
 static void ota_send_resp(UART_HandleTypeDef *huart, uint8_t rsp){
 	OTA_RESP_ pack =
 	{
-	  .sof			= OTA_SOF,
+	  .sof					= OTA_SOF,
 	  .packet_type	= OTA_PACKET_TYPE_RESPONSE,
-	  .data_len		= 1u,
-	  .status		= rsp,
-	  .eof			= OTA_EOF
+	  .data_len			= 1u,
+	  .status				= rsp,
+	  .eof					= OTA_EOF
 	};
 
 	pack.crc = ota_calcCRC(&pack.status, 1);
