@@ -129,7 +129,6 @@ int main(void)
 
   OTA_GNRL_CFG_ *cfg = (OTA_GNRL_CFG_ *)OTA_CFG_FLASH_ADDR;
   bool goto_ota_mode = false;
-  bool should_backup = false;
 
   switch(cfg->reboot_cause)
   {
@@ -150,7 +149,6 @@ int main(void)
 	  {
 		  printf("New Firmware was found!\r\n");
 		  goto_ota_mode = true;
-		  should_backup = true;
 	  }
 	  break;
 
@@ -721,10 +719,31 @@ int fputc(int ch, FILE *f)
 
 static void go_to_application (void){
 	printf("Gonna Jump to Application ...\n");
+	HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_RESET);
+
+	/* Disable all interrupts */
+	__disable_irq();
+
+	/* Disable Systick timer */
+	SysTick->CTRL = 0;
+
+	/* Set the clock to the default state */
+	HAL_RCC_DeInit();
+
+	/* Clear Interrupt Enable Register & Interrupt Pending Register */
+	for (uint8_t i = 0; i < (MCU_IRQS + 31u) / 32; i++)
+	{
+		NVIC->ICER[i]=0xFFFFFFFF;
+		NVIC->ICPR[i]=0xFFFFFFFF;
+	}
+
+	/* Re-enable all interrupts */
+	__enable_irq();
+
 	void (*app_reset_handler) (void) = (void*) (*(volatile uint32_t *) (OTA_APP_FLASH_ADDR + 4));
 
-//	__set_MSP((*(volatile uint32_t *) (OTA_APP_FLASH_ADDR)));
-	HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_RESET);
+	__set_MSP((*(volatile uint32_t *) (OTA_APP_FLASH_ADDR)));
+
 
 	app_reset_handler();
 }

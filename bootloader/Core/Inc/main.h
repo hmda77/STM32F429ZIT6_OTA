@@ -247,7 +247,7 @@ void Error_Handler(void);
 #define NBL1_GPIO_Port GPIOE
 
 /* USER CODE BEGIN Private defines */
-
+#define MCU_IRQS (70u)
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
