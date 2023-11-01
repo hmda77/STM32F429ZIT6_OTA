@@ -24,4 +24,21 @@
 
 ## Usage:
 - Clone this Repositpry.
-- set STM32CubeIDE Workspace to this Project.
+- Set STM32CubeIDE Workspace to the repository directory.
+- Fool Erase Flash.
+- Download Bootloader via Programmer.
+- Make and build Application. copy `Application.bin` file to PC Tool directory.
+- Make and build PC Tool with this command (or download released tool):
+  ```
+  gcc main.c RS232\rs232.c -IRS232 -Wall -Wextra -o2 -o <app_name>
+  ```
+- in the first boot, board is on the DFU mode. run this command for download the file to MCU Flash:
+  ```
+  ./<app_name>.exe -c <COM_port> -f <Application_bin_file> -v <ver_major>.<ver_minor> -b
+  ```
+- After downloading proccess, You can make another bin file from Application project and download it whit this command:
+  ```
+  ./<app_name>.exe -c <COM_port> -f <Application_bin_file> -v <ver_major>.<ver_minor>
+  ```
+  ( `-b` Arguments use when device is on DFU mode.)
+
