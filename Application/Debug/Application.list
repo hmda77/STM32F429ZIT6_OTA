@@ -39,13 +39,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  17 .debug_macro  0002c83a  00000000  00000000  00066eb0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   0002dc8b  00000000  00000000  000936ea  2**0
+ 18 .debug_line   0002db8a  00000000  00000000  000936ea  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    000f0d02  00000000  00000000  000c1375  2**0
+ 19 .debug_str    000f0d02  00000000  00000000  000c1274  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .comment      00000050  00000000  00000000  001b2077  2**0
+ 20 .comment      00000050  00000000  00000000  001b1f76  2**0
                   CONTENTS, READONLY
- 21 .debug_frame  00009f2c  00000000  00000000  001b20c8  2**2
+ 21 .debug_frame  00009f2c  00000000  00000000  001b1fc8  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -2756,9 +2756,9 @@ static SER_EX_ ser_proccess_data( uint8_t *buf, uint16_t len)
  80212f0:	4a3d      	ldr	r2, [pc, #244]	; (80213e8 <ser_proccess_data+0x25c>)
  80212f2:	8afb      	ldrh	r3, [r7, #22]
  80212f4:	8013      	strh	r3, [r2, #0]
-								data_calc_crc			 			= ser_calcCRC(data->data, data_len);
- 80212f6:	69bb      	ldr	r3, [r7, #24]
- 80212f8:	685b      	ldr	r3, [r3, #4]
+								data_calc_crc			 	= ser_calcCRC(&buf[4], data_len);
+ 80212f6:	687b      	ldr	r3, [r7, #4]
+ 80212f8:	3304      	adds	r3, #4
  80212fa:	8afa      	ldrh	r2, [r7, #22]
  80212fc:	4611      	mov	r1, r2
  80212fe:	4618      	mov	r0, r3
