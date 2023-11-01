@@ -11,6 +11,7 @@ compile with the command: gcc main.c RS232\rs232.c -IRS232 -Wall -Wextra -o2 -o 
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <getopt.h>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -179,7 +180,7 @@ int send_ota_start(int comport)
 }
 
 /* Build and Send the OTA END command */
-uint16_t send_ota_end(int comport)
+int send_ota_end(int comport)
 {
   uint16_t len;
   ETX_OTA_COMMAND_ *ota_end = (ETX_OTA_COMMAND_*)DATA_BUF;
@@ -399,7 +400,6 @@ int send_ser_ota_info(int comport, ser_ota_info *ota_req)
       break;
     }
   }
-
   if( ex >= 0 )
   {
     if( !is_ack_resp_received( comport ) )
@@ -417,6 +417,7 @@ int send_ser_ota_info(int comport, ser_ota_info *ota_req)
 
 int main(int argc, char *argv[])
 {
+  int option;                   /* options */
   int comport;
   int bdrate   = 115200;       /* 115200 baud */
   char mode[]={'8','N','1',0}; /* *-bits, No parity, 1 stop bit */
@@ -424,24 +425,69 @@ int main(int argc, char *argv[])
   int ex = 0;
   FILE *Fptr = NULL;
 
+  char *majorStr, *minorStr;
   uint16_t major;
   uint32_t minor;
 
+  int comportFlag = 0;
+  int fileFlag    = 0;
+  int versionFlag = 0;
+
+  int bootmode    = 0;
+
+  while ((option = getopt(argc, argv, "c:f:v:b")) != -1)
+  {
+    switch (option) 
+    {
+      case 'c':
+        comport = atoi(optarg) -1;
+        comportFlag = 1;
+        break;
+
+      case 'f':
+        strcpy(bin_name, optarg);
+        fileFlag = 1;
+        break;
+
+      case 'v':
+        majorStr = strtok(optarg, ".");
+        minorStr = strtok(NULL, ".");
+        if (majorStr != NULL && minorStr != NULL)
+        {
+          major = atoi(majorStr);
+          minor = atoi(minorStr);
+          printf("version: %d.%d\n", major,minor);
+          versionFlag = 1;
+        }
+        break;
+      
+      case 'b':
+        bootmode = 1;
+        printf("device is on DFU mode\n");
+      break;
+
+      case '?':
+        if (optopt == 'c' || optopt == 'f' || optopt == 'v')
+        {
+          fprintf(stderr, "Option -%c requires an argument.\n", optopt);
+        }
+        else {
+          fprintf(stderr, "Unknown option -%c.\n", optopt);
+        }
+        break;
+      
+      default:
+        abort();
+    }
+  }
   do
   {
-    if( argc <= 4 )
+    if (!(comportFlag & fileFlag & versionFlag))
     {
-      printf("Please feed the COM PORT number ,the Application Image major and minor version number....!!!\n");
-      printf("Example: .\\etx_ota_app.exe 8 ..\\..\\Application\\Debug\\Blinky.bin 1 5 (for version 1.5)");
+      printf("one or more arguments needed. \n-c : <comport>\n-f : <bin_file>\n-b : DFU mode?\n-v : <major>.<minor>");
       ex = -1;
       break;
     }
-
-    //get the COM port Number
-    comport = atoi(argv[1]) -1;
-    strcpy(bin_name, argv[2]);
-    major = atoi(argv[3]);
-    minor = atoi(argv[4]);
 
     printf("Opening COM%d...\n", comport+1 );
 
@@ -454,71 +500,73 @@ int main(int argc, char *argv[])
 
     //------------------ OTA REQUEST ------------------//
 
-    //send SER Start command
-    ex = send_ota_start(comport);
-    if( ex < 0 )
+    if(!bootmode)
     {
-      printf("send_ota_start Err\n");
-      break;
-    }
-
-
-    //create OTA info frame
-    ser_ota_info ota_req_data;
-    ota_req_data.ota_available  = 1u;
-    ota_req_data.ota_download   = 1u;
-    ota_req_data.ota_major      = major;
-    ota_req_data.ota_minor      = minor;
-    ota_req_data.ota_valid      = 0u; // Doesn't affect
-    ota_req_data.reserved1      = 0u; // Doesn't affect
-    ota_req_data.reserved2      = 0u; // Doesn't affect
-
-    //send SER HEADER command
-    ser_meta_info ser_info;
-    ser_info.data_type          = OTA_INFO_DATA,
-    ser_info.data_size          = sizeof(ser_ota_info),
-    ser_info.data_crc           = CalcCRC((uint8_t *)&ota_req_data, 
-                                            sizeof(ota_req_data));
-    
-    ex = send_ser_header( comport, &ser_info );
-
-    if( ex < 0 )
-    {
-      printf("send_ser_header Err\n");
-      break;
-    }
-
-    // send ota information
-
-    ex = send_ser_ota_info( comport, &ota_req_data);
-
-    if( ex < 0 )
-    {
-      printf("send ota request Err\n");
-      break;
-    }
-
-    //send OTA END command
-    printf("ssssss ota end Err\n");
-    ex = send_ota_end(comport);
-
-    if( ex < 0 )
-    {
-      printf("send_ota_end Err\n");
-      break;
-    }   
-    else
-    {
-      if( is_command_received( comport ) != OTA_REQ)
+      //send SER Start command
+      ex = send_ota_start(comport);
+      if( ex < 0 )
       {
-        //Received NACK
-        printf("Request not found\n");
-        ex = -1;
-        printf("OTA END [ex = %d]\n", ex);
+        printf("send_ota_start Err\n");
         break;
       }
-    }
-    
+
+
+      //create OTA info frame
+      ser_ota_info ota_req_data;
+      ota_req_data.ota_available  = 1u;
+      ota_req_data.ota_download   = 1u;
+      ota_req_data.ota_major      = major;
+      ota_req_data.ota_minor      = minor;
+      ota_req_data.ota_valid      = 1u; // Doesn't affect
+      ota_req_data.reserved1      = 0u; // Doesn't affect
+      ota_req_data.reserved2      = 0u; // Doesn't affect
+
+      //send SER HEADER command
+      ser_meta_info ser_info;
+      ser_info.data_type          = OTA_INFO_DATA,
+      ser_info.data_size          = sizeof(ser_ota_info),
+      ser_info.data_crc           = CalcCRC((uint8_t *)&ota_req_data, 
+                                              sizeof(ota_req_data));
+      
+      ex = send_ser_header( comport, &ser_info );
+
+      if( ex < 0 )
+      {
+        printf("send_ser_header Err\n");
+        break;
+      }
+
+      // send ota information
+
+      ex = send_ser_ota_info( comport, &ota_req_data);
+
+      if( ex < 0 )
+      {
+        printf("send ota request Err\n");
+        break;
+      }
+
+      //send OTA END command
+      ex = send_ota_end(comport);
+
+      if( ex < 0 )
+      {
+        printf("send_ota_end Err\n");
+        break;
+      }   
+      else
+      {
+        if( is_command_received( comport ) != OTA_REQ)
+        {
+          //Received NACK
+          printf("Request not found\n");
+          ex = -1;
+          printf("OTA END [ex = %d]\n", ex);
+          break;
+        }
+      }
+      printf("device Ready to get!\n");
+  }
     //------------------- OTA UPDATE ------------------//
 
     //send OTA Start command
@@ -605,7 +653,7 @@ int main(int argc, char *argv[])
     }    
 
   } while (false);
-
+  
   if(Fptr)
   {
     fclose(Fptr);

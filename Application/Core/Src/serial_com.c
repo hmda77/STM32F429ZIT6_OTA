@@ -322,7 +322,7 @@ static SER_EX_ ser_proccess_data( uint8_t *buf, uint16_t len)
 								ota_data = *(ota_info *)&buf[4];
 								ota_data.ota_valid = 0;
 								data_received_size 			= data_len;
-								data_calc_crc			 			= ser_calcCRC(data->data, data_len);
+								data_calc_crc			 	= ser_calcCRC(&buf[4], data_len);
 								ret = SER_EX_OK;
 
 						}
