@@ -1,5 +1,5 @@
 /*
- * etx_ota_update_main.h
+ * main.h
  *
  *  Created on: 26-Jul-2021
  *      Author: EmbeTronicX
@@ -12,6 +12,7 @@
 #define ETX_OTA_EOF  0xBB    // End of Frame
 #define ETX_OTA_ACK  0x00    // ACK
 #define ETX_OTA_NACK 0x01    // NACK
+#define OTA_REQ      0xEE		 // Command for request OTA from modem
 
 #define ETX_APP_FLASH_ADDR 0x08040000   //Application's Flash Address
 
@@ -19,6 +20,13 @@
 #define ETX_OTA_DATA_OVERHEAD (    9 )  //data overhead
 #define ETX_OTA_PACKET_MAX_SIZE ( ETX_OTA_DATA_MAX_SIZE + ETX_OTA_DATA_OVERHEAD )
 #define ETX_OTA_MAX_FW_SIZE ( 1024 * 512 )
+
+/*
+ * Data types
+ */
+#define	NORMAL_DATA						 0x00	// NORMAL DATA
+#define	STATUS_DATA 					 0x01	// data include status information
+#define	OTA_INFO_DATA					 0x02	// information of OTA
 
 
 /*
@@ -147,5 +155,79 @@ typedef struct
   uint32_t  crc;
   uint8_t   eof;
 }__attribute__((packed)) ETX_OTA_RESP_;
+
+/*
+ * serial data information
+ */
+typedef struct
+{
+	uint8_t  ota_available;		// OTA availability Check
+	uint8_t  ota_download;		// OTA download complete
+	uint16_t ota_major;				// OTA Major version
+	uint32_t ota_minor;				// OTA Minor version
+	uint8_t	 ota_valid;				// OTA Valid Flag (Received byte is not affected)
+	uint32_t reserved1;
+	uint32_t reserved2;
+}__attribute__((packed)) ser_ota_info;
+
+
+
+/*
+ * serial header meta info in header
+ */
+typedef struct
+{
+  uint8_t  data_type;		// refer to SER_DATA_TYPE
+  uint16_t data_size;		// size of incoming data
+  uint32_t data_crc;		// CRC of incoming data
+  uint32_t reserved1;
+  uint32_t reserved2;
+}__attribute__((packed)) ser_meta_info;
+
+
+
+
+
+
+
+/*
+ * Serial Header format
+ *
+ * __________________________________________
+ * |     | Packet |     | Header |     |     |
+ * | SOF | Type   | Len |  Data  | CRC | EOF |
+ * |_____|________|_____|________|_____|_____|
+ *   1B      1B     2B     16B     4B    1B
+ */
+typedef struct
+{
+  uint8_t           sof;
+  uint8_t           packet_type;
+  uint16_t          data_len;
+  ser_meta_info     meta_data;
+  uint32_t          crc;
+  uint8_t           eof;
+}__attribute__((packed)) SER_HEADER_;
+
+
+
+/*
+ * Serial OTA Data format
+ *
+ * ___________________________________________
+ * |     | Packet |     |         |     |     |
+ * | SOF | Type   | Len |   OTA   | CRC | EOF |
+ * |_____|________|_____|_________|_____|_____|
+ *   1B      1B     2B    nBytes   4B    1B
+ */
+typedef struct
+{
+  uint8_t         sof;
+  uint8_t         packet_type;
+  uint16_t        data_len;
+  ser_ota_info 	  ota_data;
+  uint32_t        crc;
+  uint8_t         eof;
+}__attribute__((packed)) SER_OTA_;
 
 #endif /* INC_ETX_OTA_UPDATE_MAIN_H_ */

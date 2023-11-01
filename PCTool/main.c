@@ -18,7 +18,7 @@ compile with the command: gcc main.c RS232\rs232.c -IRS232 -Wall -Wextra -o2 -o 
 #include <unistd.h>
 #endif
 
-#include "rs232.h"
+#include "RS232\rs232.h"
 #include "main.h"
 
 uint8_t DATA_BUF[ETX_OTA_PACKET_MAX_SIZE];
@@ -71,7 +71,37 @@ void delay(uint32_t us)
     usleep(us);
 #endif
 }
+/* read the command */
+uint8_t is_command_received( int comport )
+{
+  uint8_t command = 0x00;
 
+  memset(DATA_BUF, 0, ETX_OTA_PACKET_MAX_SIZE);
+
+  uint16_t len =  RS232_PollComport( comport, DATA_BUF, sizeof(ETX_OTA_COMMAND_));
+
+  if( len > 0 )
+  {
+    ETX_OTA_COMMAND_ *req = (ETX_OTA_COMMAND_ *)DATA_BUF;
+    if( req->packet_type == ETX_OTA_PACKET_TYPE_CMD)
+    {
+      if( req->crc == CalcCRC(&req->cmd, 1) )
+      {
+        if( req->cmd == OTA_REQ )
+        {
+          command = OTA_REQ;
+        }
+      }
+      else
+      {
+        printf("\nstatus:%x\nCRC Mismatch: %x != %x \n",req->cmd,req->crc,CalcCRC(&req->cmd, 1));
+      }
+    }
+
+  }
+
+  return command;
+}
 /* read the response */
 bool is_ack_resp_received( int comport )
 {
@@ -175,7 +205,6 @@ uint16_t send_ota_end(int comport)
       //some data missed.
       printf("OTA END : Send Err\n");
       ex = -1;
-      break;
     }
   }
 
@@ -293,6 +322,99 @@ int send_ota_data(int comport, uint8_t *data, uint16_t data_len)
   return ex;
 }
 
+/* Build and send the SER Header */
+int send_ser_header(int comport, ser_meta_info *ota_info)
+{
+  uint16_t len;
+  SER_HEADER_ *ser_header = (SER_HEADER_*)DATA_BUF;
+  int ex = 0;
+
+  memset(DATA_BUF, 0, ETX_OTA_PACKET_MAX_SIZE);
+
+  ser_header->sof            = ETX_OTA_SOF;
+  ser_header->packet_type    = ETX_OTA_PACKET_TYPE_HEADER;
+  ser_header->data_len       = sizeof(ser_meta_info);
+  ser_header->crc            = CalcCRC( (uint8_t*)ota_info, sizeof(ser_meta_info) );
+  ser_header->eof            = ETX_OTA_EOF;
+
+  memcpy(&ser_header->meta_data, ota_info, sizeof(ser_meta_info) );
+
+  len = sizeof(SER_HEADER_);
+
+  //send OTA Header
+  for(int i = 0; i < len; i++)
+  {
+    delay(1);
+    if( RS232_SendByte(comport, DATA_BUF[i]) )
+    {
+      //some data missed.
+      printf("SER HEADER : Send Err\n");
+      ex = -1;
+      break;
+    }
+  }
+
+  if( ex >= 0 )
+  {
+    if( !is_ack_resp_received( comport ) )
+    {
+      //Received NACK
+      printf("SER HEADER : NACK\n");
+      ex = -1;
+    }
+  }
+  printf("SER HEADER [ex = %d]\n", ex);
+  return ex;
+}
+
+/* Build and send the SER REQUEST  */
+int send_ser_ota_info(int comport, ser_ota_info *ota_req)
+{
+  uint16_t len;
+  SER_OTA_ *ser_req = (SER_OTA_ *)DATA_BUF;
+  int ex = 0;
+
+  memset(DATA_BUF, 0, ETX_OTA_PACKET_MAX_SIZE);
+
+  ser_req->sof            = ETX_OTA_SOF;
+  ser_req->packet_type    = ETX_OTA_PACKET_TYPE_DATA;
+  ser_req->data_len       = sizeof(ser_ota_info);
+  ser_req->crc            = CalcCRC( (uint8_t*)ota_req, sizeof(ser_ota_info));
+  ser_req->eof            = ETX_OTA_EOF;
+
+  memcpy( &ser_req->ota_data, ota_req, sizeof(ser_ota_info) );
+
+  len = sizeof(SER_OTA_);
+  
+
+  // send request
+  for(int i = 0; i < len; i++)
+  {
+    delay(1);
+    if( RS232_SendByte(comport, DATA_BUF[i]) )
+    {
+      //some data missed.
+      printf("SER OTA INFO : Send Err\n");
+      ex = -1;
+      break;
+    }
+  }
+
+  if( ex >= 0 )
+  {
+    if( !is_ack_resp_received( comport ) )
+    {
+      //Received NACK
+      printf("SER OTA INFO : NACK\n");
+      ex = -1;
+    }
+  }
+  printf("SER OTA INFO [ex = %d]\n", ex);
+  return ex;
+
+}
+
+
 int main(int argc, char *argv[])
 {
   int comport;
@@ -302,12 +424,15 @@ int main(int argc, char *argv[])
   int ex = 0;
   FILE *Fptr = NULL;
 
+  uint16_t major;
+  uint32_t minor;
+
   do
   {
-    if( argc <= 2 )
+    if( argc <= 4 )
     {
-      printf("Please feed the COM PORT number and the Application Image....!!!\n");
-      printf("Example: .\\etx_ota_app.exe 8 ..\\..\\Application\\Debug\\Blinky.bin");
+      printf("Please feed the COM PORT number ,the Application Image major and minor version number....!!!\n");
+      printf("Example: .\\etx_ota_app.exe 8 ..\\..\\Application\\Debug\\Blinky.bin 1 5 (for version 1.5)");
       ex = -1;
       break;
     }
@@ -315,6 +440,8 @@ int main(int argc, char *argv[])
     //get the COM port Number
     comport = atoi(argv[1]) -1;
     strcpy(bin_name, argv[2]);
+    major = atoi(argv[3]);
+    minor = atoi(argv[4]);
 
     printf("Opening COM%d...\n", comport+1 );
 
@@ -324,6 +451,75 @@ int main(int argc, char *argv[])
       ex = -1;
       break;
     }
+
+    //------------------ OTA REQUEST ------------------//
+
+    //send SER Start command
+    ex = send_ota_start(comport);
+    if( ex < 0 )
+    {
+      printf("send_ota_start Err\n");
+      break;
+    }
+
+
+    //create OTA info frame
+    ser_ota_info ota_req_data;
+    ota_req_data.ota_available  = 1u;
+    ota_req_data.ota_download   = 1u;
+    ota_req_data.ota_major      = major;
+    ota_req_data.ota_minor      = minor;
+    ota_req_data.ota_valid      = 0u; // Doesn't affect
+    ota_req_data.reserved1      = 0u; // Doesn't affect
+    ota_req_data.reserved2      = 0u; // Doesn't affect
+
+    //send SER HEADER command
+    ser_meta_info ser_info;
+    ser_info.data_type          = OTA_INFO_DATA,
+    ser_info.data_size          = sizeof(ser_ota_info),
+    ser_info.data_crc           = CalcCRC((uint8_t *)&ota_req_data, 
+                                            sizeof(ota_req_data));
+    
+    ex = send_ser_header( comport, &ser_info );
+
+    if( ex < 0 )
+    {
+      printf("send_ser_header Err\n");
+      break;
+    }
+
+    // send ota information
+
+    ex = send_ser_ota_info( comport, &ota_req_data);
+
+    if( ex < 0 )
+    {
+      printf("send ota request Err\n");
+      break;
+    }
+
+    //send OTA END command
+    printf("ssssss ota end Err\n");
+    ex = send_ota_end(comport);
+
+    if( ex < 0 )
+    {
+      printf("send_ota_end Err\n");
+      break;
+    }   
+    else
+    {
+      if( is_command_received( comport ) != OTA_REQ)
+      {
+        //Received NACK
+        printf("Request not found\n");
+        ex = -1;
+        printf("OTA END [ex = %d]\n", ex);
+        break;
+      }
+    }
+    
+    //------------------- OTA UPDATE ------------------//
 
     //send OTA Start command
     ex = send_ota_start(comport);
