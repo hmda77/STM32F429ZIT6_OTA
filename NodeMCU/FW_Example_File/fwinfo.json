@@ -1,0 +1,9 @@
+{
+  "fw_version" : {
+    "minor" : 0,
+    "major" : 5
+  },
+  "fw_crc"  : "6a5432cc",
+  "fw_size" : 71560,
+  "fw_link" : "https://github.com"
+}
