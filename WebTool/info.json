@@ -1,9 +1,0 @@
-{
-    "fw_version": {
-        "minor": 2,
-        "major": 5
-    },
-    "fw_crc": "7a6df043",
-    "fw_size": 72436,
-    "fw_link": "https://raw.githubusercontent.com/hmda77/STM32F429ZIT6_OTA/ModemCode/Application/Debug/Application.bin"
-}

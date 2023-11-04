@@ -1,92 +1,146 @@
-* {
-    font-family: system-ui;
-}
-
 body {
+
 	background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+
 	background-size: 400% 400%;
+
 	animation: gradient 200s ease infinite;
-	height: 100vh;
-    display: flex;
-    align-content: center;
-    justify-content: center;
-    align-items: center;	
+
 }
 
-h1 {
+
+
+.card-title {
+
     color: white;
-    font-size: 25px;
+
+    font-size: 25px !important;
+
     text-align: center;
+
 }
 
-form{
-	margin: 0;
-	color: #fff;
-	display: flex;
-	align-content: flex-start;
-	justify-content: space-between;
-	align-items: stretch;
-	flex-wrap: nowrap;
-	flex-direction: column;
+
+
+p {
+
+    text-align: center;
+
+    color: #eee;
+
 }
 
-input[type="submit"] {
+
+
+.btn-primary {
+
     border-radius: 5px;
+
     background: #00000000;
+
     border: 1px solid #f9f9f9f9;
+
     color: #fff;
+
     padding: 12px;
+
 }
 
-input[type="submit"]:hover {
+
+
+.btn-primary:hover {
+
     background: #ffffff44;
+
 }
 
-input[type="text"] {
+
+
+.form-control {
+
     margin: 5px 0;
+
     border: 1px solid #fff;
+
     border-radius: 100px;
+
     padding: 5px 20px;
+
     background: #00000000;
 
+
+
 }
 
-input[type="text"]:active {
-    box-shadow: 0 11px 15px -12px #fff;
+
+
+.form-floating>.form-control:focus~label, .form-floating>.form-control:-webkit-autofill~label, .form-floating>.form-control:focus~label, .form-floating>.form-control:not(:placeholder-shown)~label, .form-floating>.form-select~label  {
+
+    color: #000;
+
 }
 
-.container{
+
+
+.form-floating>label{
+
+    color: #eee;
+
+}
+
+
+
+
+
+.card{
+
     border: 1px solid #eee;
+
     box-shadow: 0px 10px 45px -20px #ffffff55;
+
     border-radius: 10px;
-    background: #ffffff22;
+
+    background: #00000033;
+
     backdrop-filter: blur(1000px);
-    height: max-content;
-    padding: 50px;
-    display: flex;
-    flex-direction: column;
-    align-content: center;
-    align-items: center;
-    flex-wrap: nowrap;
-    justify-content: center;
 
 }
+
+
 
 .github-link  {
+
     display: block;
+
     font-size: 35pt;
+
     color: white;
+
     margin-top: 20px;
+
 }
 
+
+
 @keyframes gradient {
+
 	0% {
+
 		background-position: 0% 50%;
+
 	}
+
 	50% {
+
 		background-position: 100% 50%;
+
 	}
+
 	100% {
+
 		background-position: 0% 50%;
+
 	}
+
 }
+
