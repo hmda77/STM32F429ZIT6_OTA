@@ -2,11 +2,11 @@
 
 ## To-Do:
 
-- [x] Write Bootloader with OTA supported
-- [x] Write A PC Tool for download Application Binary File
-- [x] Write A Protocol between host and client for requesting and handling OTA state
-- [ ] (In Progress) Write An Application For NodeMCU to Get and Store the Binary File From Internet
-- [ ] Write An Application For NodeMCU to Upgrade STM32 IC
+- [x] Writing Bootloader with OTA supported
+- [x] Writing A PC Tool for download Application Binary File
+- [x] Writing A Protocol between host and client for requesting and handling OTA state
+- [x] Writing An Application For NodeMCU to Get and Store the Binary File From Internet
+- [ ] Writing An Application For NodeMCU to Upgrade STM32 IC
 
 ### Bootloader Flowchart
 ![Bootloader Flowchart](./images/Bootloader.svg)
