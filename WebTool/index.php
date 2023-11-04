@@ -28,9 +28,8 @@ if (isset($_GET['newfw'])) {
 
         <html>
         <header>
-        <link rel="stylesheet" href="css/font-awesome.min.css">
-        <link rel="stylesheet" href="path/to/font-awesome/css/font-awesome.min.css">
-                <link rel="stylesheet" href="style.css">
+            <link rel="stylesheet" href="css/font-awesome.min.css">
+            <link rel="stylesheet" href="css/style.css">
         </header>
         <body>
             <div class="container">
