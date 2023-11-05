@@ -1,146 +1,109 @@
 body {
+  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
 
-	background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+  background-size: 400% 400%;
 
-	background-size: 400% 400%;
-
-	animation: gradient 200s ease infinite;
-
+  animation: gradient 200s ease infinite;
 }
-
-
 
 .card-title {
-
-    color: white;
-
-    font-size: 25px !important;
-
-    text-align: center;
-
+  color: white;
 }
 
+p, a {
+  color: #eee;
+}
 
+a:hover {
+    color: #d3d3d3;
+}
 
-p {
-
-    text-align: center;
-
+ul {
     color: #eee;
-
+    list-style: none;
 }
-
 
 
 .btn-primary {
+  border-radius: 5px;
 
-    border-radius: 5px;
+  background: #00000000;
 
-    background: #00000000;
+  border: 1px solid #f9f9f9f9;
 
-    border: 1px solid #f9f9f9f9;
+  color: #fff;
 
-    color: #fff;
-
-    padding: 12px;
-
+  padding: 12px;
 }
 
-
-
-.btn-primary:hover {
-
-    background: #ffffff44;
-
+.btn-primary:hover,
+.btn-check:active + .btn-primary,
+.btn-check:checked + .btn-primary,
+.btn-primary.active,
+.btn-primary:active,
+.show > .btn-primary.dropdown-toggle,
+.btn-check:focus + .btn-primary,
+.btn-primary:focus {
+  background: #ffffff44;
+  color: #fff;
 }
-
-
 
 .form-control {
+  margin: 5px 0;
 
-    margin: 5px 0;
+  border: 1px solid #fff;
 
-    border: 1px solid #fff;
+  border-radius: 100px;
 
-    border-radius: 100px;
+  padding: 5px 20px;
 
-    padding: 5px 20px;
-
-    background: #00000000;
-
-
-
+  background: #00000000;
 }
 
-
-
-.form-floating>.form-control:focus~label, .form-floating>.form-control:-webkit-autofill~label, .form-floating>.form-control:focus~label, .form-floating>.form-control:not(:placeholder-shown)~label, .form-floating>.form-select~label  {
-
-    color: #000;
-
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:-webkit-autofill ~ label,
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label,
+.form-floating > .form-select ~ label {
+  color: #000;
 }
 
-
-
-.form-floating>label{
-
-    color: #eee;
-
+.form-floating > label {
+  color: #eee;
 }
 
+.card {
+  border: 1px solid #eee;
 
+  box-shadow: 0px 10px 45px -20px #ffffff55;
 
+  border-radius: 10px;
 
+  background: #00000033;
 
-.card{
-
-    border: 1px solid #eee;
-
-    box-shadow: 0px 10px 45px -20px #ffffff55;
-
-    border-radius: 10px;
-
-    background: #00000033;
-
-    backdrop-filter: blur(1000px);
-
+  backdrop-filter: blur(1000px);
 }
 
+.github-link {
+  display: block;
 
+  font-size: 35pt;
 
-.github-link  {
+  color: white;
 
-    display: block;
-
-    font-size: 35pt;
-
-    color: white;
-
-    margin-top: 20px;
-
+  margin-top: 20px;
 }
-
-
 
 @keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
 
-	0% {
+  50% {
+    background-position: 100% 50%;
+  }
 
-		background-position: 0% 50%;
-
-	}
-
-	50% {
-
-		background-position: 100% 50%;
-
-	}
-
-	100% {
-
-		background-position: 0% 50%;
-
-	}
-
+  100% {
+    background-position: 0% 50%;
+  }
 }
-
