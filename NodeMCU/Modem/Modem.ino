@@ -15,32 +15,37 @@ ESP8266WiFiMulti WiFiMulti;
 
 
 // Add soft serial Port for OTA
-#define OTAPORT_TX 12
-#define OTAPORT_RX 13
+#define DEBUG_TX 12
+#define DEBUG_RX 13
 
-EspSoftwareSerial::UART otaPort;
+EspSoftwareSerial::UART DEBUG;
+
+// Serial Variables
+volatile byte receivedData;
+byte buffer[128];
+int bufferIndex = 0;
 
 
 void setup() {
 
-  Serial.begin(115200);
+  Serial.begin(9600);
   // Serial.setDebugOutput(true);
 
-  otaPort.begin(115200, SWSERIAL_8N1, OTAPORT_RX, OTAPORT_TX, false);
-  if (!otaPort) { // If the object did not initialize, then its configuration is invalid
-  Serial.println("Invalid EspSoftwareSerial pin configuration, check config"); 
+  DEBUG.begin(115200, SWSERIAL_8N1, DEBUG_RX, DEBUG_TX, false);
+  if (!DEBUG) { // If the object did not initialize, then its configuration is invalid
     while (1) { // Don't continue with invalid configuration
       delay (1000);
     }
-  } 
+  }
+  
 
-  Serial.println();
-  Serial.println();
-  Serial.println();
+  DEBUG.println();
+  DEBUG.println();
+  DEBUG.println();
 
   for (uint8_t t = 4; t > 0; t--) {
-    Serial.printf("[SETUP] WAIT %d...\n", t);
-    Serial.flush();
+    DEBUG.printf("[SETUP] WAIT %d...\n", t);
+    DEBUG.flush();
     delay(1000);
   }
 
@@ -55,24 +60,42 @@ void setup() {
 
 void readAndWriteFileToSerial(const char* filename) {
   File file = SPIFFS.open(filename, "r");
-  Serial.println("write down file");
+  DEBUG.println("write down file");
   if (file) {
     while (file.available()) {
-      otaPort.write(file.read());
+      Serial.write(file.read());
     }
     file.close();
   }
 }
 
-
+void serialEvent() {
+  while (Serial.available() > 0) {
+    receivedData = Serial.read();
+    buffer[bufferIndex] = receivedData;
+    bufferIndex++;
+  }
+}
 
 
 void loop() {
 
-  if ((WiFiMulti.run() == WL_CONNECTED)) {
-    fw_main(crMajor, crMinor);
-  }
+  // if ((WiFiMulti.run() == WL_CONNECTED)) {
+  //   fw_main(crMajor, crMinor);
+  // }
 
-  Serial.println("Wait 10s before the next round...");
-  delay(10000);
+  if (bufferIndex > 0) {
+    // Handle or process the data
+    for (int i = 0; i < bufferIndex; i++)
+    {
+      DEBUG.write(buffer[i]);
+    }
+    // Reset the buffer
+    memset(buffer, 0, sizeof(buffer));
+    bufferIndex = 0;
+  }
+  
+
+  // DEBUG.println("Wait 10s before the next round...");
+  // delay(10000);
 }

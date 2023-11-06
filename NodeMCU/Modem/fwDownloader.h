@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <ESP8266HTTPClient.h>
 #include <WiFiClientSecureBearSSL.h>
+#include <SoftwareSerial.h>
 #include <ArduinoJson.h>
 #include <FS.h>
 
@@ -10,6 +11,8 @@
 #define FW_SERVER     "fw.ziplast.ir"
 #define FW_INFO_URL   "https://fw.ziplast.ir/?getinfo"
 #define FW_FILE_NAME  "/fw.bin"
+
+extern EspSoftwareSerial::UART DEBUG;
 
 
 /* 
