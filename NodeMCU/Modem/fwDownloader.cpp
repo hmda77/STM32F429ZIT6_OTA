@@ -100,22 +100,24 @@ NET_EX_ fw_main(uint16_t current_major, uint32_t current_minor)
     }
 
     //check CRC
-    uint32_t Checksum = 0xFFFFFFFF;
-    uint8_t fcBuff[2];
-    
-    while (file.available())
-    {
-        uint8_t top = (uint8_t)(Checksum >> 24);
-        top ^= file.readBytes();
-        Checksum = (Checksum << 8) ^ net_crc_table[top];
+    uint32_t crc = 0xFFFFFFFF;
+
+    while (file.available()) {
+        uint8_t byte = file.read();
+        crc = (crc >> 8) ^ crc32b_table[(crc ^ byte) & 0xFF];
     }
+
+    crc ^= 0xFFFFFFFF;
+
     file.close();
     
-    if(Checksum != fw_crc)
+    if(crc != fw_crc)
     {
-      Serial.printf("CRC MISMATCH!!! Calc_crc = [0x%08lx], fw_crc = [0x%08lx]\r\n", Checksum, fw_crc);
+      Serial.printf("CRC MISMATCH!!! Calc_crc = [0x%08lx], fw_crc = [0x%08lx]\r\n", crc, fw_crc);
       break;
     }
+
+    Serial.println("crc_check_OK");
 
     ret = NET_EX_OK;
     // readAndWriteFileToSerial(filename);
@@ -274,15 +276,15 @@ NET_EX_ download_and_save(const char* url, const char* dest)
  * @retval CRC32
  */
 
-uint32_t net_calcCRC(uint8_t * pData, uint32_t DataLength)
-{
-    uint32_t Checksum = 0xFFFFFFFF;
-    for(unsigned int i=0; i < DataLength; i++)
-    {
-        uint8_t top = (uint8_t)(Checksum >> 24);
-        top ^= pData[i];
-        Checksum = (Checksum << 8) ^ net_crc_table[top];
-    }
-    return Checksum;
-}
+uint32_t calculate_crc32b(uint8_t * data, int length) {
+    uint32_t crc = 0xFFFFFFFF;
 
+    for (int i = 0; i < length; i++) {
+        uint8_t byte = data[i];
+        crc = (crc >> 8) ^ crc32b_table[(crc ^ byte) & 0xFF];
+    }
+
+    crc ^= 0xFFFFFFFF;
+
+    return crc;
+}
