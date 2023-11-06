@@ -19,7 +19,7 @@
 #define ETX_OTA_DATA_MAX_SIZE ( 1024 )  //Maximum data Size
 #define ETX_OTA_DATA_OVERHEAD (    9 )  //data overhead
 #define ETX_OTA_PACKET_MAX_SIZE ( ETX_OTA_DATA_MAX_SIZE + ETX_OTA_DATA_OVERHEAD )
-#define ETX_OTA_MAX_FW_SIZE ( 1024 * 512 )
+#define ETX_OTA_MAX_FW_SIZE ( 1024 * 896 )
 
 /*
  * Data types
