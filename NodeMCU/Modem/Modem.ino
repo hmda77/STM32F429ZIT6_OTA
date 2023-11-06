@@ -70,7 +70,7 @@ void loop() {
   // if ((WiFiMulti.run() == WL_CONNECTED)) {
   //   fw_main(crMajor, crMinor);
   // }
-
+  serial_app();
   
 
   // DEBUG.println("Wait 10s before the next round...");
