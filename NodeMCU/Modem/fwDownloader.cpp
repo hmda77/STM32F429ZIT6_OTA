@@ -1,3 +1,4 @@
+#include "HardwareSerial.h"
 
 #include "fwDownloader.h"
 
@@ -7,6 +8,8 @@ char fw_buf[MAX_FW_INFO];
 const char* fwServer    = FW_SERVER;
 const char* fwUrl       = FW_INFO_URL;
 const char* filename    = FW_FILE_NAME;
+
+
 
 
 NET_EX_ fw_main(uint16_t current_major, uint32_t current_minor)
@@ -39,7 +42,7 @@ NET_EX_ fw_main(uint16_t current_major, uint32_t current_minor)
 
     const char* fw_crc_s = doc["fw_crc"];
     uint32_t fw_crc = (uint32_t)strtol(fw_crc_s, NULL, 16);
-    long fw_size = doc["fw_size"];
+    uint32_t fw_size = doc["fw_size"];
     const char* fw_link = doc["fw_link"];
 
     // check if download needed or not
@@ -57,6 +60,7 @@ NET_EX_ fw_main(uint16_t current_major, uint32_t current_minor)
       }
     }
 
+
     // download and save new firmware
     Serial.println("NEW FIRMWARE!!!");
     Serial.printf("FW Version: [%d.%d]\r\nFW Size: [%d B]\r\nFW CRC = [0x%08x]\r\nFW Link = [%s]",
@@ -73,6 +77,46 @@ NET_EX_ fw_main(uint16_t current_major, uint32_t current_minor)
     }
 
     Serial.println("New Firmware Downloaded!");
+
+      NET_EX_ ret = NET_EX_ERROR;
+
+    // open doenloaded file
+    File file = SPIFFS.open(filename, "r");
+
+    if(!file)
+    {
+      Serial.println("There was ann error opening file");
+      break;
+    }
+
+    // check size
+    if( file.size() != fw_size )
+    {
+      Serial.printf("Size Mismatch!!! rec_file_size = [%d], fw_real_size = [%d]\r\n", 
+                                                                file.size(),
+                                                                fw_size);
+      file.close();
+      break;
+    }
+
+    //check CRC
+    uint32_t Checksum = 0xFFFFFFFF;
+    uint8_t fcBuff[2];
+    
+    while (file.available())
+    {
+        uint8_t top = (uint8_t)(Checksum >> 24);
+        top ^= file.readBytes();
+        Checksum = (Checksum << 8) ^ net_crc_table[top];
+    }
+    file.close();
+    
+    if(Checksum != fw_crc)
+    {
+      Serial.printf("CRC MISMATCH!!! Calc_crc = [0x%08lx], fw_crc = [0x%08lx]\r\n", Checksum, fw_crc);
+      break;
+    }
+
     ret = NET_EX_OK;
     // readAndWriteFileToSerial(filename);
 
@@ -221,3 +265,24 @@ NET_EX_ download_and_save(const char* url, const char* dest)
   }
   return ret;
 }
+
+
+/**
+ * @brief Calculate CRC32
+ * @param pData data that should be calculated
+ * @param DataLength length of data
+ * @retval CRC32
+ */
+
+uint32_t net_calcCRC(uint8_t * pData, uint32_t DataLength)
+{
+    uint32_t Checksum = 0xFFFFFFFF;
+    for(unsigned int i=0; i < DataLength; i++)
+    {
+        uint8_t top = (uint8_t)(Checksum >> 24);
+        top ^= pData[i];
+        Checksum = (Checksum << 8) ^ net_crc_table[top];
+    }
+    return Checksum;
+}
+

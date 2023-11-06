@@ -52,6 +52,7 @@ void setup() {
 
 }
 
+
 void readAndWriteFileToSerial(const char* filename) {
   File file = SPIFFS.open(filename, "r");
   Serial.println("write down file");
