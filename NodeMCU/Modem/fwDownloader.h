@@ -12,6 +12,7 @@
 #define FW_INFO_URL   "https://fw.ziplast.ir/?getinfo"
 #define FW_FILE_NAME  "/fw.bin"
 
+// external variable 
 extern EspSoftwareSerial::UART DEBUG;
 
 
