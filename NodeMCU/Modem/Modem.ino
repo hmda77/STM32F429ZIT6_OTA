@@ -2,6 +2,7 @@
 #include <ESP8266WiFiMulti.h>
 #include <SoftwareSerial.h>
 #include "fwDownloader.h"
+#include "fwSerial.h"
 
 /* WiFi Configuration */
 const char* ssid = "UwU";
@@ -19,11 +20,6 @@ ESP8266WiFiMulti WiFiMulti;
 #define DEBUG_RX 13
 
 EspSoftwareSerial::UART DEBUG;
-
-// Serial Variables
-volatile byte receivedData;
-byte buffer[128];
-int bufferIndex = 0;
 
 
 void setup() {
@@ -69,31 +65,12 @@ void readAndWriteFileToSerial(const char* filename) {
   }
 }
 
-void serialEvent() {
-  while (Serial.available() > 0) {
-    receivedData = Serial.read();
-    buffer[bufferIndex] = receivedData;
-    bufferIndex++;
-  }
-}
-
-
 void loop() {
 
   // if ((WiFiMulti.run() == WL_CONNECTED)) {
   //   fw_main(crMajor, crMinor);
   // }
 
-  if (bufferIndex > 0) {
-    // Handle or process the data
-    for (int i = 0; i < bufferIndex; i++)
-    {
-      DEBUG.write(buffer[i]);
-    }
-    // Reset the buffer
-    memset(buffer, 0, sizeof(buffer));
-    bufferIndex = 0;
-  }
   
 
   // DEBUG.println("Wait 10s before the next round...");
