@@ -1,16 +1,12 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
 #include <SoftwareSerial.h>
-#include "fwDownloader.h"
+// #include "fwDownloader.h"
 #include "fwSerial.h"
 
 /* WiFi Configuration */
 const char* ssid = "UwU";
 const char* password = "123hmd321";
-
-/* Current version of firmware */
-uint16_t crMajor = 1;
-uint32_t crMinor = 0;
 
 ESP8266WiFiMulti WiFiMulti;
 

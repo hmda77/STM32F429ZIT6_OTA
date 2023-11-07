@@ -6,6 +6,7 @@
 #include <ArduinoJson.h>
 #include <FS.h>
 
+
 #define MAX_FW_INFO 500     // Maximum FW information Length (in Byte)
 
 #define FW_SERVER     "fw.ziplast.ir"

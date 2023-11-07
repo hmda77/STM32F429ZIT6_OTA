@@ -1,8 +1,12 @@
 #include <Arduino.h>
 #include <SoftwareSerial.h>
+#include <ESP8266WiFi.h>
+#include <ESP8266WiFiMulti.h>
+#include "fwDownloader.h"
 
 // external variable 
 extern EspSoftwareSerial::UART DEBUG;
+extern ESP8266WiFiMulti WiFiMulti;
 
 
 /* -------------------------------------------- *
@@ -55,6 +59,17 @@ typedef enum{
 }CUN_RDY_;
 
 /*
+* Modem command
+*/
+typedef enum
+{
+  MD_CMD_ALIVE       = 0,  // 
+  MD_CMD_FW_STATUS   = 1, // Firmware stattus
+  MD_CMD_SYS_STATUS  = 2, // esp8266 status
+  MD_CMD_FW_GET      = 3, // request for Firmware
+}MD_CMD_;
+
+/*
  *  Serial Return value
  */
 typedef enum
@@ -73,6 +88,40 @@ typedef enum
   SER_PACKET_TYPE_HEADER    = 2,    // Header
   SER_PACKET_TYPE_RESPONSE  = 3,    // Response
 }SER_PACKET_TYPE_;
+
+/*
+ * Serial Communication process state
+ */
+typedef enum
+{
+  SER_STATE_START   = 0,
+  SER_STATE_HEADER  = 1,
+  SER_STATE_DATA    = 2,
+  SER_STATE_END     = 3,
+}SER_STATE_;
+
+
+/*
+ * Serial Commands
+ */
+typedef enum
+{
+  SER_CMD_START = 0,    // Serial Start command
+  SER_CMD_END   = 1,    // Serial End command
+  SER_CMD_ABORT = 2,    // Serial Abort command
+}SER_CMD_;
+
+/*
+ * serial header meta info in header
+ */
+typedef struct
+{
+  uint8_t  data_type;		// refer to SER_DATA_TYPE
+  uint16_t data_size;		// size of incoming data
+  uint32_t data_crc;		// CRC of incoming data
+  uint32_t reserved1;
+  uint32_t reserved2;
+}__attribute__((packed)) meta_info;
 
 /*
  * chunk handler
@@ -106,6 +155,46 @@ typedef struct
   uint8_t   eof;
 }__attribute__((packed)) SER_RESP_;
 
+/*
+ * Serial Command format
+ *
+ * ________________________________________
+ * |     | Packet |     |     |     |     |
+ * | SOF | Type   | Len | CMD | CRC | EOF |
+ * |_____|________|_____|_____|_____|_____|
+ *   1B      1B     2B    1B     4B    1B
+ */
+
+typedef struct
+{
+	uint8_t		sof;
+	uint8_t		packet_type;
+	uint16_t	data_len;
+	uint8_t		cmd;
+	uint32_t	crc;
+	uint8_t		eof;
+}__attribute__((packed)) SER_COMMAND_;
+
+
+/*
+ * Serial Header format
+ *
+ * __________________________________________
+ * |     | Packet |     | Header |     |     |
+ * | SOF | Type   | Len |  Data  | CRC | EOF |
+ * |_____|________|_____|________|_____|_____|
+ *   1B      1B     2B     16B     4B    1B
+ */
+
+typedef struct
+{
+  uint8_t     sof;
+  uint8_t     packet_type;
+  uint16_t    data_len;
+  meta_info   meta_data;
+  uint32_t    crc;
+  uint8_t     eof;
+}__attribute__((packed)) SER_HEADER_;
 /* -------------------------------------------- *
  *												*
  * 				Function References				*

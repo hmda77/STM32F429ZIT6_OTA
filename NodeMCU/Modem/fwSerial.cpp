@@ -18,12 +18,14 @@ static CHUNK_HANDL_ hchunk =
 	.chunk_ready  = CUN_EMPTY,
 	.index		  	= 0u,
 	.data_len	 		= 0u,
-	.crc_check = 0u,
+	.crc_check    = 0u,
 };
+
 
 /*------------------- Defined Functions -------------- */
 static void ser_receive_chunk(uint8_t rx_byte);
 static void ser_send_resp(uint8_t rsp);
+static uint8_t ser_process_cmd( uint8_t *buf, uint16_t len);
 
 uint32_t ser_calcCRC(uint8_t * pData, uint32_t DataLength);
 
@@ -50,7 +52,7 @@ void serial_app(){
 		}
 
 		SER_EX_ ret = SER_EX_OK;
-
+    uint8_t cmd;
 		// An Error occur in during receive chunk
 		if(hchunk.chunk_ready == CUN_ERROR)
 		{
@@ -60,17 +62,35 @@ void serial_app(){
 		else
 		{
 			DEBUG.println("Chunk Received!!!");
+      cmd = ser_process_cmd(Rx_Buffer, hchunk.data_len);
     }
 
     // Send ACK or NACK
 		if( ret != SER_EX_OK){
-			// ser_state = SER_STATE_START;
 			DEBUG.printf("Sending NACK\r\n");
 			ser_send_resp(SER_NACK);
 		}
     else
     {
       ser_send_resp(SER_ACK);
+
+      switch(cmd)
+      {
+        case MD_CMD_FW_GET:
+        {
+          if ((WiFiMulti.run() == WL_CONNECTED)) {
+            fw_main(1, 0);
+          }
+        }
+        break;
+
+        default:
+        {
+          DEBUG.println("Command not found.");
+        }
+        break;
+      }
+
     }
 
     hchunk.chunk_ready = CUN_EMPTY;
@@ -88,6 +108,27 @@ void serialEvent() {
       bufferIndex++;
     }
   }
+}
+
+
+static uint8_t ser_process_cmd( uint8_t *buf, uint16_t len) {
+  uint8_t ret = 0u;
+  do
+  {
+    if( (buf==NULL) || len == 0u)
+    {
+      break;
+    }
+
+    // Check Serial Abort Command
+    SER_COMMAND_ *cmd = (SER_COMMAND_ *)buf;
+		if(cmd->packet_type == SER_PACKET_TYPE_CMD)
+		{
+      ret = cmd->cmd;
+		}
+  }while(false);
+
+  return ret;
 }
 
 /// @brief serial receive chunk
