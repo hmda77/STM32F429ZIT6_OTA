@@ -55,6 +55,26 @@ typedef enum{
 }CUN_RDY_;
 
 /*
+ *  Serial Return value
+ */
+typedef enum
+{
+	SER_EX_OK	 		= 0,
+	SER_EX_ERROR	= 1,
+}SER_EX_;
+
+/*
+ * Serial Packet type
+ */
+typedef enum
+{
+  SER_PACKET_TYPE_CMD       = 0,    // Command
+  SER_PACKET_TYPE_DATA      = 1,    // Data
+  SER_PACKET_TYPE_HEADER    = 2,    // Header
+  SER_PACKET_TYPE_RESPONSE  = 3,    // Response
+}SER_PACKET_TYPE_;
+
+/*
  * chunk handler
  */
 
@@ -63,8 +83,28 @@ typedef struct{
 	CUN_RDY_	chunk_ready;	// chunk ready state
 	uint16_t	index;			// received byte index
 	uint16_t	data_len;		// packet chunk data length
-	uint32_t	rec_data_crc;	// received CRC
+	bool	crc_check;	// received CRC
+
 }__attribute__((packed))CHUNK_HANDL_;
+
+/*
+ * Serial Response format
+ *
+ * __________________________________________
+ * |     | Packet |     |        |     |     |
+ * | SOF | Type   | Len | Status | CRC | EOF |
+ * |_____|________|_____|________|_____|_____|
+ *   1B      1B     2B      1B     4B    1B
+ */
+typedef struct
+{
+  uint8_t   sof;
+  uint8_t   packet_type;
+  uint16_t  data_len;
+  uint8_t   status;
+  uint32_t  crc;
+  uint8_t   eof;
+}__attribute__((packed)) SER_RESP_;
 
 /* -------------------------------------------- *
  *												*
@@ -74,11 +114,17 @@ typedef struct{
  */
 
 void serial_app();
+void serial_write(uint8_t * buf, uint16_t len);
+
+
+
+
+
 
 /* -------------------------------------------- *
- *												*
- * 					CRC Table					*
- *												*
+ *												                      *
+ * 				         	CRC Table		          			*
+ *												                      *
  * -------------------------------------------- *
  */
 static const uint32_t crc_table[0x100] = {

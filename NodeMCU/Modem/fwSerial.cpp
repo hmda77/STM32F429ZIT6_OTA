@@ -5,7 +5,7 @@
 
 // Serial Variables
 volatile byte receivedData;
-byte buffer[128];
+byte buffer[64];
 int bufferIndex = 0;
 
 /* Buffer to hold the received data */
@@ -18,34 +18,59 @@ static CHUNK_HANDL_ hchunk =
 	.chunk_ready  = CUN_EMPTY,
 	.index		  	= 0u,
 	.data_len	 		= 0u,
-	.rec_data_crc = 0u,
+	.crc_check = 0u,
 };
 
 /*------------------- Defined Functions -------------- */
 static void ser_receive_chunk(uint8_t rx_byte);
+static void ser_send_resp(uint8_t rsp);
 
 uint32_t ser_calcCRC(uint8_t * pData, uint32_t DataLength);
 
 
 void serial_app(){
-	do{
+	do
+  {
+    if(bufferIndex > 0) {
+      for(int i = 0; i < bufferIndex; i++)
+      {
+        // DEBUG.write(buffer[i]);
+        ser_receive_chunk(buffer[i]);
+      }
+
+      memset(buffer, 0, sizeof(buffer));
+      bufferIndex = 0;
+
+    }
+
 		// no Byte received or chunk reception in progress
 		if( (hchunk.chunk_ready == CUN_EMPTY) ||
 			(hchunk.chunk_ready == CUN_BUSY)){
 			break;
 		}
 
-		// SER_EX_ ret = SER_EX_OK;
+		SER_EX_ ret = SER_EX_OK;
 
 		// An Error occur in during receive chunk
 		if(hchunk.chunk_ready == CUN_ERROR)
 		{
-			printf("Receive Chunk Error\r\n");
-			// ret = SER_EX_ERROR;
+			DEBUG.println("Receive Chunk Error");
+			ret = SER_EX_ERROR;
 		}
 		else
 		{
-			printf("Chunk Received!!!\r\n");
+			DEBUG.println("Chunk Received!!!");
+    }
+
+    // Send ACK or NACK
+		if( ret != SER_EX_OK){
+			// ser_state = SER_STATE_START;
+			DEBUG.printf("Sending NACK\r\n");
+			ser_send_resp(SER_NACK);
+		}
+    else
+    {
+      ser_send_resp(SER_ACK);
     }
 
     hchunk.chunk_ready = CUN_EMPTY;
@@ -57,18 +82,12 @@ void serial_app(){
 void serialEvent() {
   while (Serial.available() > 0) {
     receivedData = Serial.read();
-    buffer[bufferIndex] = receivedData;
-    bufferIndex++;
+    if( (hchunk.chunk_ready == CUN_EMPTY) ||
+			(hchunk.chunk_ready == CUN_BUSY)){
+      buffer[bufferIndex] = receivedData;
+      bufferIndex++;
+    }
   }
-  for(int i = 0; i < bufferIndex; i++)
-  {
-    if((hchunk.chunk_ready == CUN_EMPTY) || (hchunk.chunk_ready == CUN_BUSY))
-		{
-			ser_receive_chunk(buffer[i]);
-		}
-  }
-  memset(buffer, 0, sizeof(buffer));
-  bufferIndex = 0;
 }
 
 /// @brief serial receive chunk
@@ -76,7 +95,7 @@ void serialEvent() {
 /// @return None
 static void ser_receive_chunk(uint8_t rx_byte)
 {
-  
+  static uint32_t rec_data_crc;
 
   switch(hchunk.chunk_state){
 		// receive SOF byte (1byte)
@@ -86,7 +105,7 @@ static void ser_receive_chunk(uint8_t rx_byte)
       memset(Rx_Buffer, 0, sizeof(Rx_Buffer));
 			hchunk.index 		    = 0u;
 			hchunk.data_len 	  = 0u;
-			hchunk.rec_data_crc = 0u;
+			hchunk.crc_check = 0u;
 
       if(rx_byte == SER_SOF)
 			{
@@ -104,7 +123,7 @@ static void ser_receive_chunk(uint8_t rx_byte)
 				memset(Rx_Buffer, 0, sizeof(Rx_Buffer));
 				hchunk.index 		 = 0u;
 				hchunk.data_len 	 = 0u;
-				hchunk.rec_data_crc  = 0u;
+				hchunk.crc_check  = 0u;
 			}else
 			{
 				Rx_Buffer[hchunk.index++] = rx_byte;
@@ -143,46 +162,82 @@ static void ser_receive_chunk(uint8_t rx_byte)
 
 		// Get the CRC
 		case CUN_STATE_CRC:
+    {
 			Rx_Buffer[hchunk.index++] = rx_byte;
 			if( hchunk.index >= 8+hchunk.data_len)
 			{
-				hchunk.rec_data_crc = *(uint32_t *) &Rx_Buffer[4+hchunk.data_len];
-				hchunk.chunk_state = CUN_STATE_EOF;
-			}
+        uint16_t inx = 4+hchunk.data_len;
+        uint32_t rec_data_crc;
+        uint16_t crc1 = *(uint16_t *) &Rx_Buffer[inx];
+        uint16_t crc2 = *(uint16_t *) &Rx_Buffer[inx+2];
+        rec_data_crc = (uint32_t) crc2<<16 | crc1;
+        hchunk.chunk_state = CUN_STATE_EOF;
+        
+        uint32_t	cal_data_crc = 0u;
+        cal_data_crc = ser_calcCRC(&Rx_Buffer[4], hchunk.data_len);    
+        if(cal_data_crc != rec_data_crc)
+        {
+          DEBUG.printf("CHUNK CRC MISMATCH!!! received = [0x%08x] expect = [0x%08x]!!!\r\n",
+                                                                rec_data_crc,
+                                                                cal_data_crc);
+          hchunk.crc_check = 1u;
+        }
+      }
+    }
 		break;
 
 
 		case CUN_STATE_EOF:
 		{
-			do
-			{
-				Rx_Buffer[hchunk.index] = rx_byte;
-				hchunk.chunk_ready = CUN_ERROR;
-				hchunk.chunk_state = CUN_STATE_SOF;
-
-				if(Rx_Buffer[hchunk.index] != SER_EOF)
-				{
-					break;
-				}
-
-        uint32_t	cal_data_crc = 0u;
-
-				cal_data_crc = ser_calcCRC(&Rx_Buffer[4], hchunk.data_len);
-				if(cal_data_crc != hchunk.rec_data_crc)
-				{
-					printf("CHUNK CRC MISMATCH!!! [Calc CRC = 0x%08lX] [Rec CRC = 0x%08lX]\r\n",
-												                   cal_data_crc,
-																   hchunk.rec_data_crc );
-					break;
-				}
-
-				hchunk.chunk_ready = CUN_READY;
-
-			}while(false);
+      do {
+        Rx_Buffer[hchunk.index] = rx_byte;
+        hchunk.chunk_ready = CUN_ERROR;
+        hchunk.chunk_state = CUN_STATE_SOF;
+        if(Rx_Buffer[hchunk.index] != SER_EOF)
+        {
+          break;
+        }
+        if(hchunk.crc_check)
+        {
+          break;
+        }
+        hchunk.chunk_ready = CUN_READY;
+      }while(false);
 		}
 		break;
   }
 
+}
+
+
+/**
+ * @brief send response to host
+ * @param huart uart handler
+ * @param rsp ACK or NACK response
+ * @retval none
+ */
+static void ser_send_resp(uint8_t rsp){
+	SER_RESP_ pack =
+	{
+		.sof 			    = SER_SOF,
+		.packet_type	= SER_PACKET_TYPE_RESPONSE,
+		.data_len		  = 1u,
+		.status			  = rsp,
+	};
+
+	pack.crc = ser_calcCRC(&pack.status, 1);
+  pack.eof = SER_EOF;
+
+	//send respond
+	serial_write((uint8_t *)&pack, sizeof(SER_RESP_));
+
+}
+
+void serial_write(uint8_t * buf, uint16_t len)
+{
+  for(int i=0; i < len; i++){
+    Serial.write(buf[i]);
+  }
 }
 
 /**
