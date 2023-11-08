@@ -13,7 +13,7 @@ byte buffer[64];
 int bufferIndex = 0;
 
 /* Buffer to hold the received data */
-static uint8_t Rx_Buffer[MAX_SERIAL_SIZE];
+static uint8_t Rx_Buffer[100];
 uint8_t Tx_Buffer[MAX_SERIAL_SIZE];
 
 /* chunk handler */
@@ -137,7 +137,7 @@ static SER_EX_ ser_process_rsp( uint8_t *buf, uint16_t len) {
             case SER_CMD_FW_STATUS:
             {
               DEBUG.println("SER_CMD_FW_STATUS!");
-
+              
               send_ser_start();
               last_state  = ser_state;
               ser_state   = SER_STATE_WRSP;
@@ -231,26 +231,25 @@ void send_ser_start()
   DEBUG.println("D2");
   int ret = 0;
 
-  // memset(Tx_Buffer, 0, MAX_SERIAL_SIZE);
-  // DEBUG.println("D3");
+  memset(Tx_Buffer, 0, sizeof(Tx_Buffer));
+  DEBUG.println("D3");
 
-  // ser_start->sof          = SER_SOF;
-  // ser_start->packet_type  = SER_PACKET_TYPE_CMD;
-  // ser_start->data_len     = 1u;
-  // ser_start->cmd          = SER_CMD_START;
-  // // ser_start->crc          = ser_calcCRC(&ser_start->cmd, 1);
-  // ser_start->crc          = 0u;
-  // ser_start->eof          = SER_EOF;
-  // DEBUG.println("D4");
+  ser_start->sof          = SER_SOF;
+  ser_start->packet_type  = SER_PACKET_TYPE_CMD;
+  ser_start->data_len     = 1u;
+  ser_start->cmd          = SER_CMD_START;
+  ser_start->crc          = ser_calcCRC(&ser_start->cmd, 1);
+  ser_start->eof          = SER_EOF;
+  DEBUG.println("D4");
 
-  // len = sizeof(SER_COMMAND_);
+  len = sizeof(SER_COMMAND_);
 
-  // DEBUG.println("D5");
-  // for(int i=0; i < len; i++)
-  // {
-  //   delay(1);
-  //   Serial.write(Tx_Buffer[i]);
-  // }
+  DEBUG.println("D5");
+  for(int i=0; i < len; i++)
+  {
+    delay(1);
+    Serial.write(Tx_Buffer[i]);
+  }
 
 }
 

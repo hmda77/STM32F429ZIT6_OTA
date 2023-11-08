@@ -38,7 +38,7 @@ void setup() {
   for (uint8_t t = 4; t > 0; t--) {
     DEBUG.printf("[SETUP] WAIT %d...\n", t);
     DEBUG.flush();
-    delay(1000);
+    delay(100);
   }
 
   WiFi.mode(WIFI_STA);
