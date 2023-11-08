@@ -2,12 +2,6 @@
 
 #include "fwDownloader.h"
 
-char fw_buf[MAX_FW_INFO];
-
-/* server configurations */
-const char* fwServer    = FW_SERVER;
-const char* fwUrl       = FW_INFO_URL;
-const char* filename    = FW_FILE_NAME;
 
 
 
@@ -15,109 +9,57 @@ const char* filename    = FW_FILE_NAME;
 NET_EX_ fw_main(uint16_t current_major, uint32_t current_minor)
 {
   NET_EX_ ret = NET_EX_ERROR;
-  do{
-    /* clear buffer */
-    memset(fw_buf, 0, sizeof(fw_buf));
+  // do{
 
-    if(get_fw_info(fwUrl, fw_buf) != NET_EX_OK)
-    {
-      DEBUG.println("get_fw_info failed");
-      break;
-    }
+  //   if(download_and_save(fw_link, filename) != NET_EX_OK )
+  //   {
+  //     DEBUG.println("Download Failed");
+  //     break;
+
+  //   }
+
+  //   DEBUG.println("New Firmware Downloaded!");
+
+  //     NET_EX_ ret = NET_EX_ERROR;
+
+  //   // open doenloaded file
+  //   File file = SPIFFS.open(filename, "r");
+
+  //   if(!file)
+  //   {
+  //     DEBUG.println("There was ann error opening file");
+  //     break;
+  //   }
+
+  //   // check size
+  //   if( file.size() != fw_size )
+  //   {
+  //     DEBUG.printf("Size Mismatch!!! rec_file_size = [%d], fw_real_size = [%d]\r\n", 
+  //                                                               file.size(),
+  //                                                               fw_size);
+  //     file.close();
+  //     break;
+  //   }
+
+  //   //check CRC
+  //   uint32_t crc = 0xFFFFFFFF;
+
+  //   while (file.available()) {
+  //       uint8_t byte = file.read();
+  //       crc = (crc >> 8) ^ crc32b_table[(crc ^ byte) & 0xFF];
+  //   }
+
+  //   crc ^= 0xFFFFFFFF;
+
+  //   file.close();
     
-    // create JSON object
-    StaticJsonDocument<96> doc;
+  //   if(crc != fw_crc)
+  //   {
+  //     DEBUG.printf("CRC MISMATCH!!! Calc_crc = [0x%08lx], fw_crc = [0x%08lx]\r\n", crc, fw_crc);
+  //     break;
+  //   }
 
-    DeserializationError error = deserializeJson(doc, fw_buf, MAX_FW_INFO);
-
-    if (error) {
-      DEBUG.print(F("deserializeJson() failed: "));
-      DEBUG.println(error.f_str());
-      break;
-    }
-
-    // store values after JSON Decoding
-    uint32_t fw_version_minor = doc["fw_version"]["minor"];
-    uint16_t fw_version_major = doc["fw_version"]["major"]; 
-
-    const char* fw_crc_s = doc["fw_crc"];
-    uint32_t fw_crc = (uint32_t)strtol(fw_crc_s, NULL, 16);
-    uint32_t fw_size = doc["fw_size"];
-    const char* fw_link = doc["fw_link"];
-
-    // check if download needed or not
-    if ( !(current_major <= fw_version_major) )
-    {
-      break;
-    }
-
-    if ( (current_major == fw_version_major))
-    {
-      if( !(current_minor < fw_version_minor) )
-      {
-        // There is Nothing for update
-        break;
-      }
-    }
-
-
-    // download and save new firmware
-    DEBUG.println("NEW FIRMWARE!!!");
-    DEBUG.printf("FW Version: [%d.%d]\r\nFW Size: [%d B]\r\nFW CRC = [0x%08x]\r\nFW Link = [%s]",
-                    fw_version_major,
-                    fw_version_minor,
-                    fw_size,
-                    fw_crc,
-                    fw_link);
-    if(download_and_save(fw_link, filename) != NET_EX_OK )
-    {
-      DEBUG.println("Download Failed");
-      break;
-
-    }
-
-    DEBUG.println("New Firmware Downloaded!");
-
-      NET_EX_ ret = NET_EX_ERROR;
-
-    // open doenloaded file
-    File file = SPIFFS.open(filename, "r");
-
-    if(!file)
-    {
-      DEBUG.println("There was ann error opening file");
-      break;
-    }
-
-    // check size
-    if( file.size() != fw_size )
-    {
-      DEBUG.printf("Size Mismatch!!! rec_file_size = [%d], fw_real_size = [%d]\r\n", 
-                                                                file.size(),
-                                                                fw_size);
-      file.close();
-      break;
-    }
-
-    //check CRC
-    uint32_t crc = 0xFFFFFFFF;
-
-    while (file.available()) {
-        uint8_t byte = file.read();
-        crc = (crc >> 8) ^ crc32b_table[(crc ^ byte) & 0xFF];
-    }
-
-    crc ^= 0xFFFFFFFF;
-
-    file.close();
-    
-    if(crc != fw_crc)
-    {
-      DEBUG.printf("CRC MISMATCH!!! Calc_crc = [0x%08lx], fw_crc = [0x%08lx]\r\n", crc, fw_crc);
-      break;
-    }
-
-    DEBUG.println("crc_check_OK");
+  //   DEBUG.println("crc_check_OK");
 
     ret = NET_EX_OK;
     // readAndWriteFileToSerial(filename);
@@ -125,7 +67,7 @@ NET_EX_ fw_main(uint16_t current_major, uint32_t current_minor)
     // crMajor = fw_version_major;
     // crMinor = fw_version_minor;
 
-  }while(false);
+  // }while(false);
 
   return ret;
 }

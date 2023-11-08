@@ -59,17 +59,6 @@ typedef enum{
 }CUN_RDY_;
 
 /*
-* Modem command
-*/
-typedef enum
-{
-  MD_CMD_ALIVE       = 0,  // 
-  MD_CMD_FW_STATUS   = 1, // Firmware stattus
-  MD_CMD_SYS_STATUS  = 2, // esp8266 status
-  MD_CMD_FW_GET      = 3, // request for Firmware
-}MD_CMD_;
-
-/*
  *  Serial Return value
  */
 typedef enum
@@ -98,6 +87,7 @@ typedef enum
   SER_STATE_HEADER  = 1,
   SER_STATE_DATA    = 2,
   SER_STATE_END     = 3,
+  SER_STATE_WRSP    = 4,  // Wait for response
 }SER_STATE_;
 
 
@@ -106,9 +96,13 @@ typedef enum
  */
 typedef enum
 {
-  SER_CMD_START = 0,    // Serial Start command
-  SER_CMD_END   = 1,    // Serial End command
-  SER_CMD_ABORT = 2,    // Serial Abort command
+  SER_CMD_START       = 0,    // Serial Start command
+  SER_CMD_END         = 1,    // Serial End command
+  SER_CMD_ABORT       = 2,    // Serial Abort command
+  SER_CMD_ALIVE       = 3,    // request for ACK
+  SER_CMD_FW_STATUS   = 4,    // Firmware stattus
+  SER_CMD_SYS_STATUS  = 5,    // esp8266 status
+  SER_CMD_FW_GET      = 6,    // request for Firmware
 }SER_CMD_;
 
 /*
