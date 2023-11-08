@@ -27,6 +27,13 @@ extern ESP8266WiFiMulti WiFiMulti;
 #define SER_NACK 0x01    // NACK
 #define SER_ACK  0x00    // ACK
 
+/*
+ * Data types
+ */
+#define	NORMAL_DATA						 0x00	// NORMAL DATA
+#define	STATUS_DATA 					 0x01	// data include status information
+#define	OTA_INFO_DATA					 0x02	// information of OTA
+
 
 /* -------------------------------------------- *
  *																							*
@@ -87,7 +94,6 @@ typedef enum
   SER_STATE_HEADER  = 1,
   SER_STATE_DATA    = 2,
   SER_STATE_END     = 3,
-  SER_STATE_WRSP    = 4,  // Wait for response
 }SER_STATE_;
 
 
@@ -129,6 +135,21 @@ typedef struct{
 	bool	crc_check;	// received CRC
 
 }__attribute__((packed))CHUNK_HANDL_;
+
+/*
+ * serial data information
+ */
+typedef struct
+{
+	uint8_t  ota_available;		// OTA availability Check
+	uint8_t  ota_download;		// OTA download complete
+	uint16_t ota_major;				// OTA Major version
+	uint32_t ota_minor;				// OTA Minor version
+	uint8_t	 ota_valid;				// OTA Valid Flag (Received byte is not affected)
+	uint32_t reserved1;
+	uint32_t reserved2;
+}__attribute__((packed)) ser_fw_info;
+
 
 /*
  * Serial Response format
@@ -189,6 +210,25 @@ typedef struct
   uint32_t    crc;
   uint8_t     eof;
 }__attribute__((packed)) SER_HEADER_;
+
+/*
+ * Serial OTA Data format
+ *
+ * ___________________________________________
+ * |     | Packet |     |         |     |     |
+ * | SOF | Type   | Len |   OTA   | CRC | EOF |
+ * |_____|________|_____|_________|_____|_____|
+ *   1B      1B     2B    nBytes   4B    1B
+ */
+typedef struct
+{
+  uint8_t         sof;
+  uint8_t         packet_type;
+  uint16_t        data_len;
+  ser_fw_info 	  ota_data;
+  uint32_t        crc;
+  uint8_t         eof;
+}__attribute__((packed)) SER_OTA_;
 /* -------------------------------------------- *
  *												*
  * 				Function References				*

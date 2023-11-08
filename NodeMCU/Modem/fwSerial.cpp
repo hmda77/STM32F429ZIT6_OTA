@@ -4,8 +4,7 @@
 /* -------------- Defined  variables ------------- */
 
 // serial receive state
-static SER_STATE_ ser_state = SER_STATE_START;
-static SER_STATE_ last_state = SER_STATE_START;
+static SER_STATE_ ser_state = SER_STATE_START;\
 
 // Serial Variables
 volatile byte receivedData;
@@ -26,14 +25,21 @@ static CHUNK_HANDL_ hchunk =
 	.crc_check    = 0u,
 };
 
+static ser_fw_info ser_fw_data;
+static uint32_t fw_crc;
+static uint16_t fw_size;
+static uint8_t fw_link[200];
+
+static meta_info ser_info;
 
 
 /*------------------- Defined Functions -------------- */
 static void ser_receive_chunk(uint8_t rx_byte);
 static void ser_send_resp(uint8_t rsp);
 static SER_EX_ ser_process_rsp( uint8_t *buf, uint16_t len);
-SER_EX_ send_info();
 void send_ser_start();
+void send_ser_header(meta_info *meta_data);
+SER_EX_ send_info(ser_fw_info * ota_info);
 uint32_t ser_calcCRC(uint8_t * pData, uint32_t DataLength);
 
 
@@ -134,13 +140,23 @@ static SER_EX_ ser_process_rsp( uint8_t *buf, uint16_t len) {
 		    {
           switch(cmd->cmd)
           {
+            //request for firmware information
             case SER_CMD_FW_STATUS:
             {
-              DEBUG.println("SER_CMD_FW_STATUS!");
-              
+              memset(&ser_fw_data, 0, sizeof(ser_fw_info));
+              memset(&ser_info, 0, sizeof(meta_info));
+
+              if(send_info(&ser_fw_data) != SER_EX_OK)
+              {
+                break;
+              }
+
+              // set header meta info
+              ser_info.data_type  = OTA_INFO_DATA;
+              ser_info.data_size  = sizeof(ser_fw_info);
+              ser_info.data_crc   = ser_calcCRC((uint8_t *)&ser_fw_data, sizeof(ser_fw_info));
               send_ser_start();
-              last_state  = ser_state;
-              ser_state   = SER_STATE_WRSP;
+              ser_state   = SER_STATE_HEADER;
               ret = SER_EX_OK;
             }
             break;
@@ -149,8 +165,7 @@ static SER_EX_ ser_process_rsp( uint8_t *buf, uint16_t len) {
             {
               DEBUG.println("SER_CMD_FW_GET!");
               send_ser_start();
-              last_state  = ser_state;
-              ser_state   = SER_STATE_WRSP;
+              ser_state   = SER_STATE_HEADER;
               ret = SER_EX_OK;
             }
 
@@ -165,45 +180,16 @@ static SER_EX_ ser_process_rsp( uint8_t *buf, uint16_t len) {
       }
       break;
 
-      case SER_STATE_WRSP:
+      case SER_STATE_HEADER:
       {
         SER_RESP_ *rsp = (SER_RESP_ *)buf;
         if(rsp->packet_type == SER_PACKET_TYPE_RESPONSE)
         {
           if(rsp->status == SER_ACK)
           {
+            send_ser_header(&ser_info);
+            ser_state   = SER_STATE_DATA;
             ret = SER_EX_OK;
-            switch(last_state)
-            {
-              case SER_STATE_START:
-              {
-                ser_state = SER_STATE_HEADER;
-              }
-              break;
-
-              case SER_STATE_HEADER:
-              {
-                ser_state = SER_STATE_DATA;
-              }
-              break;
-
-              case SER_STATE_DATA:
-              {
-                ser_state = SER_STATE_END;
-              }
-
-              case SER_STATE_END:
-              {
-                ser_state = SER_STATE_START;
-              }
-              break;
-              default:
-              {
-                ret = SER_EX_ERROR;
-                ser_state = SER_STATE_START;
-              }
-              break;
-            }
           }
         }
       }
@@ -226,13 +212,9 @@ static SER_EX_ ser_process_rsp( uint8_t *buf, uint16_t len) {
 void send_ser_start()
 {
   uint16_t len;
-  DEBUG.println("D1");
   SER_COMMAND_ *ser_start = (SER_COMMAND_ *)Tx_Buffer;
-  DEBUG.println("D2");
-  int ret = 0;
 
   memset(Tx_Buffer, 0, sizeof(Tx_Buffer));
-  DEBUG.println("D3");
 
   ser_start->sof          = SER_SOF;
   ser_start->packet_type  = SER_PACKET_TYPE_CMD;
@@ -240,11 +222,9 @@ void send_ser_start()
   ser_start->cmd          = SER_CMD_START;
   ser_start->crc          = ser_calcCRC(&ser_start->cmd, 1);
   ser_start->eof          = SER_EOF;
-  DEBUG.println("D4");
 
   len = sizeof(SER_COMMAND_);
 
-  DEBUG.println("D5");
   for(int i=0; i < len; i++)
   {
     delay(1);
@@ -253,62 +233,94 @@ void send_ser_start()
 
 }
 
+void send_ser_header(meta_info *meta_data)
+{
+  uint16_t len;
+  SER_HEADER_  * ser_header = (SER_HEADER_ *)Tx_Buffer;
+  
+  memset(Tx_Buffer, 0, sizeof(Tx_Buffer));
 
-SER_EX_ send_info()
+  ser_header->sof         = SER_SOF;
+  ser_header->packet_type = SER_PACKET_TYPE_HEADER;
+  ser_header->data_len    = sizeof(meta_info);
+  ser_header->crc         = ser_calcCRC( (uint8_t *)meta_data, sizeof(meta_info));
+  ser_header->eof         = SER_EOF;
+
+  memcpy(&ser_header->meta_data, meta_data, sizeof(meta_info));
+
+  len = sizeof(SER_HEADER_);
+
+  for(int i=0; i < len; i++)
+  {
+    delay(1);
+    Serial.write(Tx_Buffer[i]);
+  }
+}
+
+
+SER_EX_ send_info(ser_fw_info * ota_info)
 {
   SER_EX_ ret = SER_EX_ERROR;
-  // /* ------MODEM VARIABLE----- */
-  // char fw_buf[MAX_FW_INFO];
+  /* ------MODEM VARIABLE----- */
+  char fw_buf[MAX_FW_INFO];
 
-  // /* server configurations */
-  // const char* fwServer    = FW_SERVER;
-  // const char* fwUrl       = FW_INFO_URL;
-  // const char* filename    = FW_FILE_NAME;
-  // if ((WiFiMulti.run() == WL_CONNECTED)) {
-  //   do
-  //   {
-  //     /* clear buffer */
-  //     memset(fw_buf, 0, sizeof(fw_buf));
+  /* server configurations */
+  const char* fwServer    = FW_SERVER;
+  const char* fwUrl       = FW_INFO_URL;
+  const char* filename    = FW_FILE_NAME;
+  if ((WiFiMulti.run() == WL_CONNECTED)) {
+    do
+    {
+      /* clear buffer */
+      memset(fw_buf, 0, sizeof(fw_buf));
 
-  //     if(get_fw_info(fwUrl, fw_buf) != NET_EX_OK)
-  //     {
-  //       DEBUG.println("get_fw_info failed");
-  //       break;
-  //     }
+      if(get_fw_info(fwUrl, fw_buf) != NET_EX_OK)
+      {
+        DEBUG.println("get_fw_info failed");
+        break;
+      }
 
-  //         // create JSON object
-  //   StaticJsonDocument<96> doc;
+          // create JSON object
+    StaticJsonDocument<96> doc;
 
-  //   DeserializationError error = deserializeJson(doc, fw_buf, MAX_FW_INFO);
+    DeserializationError error = deserializeJson(doc, fw_buf, MAX_FW_INFO);
 
-  //   if (error) {
-  //     DEBUG.print(F("deserializeJson() failed: "));
-  //     DEBUG.println(error.f_str());
-  //     break;
-  //   }
+    if (error) {
+      DEBUG.print(F("deserializeJson() failed: "));
+      DEBUG.println(error.f_str());
+      break;
+    }
+    
+    ota_info->ota_available = 1;
+    ota_info->ota_download  = 0;
+    ota_info->ota_major     = doc["fw_version"]["major"];
+    ota_info->ota_minor     = doc["fw_version"]["minor"];
+    ota_info->ota_valid     = 0;
+    ota_info->reserved1     = 0;
+    ota_info->reserved2     = 0;
+    
+    // store values after JSON Decoding
 
-  //   // store values after JSON Decoding
-  //   uint32_t fw_version_minor = doc["fw_version"]["minor"];
-  //   uint16_t fw_version_major = doc["fw_version"]["major"]; 
+    const char* fw_crc_s = doc["fw_crc"];
+    fw_crc = (uint32_t)strtol(fw_crc_s, NULL, 16);
+    fw_size = doc["fw_size"];
+    memset(fw_link, 0, sizeof(fw_link));
+    const char* fw_link_s = doc["fw_link"];
+    memcpy(fw_link, fw_link_s, strlen(fw_link_s));
 
-  //   const char* fw_crc_s = doc["fw_crc"];
-  //   uint32_t fw_crc = (uint32_t)strtol(fw_crc_s, NULL, 16);
-  //   uint32_t fw_size = doc["fw_size"];
-  //   const char* fw_link = doc["fw_link"];
-
-  //   DEBUG.printf("FW Version: [%d.%d]\r\nFW Size: [%d B]\r\nFW CRC = [0x%08x]\r\nFW Link = [%s]",
-  //               fw_version_major,
-  //               fw_version_minor,
-  //               fw_size,
-  //               fw_crc,
-  //               fw_link);
-  //     ret = SER_EX_OK;
-  //   }while(false);
-  // }
-  // else
-  // {
-  //   DEBUG.println("WiFi is Not Connected");
-  // }
+    DEBUG.printf("FW Version: [%d.%d]\r\nFW Size: [%d B]\r\nFW CRC = [0x%08x]\r\nFW Link = [%s]",
+                ota_info->ota_major,
+                ota_info->ota_minor,
+                fw_size,
+                fw_crc,
+                fw_link);
+      ret = SER_EX_OK;
+    }while(false);
+  }
+  else
+  {
+    DEBUG.println("WiFi is Not Connected");
+  }
   return ret;
 }
 
