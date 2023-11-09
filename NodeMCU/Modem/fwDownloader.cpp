@@ -15,7 +15,6 @@ NET_EX_ fw_main(uint16_t current_major, uint32_t current_minor)
   //   {
   //     DEBUG.println("Download Failed");
   //     break;
-
   //   }
 
   //   DEBUG.println("New Firmware Downloaded!");
@@ -129,7 +128,7 @@ NET_EX_ get_fw_info(const char* url, char* fw_buf)
 * @parm dest destination for saving received file
 * @retval NET_EX_
 */
-NET_EX_ download_and_save(const char* url, const char* dest)
+NET_EX_ download_fw(const char* url, const char* dest)
 {
   NET_EX_ ret = NET_EX_ERROR;
 

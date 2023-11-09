@@ -63,9 +63,6 @@ void readAndWriteFileToSerial(const char* filename) {
 
 void loop() {
 
-  // if ((WiFiMulti.run() == WL_CONNECTED)) {
-  //   fw_main(crMajor, crMinor);
-  // }
   serial_app();
   
 

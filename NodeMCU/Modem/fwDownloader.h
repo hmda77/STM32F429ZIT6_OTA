@@ -37,7 +37,7 @@ typedef struct
 
 /* function defenitions */
 NET_EX_ get_fw_info(const char* url, char* fw_buf);
-NET_EX_ download_and_save(const char* url, const char* dest);
+NET_EX_ download_fw(const char* url, const char* dest);
 NET_EX_ fw_main(uint16_t current_major, uint32_t current_minor);
 NET_EX_ check_file_crc(const char* filename);
 uint32_t net_calcCRC(uint8_t * pData, uint32_t DataLength);

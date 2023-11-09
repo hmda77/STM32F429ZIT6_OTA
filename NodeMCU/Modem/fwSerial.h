@@ -107,8 +107,9 @@ typedef enum
   SER_CMD_ABORT       = 2,    // Serial Abort command
   SER_CMD_ALIVE       = 3,    // request for ACK
   SER_CMD_FW_STATUS   = 4,    // Firmware stattus
-  SER_CMD_SYS_STATUS  = 5,    // esp8266 status
-  SER_CMD_FW_GET      = 6,    // request for Firmware
+  SER_CMD_FW_GET      = 5,    // request for Firmware
+  SER_CMD_FW_DL       = 6,    // download firmware
+  SER_CMD_SYS_STATUS  = 7,    // esp8266 status
 }SER_CMD_;
 
 /*

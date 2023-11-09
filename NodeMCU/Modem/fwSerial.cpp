@@ -4,7 +4,7 @@
 /* -------------- Defined  variables ------------- */
 
 // serial receive state
-static SER_STATE_ ser_state = SER_STATE_START;\
+static SER_STATE_ ser_state = SER_STATE_START;
 
 // Serial Variables
 volatile byte receivedData;
@@ -27,11 +27,12 @@ static CHUNK_HANDL_ hchunk =
 
 static ser_fw_info ser_fw_data;
 static uint32_t fw_crc;
-static uint16_t fw_size;
+static uint32_t fw_size;
 static uint8_t fw_link[200];
 
 static meta_info ser_info;
 
+const char * filename = FW_FILE_NAME;
 
 /*------------------- Defined Functions -------------- */
 static void ser_receive_chunk(uint8_t rx_byte);
@@ -39,7 +40,10 @@ static void ser_send_resp(uint8_t rsp);
 static SER_EX_ ser_process_rsp( uint8_t *buf, uint16_t len);
 void send_ser_start();
 void send_ser_header(meta_info *meta_data);
-SER_EX_ send_info(ser_fw_info * ota_info);
+void send_ser_info(ser_fw_info * ota_info);
+void send_ser_end();
+SER_EX_ download_save_fw(const char* dest);
+SER_EX_ get_info(ser_fw_info * ota_info);
 uint32_t ser_calcCRC(uint8_t * pData, uint32_t DataLength);
 
 
@@ -146,7 +150,7 @@ static SER_EX_ ser_process_rsp( uint8_t *buf, uint16_t len) {
               memset(&ser_fw_data, 0, sizeof(ser_fw_info));
               memset(&ser_info, 0, sizeof(meta_info));
 
-              if(send_info(&ser_fw_data) != SER_EX_OK)
+              if(get_info(&ser_fw_data) != SER_EX_OK)
               {
                 break;
               }
@@ -161,6 +165,27 @@ static SER_EX_ ser_process_rsp( uint8_t *buf, uint16_t len) {
             }
             break;
 
+            case SER_CMD_FW_DL:
+            {
+              // Download Firmware
+              if(download_save_fw(filename) != SER_EX_OK)
+              {
+                break;
+              }
+
+              // update fw info
+              ser_fw_data.ota_download = 1u;
+
+              // set header meta info
+              ser_info.data_type  = OTA_INFO_DATA;
+              ser_info.data_size  = sizeof(ser_fw_info);
+              ser_info.data_crc   = ser_calcCRC((uint8_t *)&ser_fw_data, sizeof(ser_fw_info));
+              send_ser_start();
+              ser_state = SER_STATE_HEADER;
+              ret = SER_EX_OK;
+            }
+            break;
+
             case SER_CMD_FW_GET:
             {
               DEBUG.println("SER_CMD_FW_GET!");
@@ -168,6 +193,7 @@ static SER_EX_ ser_process_rsp( uint8_t *buf, uint16_t len) {
               ser_state   = SER_STATE_HEADER;
               ret = SER_EX_OK;
             }
+            break;
 
 
             default:
@@ -189,6 +215,47 @@ static SER_EX_ ser_process_rsp( uint8_t *buf, uint16_t len) {
           {
             send_ser_header(&ser_info);
             ser_state   = SER_STATE_DATA;
+            ret = SER_EX_OK;
+          }
+        }
+      }
+      break;
+
+      case SER_STATE_DATA:
+      {
+        SER_RESP_ *rsp = (SER_RESP_ *)buf;
+        if(rsp->packet_type == SER_PACKET_TYPE_RESPONSE)
+        {
+          if(rsp->status == SER_ACK)
+          {
+            switch(ser_info.data_type){
+              case OTA_INFO_DATA:
+              {
+                send_ser_info(&ser_fw_data);
+                ser_state   = SER_STATE_END;
+                ret = SER_EX_OK;
+              }break;
+
+              default:
+              {
+                ser_state = SER_STATE_START;
+              }
+              break;
+            }
+          }
+        }
+      }
+      break;
+
+      case SER_STATE_END:
+      {
+        SER_RESP_ *rsp = (SER_RESP_ *)buf;
+        if(rsp->packet_type == SER_PACKET_TYPE_RESPONSE)
+        {
+          if(rsp->status == SER_ACK)
+          {
+            send_ser_end();
+            ser_state = SER_STATE_START;
             ret = SER_EX_OK;
           }
         }
@@ -257,8 +324,118 @@ void send_ser_header(meta_info *meta_data)
   }
 }
 
+void send_ser_info(ser_fw_info * ota_info)
+{
+  uint16_t len;
+  SER_OTA_ *ser_req = (SER_OTA_ *)Tx_Buffer;
 
-SER_EX_ send_info(ser_fw_info * ota_info)
+  memset(Tx_Buffer, 0, sizeof(Tx_Buffer));
+
+  ser_req->sof             =  SER_SOF;
+  ser_req->packet_type     =  SER_PACKET_TYPE_DATA;
+  ser_req->data_len        =  sizeof(ser_fw_info);
+  ser_req->crc             =  ser_calcCRC( (uint8_t *)ota_info, sizeof(ser_fw_info));
+  ser_req->eof             =  SER_EOF;
+
+  memcpy( &ser_req->ota_data, ota_info, sizeof(ser_fw_info) );
+
+  len = sizeof(SER_OTA_);
+  
+  for(int i=0; i < len; i++)
+  {
+    delay(1);
+    Serial.write(Tx_Buffer[i]);
+  }
+}
+
+void send_ser_end()
+{
+  uint16_t len;
+  SER_COMMAND_ *ser_end = (SER_COMMAND_ *)Tx_Buffer;
+
+  memset(Tx_Buffer, 0, sizeof(Tx_Buffer));
+
+  ser_end->sof          = SER_SOF;
+  ser_end->packet_type  = SER_PACKET_TYPE_CMD;
+  ser_end->data_len     = 1u;
+  ser_end->cmd          = SER_CMD_END;
+  ser_end->crc          = ser_calcCRC(&ser_end->cmd, 1);
+  ser_end->eof          = SER_EOF;
+
+  len = sizeof(SER_COMMAND_);
+
+  for(int i=0; i < len; i++)
+  {
+    delay(1);
+    Serial.write(Tx_Buffer[i]);
+  }
+
+}
+
+SER_EX_ download_save_fw(const char* dest)
+{
+  SER_EX_ ret = SER_EX_ERROR;
+
+  do
+  {
+    const char * url = (char *)fw_link;
+    if(download_fw(url, dest) != NET_EX_OK )
+    {
+      DEBUG.println("Download Failed");
+      break;
+    }
+
+    
+    DEBUG.println("New Firmware Downloaded!");
+    
+
+    // open doenloaded file
+    File file = SPIFFS.open(filename, "r");
+
+    if(!file)
+    {
+      DEBUG.println("There was ann error opening file");
+      break;
+    }
+
+    // check size
+    if( file.size() != fw_size )
+    {
+      DEBUG.printf("Size Mismatch!!! rec_file_size = [%d], fw_real_size = [%d]\r\n", 
+                                                                file.size(),
+                                                                fw_size);
+      file.close();
+      break;
+    }
+
+    //check CRC
+    uint32_t crc = 0xFFFFFFFF;
+
+    while (file.available()) {
+        uint8_t byte = file.read();
+        crc = (crc >> 8) ^ crc32b_table[(crc ^ byte) & 0xFF];
+    }
+
+    crc ^= 0xFFFFFFFF;
+
+    file.close();
+    
+    if(crc != fw_crc)
+    {
+      DEBUG.printf("CRC MISMATCH!!! Calc_crc = [0x%08lx], fw_crc = [0x%08lx]\r\n", crc, fw_crc);
+      break;
+    }
+
+    DEBUG.println("crc_check_OK");
+
+    ret = SER_EX_OK;
+    
+  }while(false);
+  
+  return ret;
+}
+
+SER_EX_ get_info(ser_fw_info * ota_info)
 {
   SER_EX_ ret = SER_EX_ERROR;
   /* ------MODEM VARIABLE----- */
@@ -303,6 +480,8 @@ SER_EX_ send_info(ser_fw_info * ota_info)
 
     const char* fw_crc_s = doc["fw_crc"];
     fw_crc = (uint32_t)strtol(fw_crc_s, NULL, 16);
+    // const char* fw_size_s = doc["fw_size"];
+    // sprintf(fw_size_s,"%s\0",);
     fw_size = doc["fw_size"];
     memset(fw_link, 0, sizeof(fw_link));
     const char* fw_link_s = doc["fw_link"];
