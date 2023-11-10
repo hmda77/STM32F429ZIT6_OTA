@@ -323,51 +323,6 @@ int send_ota_data(int comport, uint8_t *data, uint16_t data_len)
   return ex;
 }
 
-/* Build and send the SER Header */
-int send_ser_header(int comport, ser_meta_info *ota_info)
-{
-  uint16_t len;
-  SER_HEADER_ *ser_header = (SER_HEADER_*)DATA_BUF;
-  int ex = 0;
-
-  memset(DATA_BUF, 0, ETX_OTA_PACKET_MAX_SIZE);
-
-  ser_header->sof            = ETX_OTA_SOF;
-  ser_header->packet_type    = ETX_OTA_PACKET_TYPE_HEADER;
-  ser_header->data_len       = sizeof(ser_meta_info);
-  ser_header->crc            = CalcCRC( (uint8_t*)ota_info, sizeof(ser_meta_info) );
-  ser_header->eof            = ETX_OTA_EOF;
-
-  memcpy(&ser_header->meta_data, ota_info, sizeof(ser_meta_info) );
-
-  len = sizeof(SER_HEADER_);
-
-  //send OTA Header
-  for(int i = 0; i < len; i++)
-  {
-    delay(1);
-    if( RS232_SendByte(comport, DATA_BUF[i]) )
-    {
-      //some data missed.
-      printf("SER HEADER : Send Err\n");
-      ex = -1;
-      break;
-    }
-  }
-
-  if( ex >= 0 )
-  {
-    if( !is_ack_resp_received( comport ) )
-    {
-      //Received NACK
-      printf("SER HEADER : NACK\n");
-      ex = -1;
-    }
-  }
-  printf("SER HEADER [ex = %d]\n", ex);
-  return ex;
-}
-
 /* Build and send the SER REQUEST  */
 int send_ser_ota_info(int comport, ser_ota_info *ota_req)
 {
@@ -419,7 +374,7 @@ int main(int argc, char *argv[])
 {
   int option;                   /* options */
   int comport;
-  int bdrate   = 115200;       /* 115200 baud */
+  int bdrate   = 9600;       /* 115200 baud */
   char mode[]={'8','N','1',0}; /* *-bits, No parity, 1 stop bit */
   char bin_name[1024];
   int ex = 0;
@@ -522,17 +477,17 @@ int main(int argc, char *argv[])
       ota_req_data.reserved2      = 0u; // Doesn't affect
 
       //send SER HEADER command
-      ser_meta_info ser_info;
+      meta_info ser_info;
       ser_info.data_type          = OTA_INFO_DATA,
       ser_info.data_size          = sizeof(ser_ota_info),
       ser_info.data_crc           = CalcCRC((uint8_t *)&ota_req_data, 
                                               sizeof(ota_req_data));
       
-      ex = send_ser_header( comport, &ser_info );
+      ex = send_ota_header( comport, &ser_info );
 
       if( ex < 0 )
       {
-        printf("send_ser_header Err\n");
+        printf("send_ota_header Err\n");
         break;
       }
 
@@ -604,8 +559,9 @@ int main(int argc, char *argv[])
 
     //Send OTA Header
     meta_info ota_info;
-    ota_info.package_size = app_size;
-    ota_info.package_crc  = CalcCRC( APP_BIN, app_size);
+    ota_info.data_type   = NORMAL_DATA;
+    ota_info.data_size = app_size;
+    ota_info.data_crc  = CalcCRC( APP_BIN, app_size);
 
     ex = send_ota_header( comport, &ota_info );
     if( ex < 0 )

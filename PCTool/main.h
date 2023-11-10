@@ -76,8 +76,9 @@ typedef enum
  */
 typedef struct
 {
-  uint32_t package_size;
-  uint32_t package_crc;
+  uint8_t  data_type;		// refer to SER_DATA_TYPE
+  uint32_t data_size;
+  uint32_t data_crc;
   uint32_t reserved1;
   uint32_t reserved2;
 }__attribute__((packed)) meta_info;
@@ -169,45 +170,6 @@ typedef struct
 	uint32_t reserved1;
 	uint32_t reserved2;
 }__attribute__((packed)) ser_ota_info;
-
-
-
-/*
- * serial header meta info in header
- */
-typedef struct
-{
-  uint8_t  data_type;		// refer to SER_DATA_TYPE
-  uint32_t data_size;		// size of incoming data
-  uint32_t data_crc;		// CRC of incoming data
-  uint32_t reserved1;
-  uint32_t reserved2;
-}__attribute__((packed)) ser_meta_info;
-
-
-
-
-
-
-
-/*
- * Serial Header format
- *
- * __________________________________________
- * |     | Packet |     | Header |     |     |
- * | SOF | Type   | Len |  Data  | CRC | EOF |
- * |_____|________|_____|________|_____|_____|
- *   1B      1B     2B     16B     4B    1B
- */
-typedef struct
-{
-  uint8_t           sof;
-  uint8_t           packet_type;
-  uint16_t          data_len;
-  ser_meta_info     meta_data;
-  uint32_t          crc;
-  uint8_t           eof;
-}__attribute__((packed)) SER_HEADER_;
 
 
 
