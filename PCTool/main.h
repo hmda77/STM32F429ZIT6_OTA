@@ -12,7 +12,7 @@
 #define ETX_OTA_EOF  0xBB    // End of Frame
 #define ETX_OTA_ACK  0x00    // ACK
 #define ETX_OTA_NACK 0x01    // NACK
-#define OTA_REQ      0xEE		 // Command for request OTA from modem
+
 
 #define ETX_APP_FLASH_ADDR 0x08040000   //Application's Flash Address
 
@@ -69,6 +69,11 @@ typedef enum
   ETX_OTA_CMD_START = 0,    // OTA Start command
   ETX_OTA_CMD_END   = 1,    // OTA End command
   ETX_OTA_CMD_ABORT = 2,    // OTA Abort command
+  SER_CMD_ALIVE       = 3,    // request for ACK
+  SER_CMD_FW_STATUS   = 4,    // Firmware stattus
+  SER_CMD_FW_GET      = 5,    // request for Firmware
+  SER_CMD_FW_DL       = 6,    // download firmware
+  SER_CMD_SYS_STATUS  = 7,    // esp8266 status
 }ETX_OTA_CMD_;
 
 /*

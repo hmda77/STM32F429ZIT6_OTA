@@ -88,9 +88,9 @@ uint8_t is_command_received( int comport )
     {
       if( req->crc == CalcCRC(&req->cmd, 1) )
       {
-        if( req->cmd == OTA_REQ )
+        if( req->cmd == SER_CMD_FW_GET )
         {
-          command = OTA_REQ;
+          command = SER_CMD_FW_GET;
         }
       }
       else
@@ -511,7 +511,7 @@ int main(int argc, char *argv[])
       }   
       else
       {
-        if( is_command_received( comport ) != OTA_REQ)
+        if( is_command_received( comport ) != SER_CMD_FW_GET)
         {
           //Received NACK
           printf("Request not found\n");
