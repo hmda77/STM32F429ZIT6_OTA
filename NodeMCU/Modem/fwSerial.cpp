@@ -480,8 +480,6 @@ SER_EX_ get_info(ser_fw_info * ota_info)
 
     const char* fw_crc_s = doc["fw_crc"];
     fw_crc = (uint32_t)strtol(fw_crc_s, NULL, 16);
-    // const char* fw_size_s = doc["fw_size"];
-    // sprintf(fw_size_s,"%s\0",);
     fw_size = doc["fw_size"];
     memset(fw_link, 0, sizeof(fw_link));
     const char* fw_link_s = doc["fw_link"];
