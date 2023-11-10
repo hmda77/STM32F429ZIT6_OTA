@@ -1,3 +1,4 @@
+#include "FS.h"
 #include "fwSerial.h"
 
 
@@ -32,6 +33,8 @@ static uint8_t fw_link[200];
 
 static meta_info ser_info;
 
+static uint32_t byte_sent;
+
 const char * filename = FW_FILE_NAME;
 
 /*------------------- Defined Functions -------------- */
@@ -41,9 +44,11 @@ static SER_EX_ ser_process_rsp( uint8_t *buf, uint16_t len);
 void send_ser_start();
 void send_ser_header(meta_info *meta_data);
 void send_ser_info(ser_fw_info * ota_info);
+SER_EX_ send_ser_data(uint32_t index,uint16_t size);
 void send_ser_end();
 SER_EX_ download_save_fw(const char* dest);
 SER_EX_ get_info(ser_fw_info * ota_info);
+SER_EX_ check_file(meta_info * ser_info);
 uint32_t ser_calcCRC(uint8_t * pData, uint32_t DataLength);
 
 
@@ -188,7 +193,12 @@ static SER_EX_ ser_process_rsp( uint8_t *buf, uint16_t len) {
 
             case SER_CMD_FW_GET:
             {
-              DEBUG.println("SER_CMD_FW_GET!");
+              if(check_file(&ser_info) != SER_EX_OK)
+              {
+                DEBUG.println("checking file failed");
+                break;
+              }
+              byte_sent = 0;
               send_ser_start();
               ser_state   = SER_STATE_HEADER;
               ret = SER_EX_OK;
@@ -229,12 +239,41 @@ static SER_EX_ ser_process_rsp( uint8_t *buf, uint16_t len) {
           if(rsp->status == SER_ACK)
           {
             switch(ser_info.data_type){
+
+              // SEND Information data
               case OTA_INFO_DATA:
               {
                 send_ser_info(&ser_fw_data);
                 ser_state   = SER_STATE_END;
                 ret = SER_EX_OK;
               }break;
+
+              // SEND firmware
+              case NORMAL_DATA:
+              {
+                uint16_t size = 0;
+
+                if( (fw_size - byte_sent) >= MAX_SERIAL_DATA_LENGTH)
+                {
+                  size = MAX_SERIAL_DATA_LENGTH;
+                }
+                else
+                {
+                  size = fw_size - byte_sent;
+                }
+
+                DEBUG.printf("[%d/%d]\r\n", byte_sent/MAX_SERIAL_DATA_LENGTH, fw_size/MAX_SERIAL_DATA_LENGTH);
+
+                ret = send_ser_data(byte_sent ,size);
+
+                byte_sent += size;
+
+                if(byte_sent >= fw_size)
+                {
+                  ser_state = SER_STATE_END;
+                }
+              }
+              break;
 
               default:
               {
@@ -371,6 +410,113 @@ void send_ser_end()
   }
 
 }
+SER_EX_ send_ser_data(uint32_t index,uint16_t size)
+{
+  SER_EX_ ret = SER_EX_ERROR;
+  do
+  {
+    File file = SPIFFS.open(filename, "r");
+
+    if (!file)
+    {
+      DEBUG.println("failed to open file");
+      break;
+    }
+
+    if ( !( file.seek(index) ) )
+    {
+      DEBUG.println("faild to seek file");
+      break;
+    }
+
+    char fbuffer[size + 1];
+    int bytesRead = file.readBytes(fbuffer, size);
+
+    file.close();
+    
+    // create packet
+    uint16_t len;
+    SER_DATA_ *ser_data = (SER_DATA_ *)Tx_Buffer;
+
+    memset(Tx_Buffer, 0, sizeof(Tx_Buffer));
+
+    ser_data->sof             = SER_SOF;
+    ser_data->packet_type     = SER_PACKET_TYPE_DATA;
+    ser_data->data_len        = size;
+
+    len = 4;
+
+    // Copy the data
+    memcpy(&Tx_Buffer[len], fbuffer, size);
+    len += size;
+
+    // Calculate CRC MPEG
+    uint32_t calc_crc = ser_calcCRC((uint8_t *) fbuffer, size);
+    memcpy(&Tx_Buffer[len], (uint8_t *)&calc_crc, sizeof(calc_crc));
+    len += sizeof(calc_crc);
+
+    // Add EOF
+    Tx_Buffer[len] = SER_EOF;
+    len++;
+
+    for(int i=0; i < len; i++)
+    {
+      delay(1);
+      Serial.write(Tx_Buffer[i]);
+    }
+
+    ret = SER_EX_OK;
+
+  }while(false);
+
+  return ret;
+}
+
+SER_EX_ check_file(meta_info * ser_info)
+{
+  SER_EX_ ret = SER_EX_ERROR;
+  do
+  {
+    File file = SPIFFS.open(filename, "r");
+
+    if(!file)
+    {
+      DEBUG.println("There was ann error opening file");
+      break;
+    }
+
+    // check size
+    if( file.size() != fw_size )
+    {
+      DEBUG.printf("Size Mismatch!!! rec_file_size = [%d], fw_real_size = [%d]\r\n", 
+                                                                file.size(),
+                                                                fw_size);
+      file.close();
+      break;
+    }
+
+    //calculate CRC MPEG
+    uint32_t crc = 0xFFFFFFFF;
+
+    while (file.available()) {
+        uint8_t byte = file.read();
+        uint8_t top = (uint8_t)(crc >> 24);
+        top ^= byte;
+        crc = (crc << 8) ^ crc_table[top];
+    }
+
+    file.close();
+
+    // Update serial header meta info
+    
+    ser_info->data_type = NORMAL_DATA;
+    ser_info->data_crc  = crc;
+    ser_info->data_size = fw_size;
+    
+    ret = SER_EX_OK;
+  }while(false);
+  return ret;
+}
 
 SER_EX_ download_save_fw(const char* dest)
 {
@@ -389,7 +535,7 @@ SER_EX_ download_save_fw(const char* dest)
     DEBUG.println("New Firmware Downloaded!");
     
 
-    // open doenloaded file
+    // open downloaded file
     File file = SPIFFS.open(filename, "r");
 
     if(!file)

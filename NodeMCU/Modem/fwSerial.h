@@ -118,7 +118,7 @@ typedef enum
 typedef struct
 {
   uint8_t  data_type;		// refer to SER_DATA_TYPE
-  uint16_t data_size;		// size of incoming data
+  uint32_t data_size;		// size of incoming data
   uint32_t data_crc;		// CRC of incoming data
   uint32_t reserved1;
   uint32_t reserved2;
@@ -230,6 +230,25 @@ typedef struct
   uint32_t        crc;
   uint8_t         eof;
 }__attribute__((packed)) SER_OTA_;
+
+
+/*
+ * Serial Normal Data format
+ *
+ * __________________________________________
+ * |     | Packet |     |        |     |     |
+ * | SOF | Type   | Len |  Data  | CRC | EOF |
+ * |_____|________|_____|________|_____|_____|
+ *   1B      1B     2B    nBytes   4B    1B
+ */
+typedef struct
+{
+  uint8_t     sof;
+  uint8_t     packet_type;
+  uint16_t    data_len;
+  uint8_t     *data;
+}__attribute__((packed)) SER_DATA_;
+
 /* -------------------------------------------- *
  *												*
  * 				Function References				*
