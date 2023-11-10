@@ -295,13 +295,16 @@ static OTA_EX_ ota_process_data( uint8_t *buf, uint16_t len )
 
 				if( header->packet_type == OTA_PACKET_TYPE_HEADER )
 				{
-					ota_fw_total_size = header->meta_data.package_size;
-					ota_fw_crc 		  = header->meta_data.package_crc;
-					printf("Received OTA Header. FW size = %ld, FW crc = [0x%08lX]\r\n",
-													ota_fw_total_size, ota_fw_crc);
+					if( header->meta_data.data_type == NORMAL_DATA )
+					{
+						ota_fw_total_size = header->meta_data.package_size;
+						ota_fw_crc 		  = header->meta_data.package_crc;
+						printf("Received OTA Header. FW size = %ld, FW crc = [0x%08lX]\r\n",
+														ota_fw_total_size, ota_fw_crc);
 
-					ota_state = OTA_STATE_DATA;
-					ret = OTA_EX_OK;
+						ota_state = OTA_STATE_DATA;
+						ret = OTA_EX_OK;
+					}
 
 				}
 			}
@@ -864,7 +867,7 @@ static void ota_req_send(UART_HandleTypeDef *huart)
 		.sof					= OTA_SOF,
 		.packet_type	= OTA_PACKET_TYPE_CMD,
 		.data_len			= 1u,
-		.cmd					= OTA_REQ,
+		.cmd					= SER_CMD_FW_GET,
 		.eof					= OTA_EOF
 	};
 

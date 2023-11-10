@@ -25,7 +25,6 @@
 #define OTA_EOF  0xBB    // End of Frame
 #define OTA_NACK 0x01    // NACK
 #define OTA_ACK  0x00    // ACK
-#define OTA_REQ	 0xEE		 // Command for request OTA from modem
 
 #define OTA_SLOT_FLASH_ADDR		0x08120000				// First Block base address
 #define OTA_SLOT_SECTOR			FLASH_SECTOR_17			// First Sector Of Slot
@@ -45,6 +44,13 @@
 #define OTA_NORMAL_BOOT				( 0xABABABAB )		// Normal Boot
 #define OTA_UPDATE_APP				( 0xCDCDCDCD )		// UPDATE REQUEST
 #define OTA_LOAD_PREV_APP			( 0xEFEFEFEF )		// Load previous APP
+
+/*
+ * Data types
+ */
+#define	NORMAL_DATA						 0x00	// NORMAL DATA
+#define	STATUS_DATA 					 0x01	// data include status information
+#define	OTA_INFO_DATA					 0x02	// information of OTA
 
 
 /* -------------------------------------------- *
@@ -91,9 +97,14 @@ typedef enum
  */
 typedef enum
 {
-  OTA_CMD_START = 0,    // OTA Start command
-  OTA_CMD_END   = 1,    // OTA End command
-  OTA_CMD_ABORT = 2,    // OTA Abort command
+  OTA_CMD_START 			= 0,    // OTA Start command
+  OTA_CMD_END   			= 1,    // OTA End command
+  OTA_CMD_ABORT 			= 2,    // OTA Abort command
+  SER_CMD_ALIVE       = 3,    // request for ACK
+  SER_CMD_FW_STATUS   = 4,    // Firmware stattus
+  SER_CMD_FW_GET      = 5,    // request for Firmware
+  SER_CMD_FW_DL       = 6,    // download firmware
+  SER_CMD_SYS_STATUS  = 7,    // esp8266 status
 }OTA_CMD_;
 
 
@@ -102,6 +113,7 @@ typedef enum
  */
 typedef struct
 {
+	uint8_t  data_type;		// refer to SER_DATA_TYPE
   uint32_t package_size;
   uint32_t package_crc;
   uint32_t reserved1;
