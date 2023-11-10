@@ -48,13 +48,18 @@ extern uint8_t Rx_Byte[2];
 /*Configuration */
 OTA_GNRL_CFG_ *cfg_flash	=	(OTA_GNRL_CFG_*) (OTA_CFG_FLASH_ADDR);
 
+/* current version of Application */
+const uint16_t v_major = V_MAJOR;
+const uint32_t v_minor = V_MINOR;
+
 
 /*------------------- Defined Functions -------------- */
 static void ser_receive_chunk(uint8_t rx_byte);
 static SER_EX_ ser_proccess_data( uint8_t *buf, uint16_t len);
 static void ser_send_resp(UART_HandleTypeDef *huart, uint8_t rsp);
 static HAL_StatusTypeDef write_cfg_to_flash( OTA_GNRL_CFG_ *cfg );
-void ser_ota_requsted();
+void go_to_DFU();
+static void ota_req_send(UART_HandleTypeDef *huart, uint8_t cmd);
 uint32_t ser_calcCRC(uint8_t * pData, uint32_t DataLength);
 
 
@@ -92,13 +97,52 @@ void serial_app(){
 		}
 
 		/* check ota request */
-		if(ota_data.ota_available & ota_data.ota_download & ota_data.ota_valid)
+		if(data_info.data_type == OTA_INFO_DATA)
 		{
-			ser_ota_requsted();
+			ota_data.ota_valid = 1u;
+			do
+			{
+				// check update is needed or not
+				if(ota_data.ota_major < v_major)
+				{
+					break;
+				}
+
+				if(v_major == ota_data.ota_major )
+				{
+					if(ota_data.ota_minor <= v_minor)
+					{
+						break;
+					}
+				}
+
+				// go to DFU mode if firmware downloaded
+				if(ota_data.ota_available & ota_data.ota_download & ota_data.ota_valid)
+				{
+					go_to_DFU();
+					break;
+				}
+
+				printf("A NEW FIRMWARE FOUND!!! VERSION = [%d,%ld]\r\n", ota_data.ota_major,
+																																 ota_data.ota_minor);
+
+				// request to download firmware
+				if( !(ota_data.ota_download) )
+				{
+					ota_req_send(&huart5, SER_CMD_FW_DL);
+					break;
+				}
+
+			}while(false);
 		}
+
 
 		hchunk.chunk_ready = CUN_EMPTY;
 	}while(false);
+}
+
+void ota_check(){
+	ota_req_send(&huart5, SER_CMD_FW_STATUS);
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
@@ -368,13 +412,6 @@ static SER_EX_ ser_proccess_data( uint8_t *buf, uint16_t len)
 												data_calc_crc, data_info.data_crc);
 								break;
 							}
-
-							if(data_info.data_type == OTA_INFO_DATA)
-							{
-								ota_data.ota_valid = 1u;
-								printf("A NEW FIRMWARE FOUND!!! VERSION = [%d,%ld]\r\n", ota_data.ota_major,
-																																				 ota_data.ota_minor);
-							}
 						}
 						printf("Validated Successfully!\r\n");
 
@@ -427,7 +464,7 @@ static void ser_send_resp(UART_HandleTypeDef *huart, uint8_t rsp){
  * @brief save boot reason to OTA update and save data in configuration
  * sector patr
  */
-void ser_ota_requsted()
+void go_to_DFU()
 {
 	do
 	{
@@ -531,6 +568,29 @@ static HAL_StatusTypeDef write_cfg_to_flash( OTA_GNRL_CFG_ *cfg )
 	}while(false);
 
 	return ret;
+}
+
+
+/**
+ * @brief send request to host
+ * @param huart uart handler
+ * @retval none
+ */
+static void ota_req_send(UART_HandleTypeDef *huart, uint8_t cmd)
+{
+	SER_COMMAND_ pack =
+	{
+		.sof					= SER_SOF,
+		.packet_type	= SER_PACKET_TYPE_CMD,
+		.data_len			= 1u,
+		.cmd					= cmd,
+		.eof					= SER_EOF
+	};
+
+	pack.crc = ser_calcCRC(&pack.cmd, 1);
+
+	//send request
+	HAL_UART_Transmit(huart, (uint8_t *)&pack, sizeof(SER_COMMAND_),HAL_MAX_DELAY);
 }
 
 /**

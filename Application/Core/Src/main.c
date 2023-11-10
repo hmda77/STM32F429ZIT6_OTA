@@ -32,10 +32,6 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-// MINOR AND MAJOR VERSION Definition
-#define V_MAJOR 0
-#define V_MINOR 3
-
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -76,6 +72,8 @@ ota_info ota_data =
 				.ota_minor		 = 0u,
 				.ota_valid		 = 0u,
 		};
+
+uint32_t prOTACheck = 0u;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -201,6 +199,12 @@ int main(void)
     /* check serial communication process */
     serial_app();
 
+    /* check for OTA Update */
+    if( HAL_GetTick() - prOTACheck > OTA_CHECK_INTERVAL)
+    {
+    	prOTACheck = HAL_GetTick();
+    	ota_check();
+    }
   }
   /* USER CODE END 3 */
 }

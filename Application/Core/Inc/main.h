@@ -248,9 +248,18 @@ void Error_Handler(void);
 #define NBL1_GPIO_Port GPIOE
 
 /* USER CODE BEGIN Private defines */
+// MINOR AND MAJOR VERSION Definition
+#define V_MAJOR 0
+#define V_MINOR 4
+
+/* OTA check frequently in milliseconds*/
+#define OTA_CHECK_INTERVAL					( 120000 )
+
+
 #define LCD_FRAME_BUFFER_LAYER0					(LCD_FRAME_BUFFER+0x130000)
 #define LCD_FRAME_BUFFER_LAYER1					LCD_FRAME_BUFFER
 #define CONVERTED_FRAME_BUFFER					(LCD_FRAME_BUFFER+0x260000)
+
 
 /* USER CODE END Private defines */
 

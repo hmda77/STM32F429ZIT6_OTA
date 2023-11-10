@@ -18,9 +18,9 @@
  * -------------------------------------------- *
  */
 
-#define MAX_SERIAL_DATA_LENGTH					( 1024 )	// Max Data frame can have
-#define MAX_SERIAL_OVERHEAD						( 9 )		// frame overhead like SOF, data length, ...
-#define MAX_SERIAL_SIZE 						1024 + 9	// Maximum serial frame
+#define MAX_SERIAL_DATA_LENGTH			( 1024 )		// Max Data frame can have
+#define MAX_SERIAL_OVERHEAD					( 9 )				// frame overhead like SOF, data length, ...
+#define MAX_SERIAL_SIZE 						1024 + 9		// Maximum serial frame
 
 #define SER_SOF  0xAA    // Start of Frame
 #define SER_EOF  0xBB    // End of Frame
@@ -106,9 +106,14 @@ typedef enum
  */
 typedef enum
 {
-  SER_CMD_START = 0,    // Serial Start command
-  SER_CMD_END   = 1,    // Serial End command
-  SER_CMD_ABORT = 2,    // Serial Abort command
+  SER_CMD_START				= 0,    // Serial Start command
+  SER_CMD_END   			= 1,    // Serial End command
+  SER_CMD_ABORT 			= 2,    // Serial Abort command
+  SER_CMD_ALIVE       = 3,    // request for ACK
+  SER_CMD_FW_STATUS   = 4,    // Firmware stattus
+  SER_CMD_FW_GET      = 5,    // request for Firmware
+  SER_CMD_FW_DL       = 6,    // download firmware
+  SER_CMD_SYS_STATUS  = 7,    // esp8266 status
 }SER_CMD_;
 
 
@@ -327,6 +332,7 @@ typedef struct
  */
 
 void serial_app();
+void ota_check();
 
 /* -------------------------------------------- *
  *												*
