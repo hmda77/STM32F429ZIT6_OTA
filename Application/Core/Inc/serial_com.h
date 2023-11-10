@@ -129,7 +129,7 @@ typedef enum
 typedef struct
 {
   uint8_t  data_type;		// refer to SER_DATA_TYPE
-  uint16_t data_size;		// size of incoming data
+  uint32_t data_size;		// size of incoming data
   uint32_t data_crc;		// CRC of incoming data
   uint32_t reserved1;
   uint32_t reserved2;
