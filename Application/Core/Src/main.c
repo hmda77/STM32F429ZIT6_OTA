@@ -202,6 +202,7 @@ int main(void)
     /* check for OTA Update */
     if( HAL_GetTick() - prOTACheck > OTA_CHECK_INTERVAL)
     {
+    	printf("Check for Update!\r\n");
     	prOTACheck = HAL_GetTick();
     	ota_check();
     }

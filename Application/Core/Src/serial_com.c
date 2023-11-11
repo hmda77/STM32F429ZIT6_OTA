@@ -94,46 +94,49 @@ void serial_app(){
 		else
 		{
 			ser_send_resp(&huart5, SER_ACK);
-		}
 
-		/* check ota request */
-		if(data_info.data_type == OTA_INFO_DATA)
-		{
-			ota_data.ota_valid = 1u;
-			do
-			{
-				// check update is needed or not
-				if(ota_data.ota_major < v_major)
+			/* check ota request */
+			if (ser_state == SER_STATE_START){
+				if(data_info.data_type == OTA_INFO_DATA)
 				{
-					break;
-				}
-
-				if(v_major == ota_data.ota_major )
-				{
-					if(ota_data.ota_minor <= v_minor)
+					ota_data.ota_valid = 1u;
+					do
 					{
-						break;
-					}
+						// check update is needed or not
+						if(ota_data.ota_major < v_major)
+						{
+							break;
+						}
+
+						if(v_major == ota_data.ota_major )
+						{
+							if(ota_data.ota_minor <= v_minor)
+							{
+								break;
+							}
+						}
+
+						// go to DFU mode if firmware downloaded
+						if(ota_data.ota_available & ota_data.ota_download & ota_data.ota_valid)
+						{
+							go_to_DFU();
+							break;
+						}
+
+						printf("A NEW FIRMWARE FOUND!!! VERSION = [%d,%ld]\r\n", ota_data.ota_major,
+																																		 ota_data.ota_minor);
+
+						// request to download firmware
+						if( !(ota_data.ota_download) )
+						{
+							printf("request for download!\r\n");
+							ota_req_send(&huart5, SER_CMD_FW_DL);
+							break;
+						}
+
+					}while(false);
 				}
-
-				// go to DFU mode if firmware downloaded
-				if(ota_data.ota_available & ota_data.ota_download & ota_data.ota_valid)
-				{
-					go_to_DFU();
-					break;
-				}
-
-				printf("A NEW FIRMWARE FOUND!!! VERSION = [%d,%ld]\r\n", ota_data.ota_major,
-																																 ota_data.ota_minor);
-
-				// request to download firmware
-				if( !(ota_data.ota_download) )
-				{
-					ota_req_send(&huart5, SER_CMD_FW_DL);
-					break;
-				}
-
-			}while(false);
+			}
 		}
 
 
@@ -329,7 +332,7 @@ static SER_EX_ ser_proccess_data( uint8_t *buf, uint16_t len)
 					data_info.data_size = header->meta_data.data_size;
 					data_info.data_crc	 = header->meta_data.data_crc;
 
-					printf("Received Data Header. type=[%d], size=[%d], crc=[0x%08lX]\r\n",
+					printf("Received Data Header. type=[%d], size=[%ld], crc=[0x%08lX]\r\n",
 																									data_info.data_type,
 																									data_info.data_size,
 																									data_info.data_crc);
@@ -417,7 +420,6 @@ static SER_EX_ ser_proccess_data( uint8_t *buf, uint16_t len)
 
 						ser_state = SER_STATE_START;
 						ret = SER_EX_OK;
-
 					}
 				}
 			}

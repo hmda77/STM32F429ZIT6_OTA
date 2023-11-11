@@ -253,7 +253,7 @@ void Error_Handler(void);
 #define V_MINOR 4
 
 /* OTA check frequently in milliseconds*/
-#define OTA_CHECK_INTERVAL					( 120000 )
+#define OTA_CHECK_INTERVAL					( 40000 )
 
 
 #define LCD_FRAME_BUFFER_LAYER0					(LCD_FRAME_BUFFER+0x130000)
