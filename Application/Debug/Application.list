@@ -475,13 +475,13 @@ int main(void)
   sprintf(buffch,"Starting Application (%d.%d)", BL_Version[0], BL_Version[1]);
  80205d6:	2300      	movs	r3, #0
  80205d8:	461a      	mov	r2, r3
- 80205da:	2304      	movs	r3, #4
+ 80205da:	2305      	movs	r3, #5
  80205dc:	4938      	ldr	r1, [pc, #224]	; (80206c0 <main+0x12c>)
  80205de:	4839      	ldr	r0, [pc, #228]	; (80206c4 <main+0x130>)
  80205e0:	f00d ff04 	bl	802e3ec <siprintf>
   printf("Starting Application (%d.%d)\r\n", BL_Version[0], BL_Version[1]);
  80205e4:	2300      	movs	r3, #0
- 80205e6:	2204      	movs	r2, #4
+ 80205e6:	2205      	movs	r2, #5
  80205e8:	4619      	mov	r1, r3
  80205ea:	4837      	ldr	r0, [pc, #220]	; (80206c8 <main+0x134>)
  80205ec:	f00d fe60 	bl	802e2b0 <iprintf>
@@ -2132,7 +2132,7 @@ void serial_app(){
 							if(ota_data.ota_minor <= v_minor)
  8020f52:	4b22      	ldr	r3, [pc, #136]	; (8020fdc <serial_app+0x120>)
  8020f54:	685b      	ldr	r3, [r3, #4]
- 8020f56:	2204      	movs	r2, #4
+ 8020f56:	2205      	movs	r2, #5
  8020f58:	4293      	cmp	r3, r2
  8020f5a:	d926      	bls.n	8020faa <serial_app+0xee>
 								break;

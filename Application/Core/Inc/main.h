@@ -250,7 +250,7 @@ void Error_Handler(void);
 /* USER CODE BEGIN Private defines */
 // MINOR AND MAJOR VERSION Definition
 #define V_MAJOR 0
-#define V_MINOR 4
+#define V_MINOR 5
 
 /* OTA check frequently in milliseconds*/
 #define OTA_CHECK_INTERVAL					( 40000 )
