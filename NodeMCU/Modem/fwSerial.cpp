@@ -88,7 +88,7 @@ void serial_app(){
 
     // Send ACK or NACK
 		if( ret != SER_EX_OK ){
-			DEBUG.printf("NACK\r\n");
+			DEBUG.printf("NACK in ser_state = [%d]\r\n", ser_state);
       ser_state = SER_STATE_START;
 			// ser_send_resp(SER_NACK);
 		}
@@ -625,7 +625,7 @@ SER_EX_ get_info(ser_fw_info * ota_info)
     // store values after JSON Decoding
 
     const char* fw_crc_s = doc["fw_crc"];
-    fw_crc = (uint32_t)strtol(fw_crc_s, NULL, 16);
+    fw_crc = (uint32_t)strtoul(fw_crc_s, NULL, 16);
     fw_size = doc["fw_size"];
     memset(fw_link, 0, sizeof(fw_link));
     const char* fw_link_s = doc["fw_link"];
