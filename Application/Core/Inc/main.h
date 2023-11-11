@@ -250,10 +250,10 @@ void Error_Handler(void);
 /* USER CODE BEGIN Private defines */
 // MINOR AND MAJOR VERSION Definition
 #define V_MAJOR 0
-#define V_MINOR 5
+#define V_MINOR 9
 
 /* OTA check frequently in milliseconds*/
-#define OTA_CHECK_INTERVAL					( 40000 )
+#define OTA_CHECK_INTERVAL					( 120000 )
 
 
 #define LCD_FRAME_BUFFER_LAYER0					(LCD_FRAME_BUFFER+0x130000)

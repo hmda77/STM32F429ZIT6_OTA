@@ -81,7 +81,7 @@ void serial_app(){
 		}
 		else
 		{
-			printf("Chunk Received!!!\r\n");
+//			printf("Chunk Received!!!\r\n");
 			ret = ser_proccess_data(Rx_Buffer, hchunk.data_len);
 		}
 
@@ -401,7 +401,7 @@ static SER_EX_ ser_proccess_data( uint8_t *buf, uint16_t len)
 				{
 					if(cmd->cmd == SER_CMD_END)
 					{
-						printf("Receive SERIAL END COMMAND\r\nValidation...\r\n");
+						printf("Receive SERIAL END COMMAND\r\n");
 
 						//Validation the received packets
 						//TODO: validation normal data
@@ -416,7 +416,7 @@ static SER_EX_ ser_proccess_data( uint8_t *buf, uint16_t len)
 								break;
 							}
 						}
-						printf("Validated Successfully!\r\n");
+//						printf("Validated Successfully!\r\n");
 
 						ser_state = SER_STATE_START;
 						ret = SER_EX_OK;

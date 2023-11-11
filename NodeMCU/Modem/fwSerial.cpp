@@ -82,7 +82,7 @@ void serial_app(){
 		}
 		else
 		{
-			DEBUG.println("Chunk Received!!!");
+			// DEBUG.println("Chunk Received!!!");
       ret = ser_process_rsp(Rx_Buffer, hchunk.data_len);
     }
 
@@ -144,6 +144,17 @@ static SER_EX_ ser_process_rsp( uint8_t *buf, uint16_t len) {
     {
       case SER_STATE_START:
       {
+        SER_RESP_ *rsp = (SER_RESP_ *)buf;
+        if(rsp->packet_type == SER_PACKET_TYPE_RESPONSE)
+        {
+          if(rsp->status == SER_ACK)
+          {
+            // last operation successfull (after EOF)
+            ret = SER_EX_OK;
+            break;
+          }
+        }
+
         SER_COMMAND_ *cmd = (SER_COMMAND_ *)buf;
         if(cmd->packet_type == SER_PACKET_TYPE_CMD)
 		    {
