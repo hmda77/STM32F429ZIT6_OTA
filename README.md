@@ -64,6 +64,6 @@ you can update firmware in two way: offline or Online programming.
 
 # Refferences
 - [STM32 Refference Manual RM0090](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf)
-- [Embetronicx Bootloader](https://github.com/Embetronicx/STM32-Bootloader/blob/main/Bootloader_Example/HostApp/PcTool/etx_ota_update_main.c)
+- [Embetronicx Bootloader](https://github.com/Embetronicx/STM32-Bootloader/blob/main/)
 - [ChatGPT3.5](https://chat.openai.com)
 
