@@ -14,7 +14,9 @@ Welcome to the Over-the-Air (OTA) Update Project with STM32! This project is des
 ### OTA Flowchart
 ![OTA Flowchart](./images/OTA_Flowchart.svg)
 
-## Requirements:
+## Getting Started
+
+## Prerequisites:
 ### Hardware:
 - STM32F429ZIT6 Discovery Board
 - NodeMCU
@@ -25,11 +27,22 @@ Welcome to the Over-the-Air (OTA) Update Project with STM32! This project is des
 - Any Serial Communication Software Like PuTTY, Docklight, ...
 - STM32CubeProgrammer (Optional)
 
-## Usage:
 - Clone this Repositpry.
 - Set STM32CubeIDE Workspace to the repository directory.
-- Fool Erase Flash.
+- Full Erase Flash.
 - Download Bootloader via Programmer.
+
+## Installation:
+- Clone this Repositpry.
+  ```
+  git clone https://github.com/hmda77/STM32F429ZIT6_OTA.git
+  ```
+- Set STM32CubeIDE Workspace to the repository directory.
+
+## Usage:
+- Full Erase Flash.
+- Download Bootloader via Programmer.
+
 ### First Time Boot:
 - Make and build Application. copy `Application.bin` file to PC Tool directory.
 - Make and build PC Tool with this command (or download released tool):
@@ -64,7 +77,11 @@ you can update firmware in two way: offline or Online programming.
 - Connect the Main Serial Port of NodeMCU to the STM32 UART with baudrate equals to 9600.
 - STM32 Will Check the new firmware and download it automatically.
 
-# Refferences
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+# Acknowledgments
 - [STM32 Refference Manual RM0090](https://www.st.com/resource/en/reference_manual/dm00031020-stm32f405-415-stm32f407-417-stm32f427-437-and-stm32f429-439-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf)
 - [Embetronicx Bootloader](https://github.com/Embetronicx/STM32-Bootloader/blob/main/)
 - [ChatGPT3.5](https://chat.openai.com)
