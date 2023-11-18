@@ -1,5 +1,4 @@
 # STM32F429ZIT6 OTA Project
-![follow](https://img.shields.io/github/followers/hmda77.svg?style=social&label=Follow&maxAge=2592000)
 ![total downloads](https://img.shields.io/github/downloads/hmda77/STM32F429ZIT6_OTA/total.svg)
 ![stars](https://img.shields.io/github/stars/hmda77/STM32F429ZIT6_OTA.svg)
 ![forks](https://img.shields.io/github/forks/hmda77/STM32F429ZIT6_OTA.svg)
@@ -96,3 +95,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [ChatGPT3.5](https://chat.openai.com)
 
 [![Website](https://img.shields.io/badge/website-000000?style=for-the-badge&logo=About.me&logoColor=white)](https://hamidarabsorkhi.ir/eng)
+[![follow](https://img.shields.io/github/followers/hmda77.svg?style=social&label=Follow&maxAge=2592000)](https://github.com/hmda77)
