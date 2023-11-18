@@ -1,4 +1,9 @@
 # STM32F429ZIT6 OTA Project
+![follow](https://img.shields.io/github/followers/hmda77.svg?style=social&label=Follow&maxAge=2592000)
+![total downloads](https://img.shields.io/github/downloads/hmda77/STM32F429ZIT6_OTA/total.svg)
+![stars](https://img.shields.io/github/stars/hmda77/STM32F429ZIT6_OTA.svg)
+![forks](https://img.shields.io/github/forks/hmda77/STM32F429ZIT6_OTA.svg)
+![watchers](https://img.shields.io/github/watchers/hmda77/STM32F429ZIT6_OTA.svg)
 ## Overview
 Welcome to the Over-the-Air (OTA) Update Project with STM32! This project is designed to facilitate firmware updates for STM32 microcontrollers using a wireless communication protocol. With OTA updates, you can remotely deploy firmware updates to STM32 devices without the need for physical access.
 
@@ -23,6 +28,9 @@ Welcome to the Over-the-Air (OTA) Update Project with STM32! This project is des
 - CH340G (or Any USB to TTL Module)
 
 ### Software:
+![C](https://img.shields.io/badge/C-00599C?style=for-the-badge&logo=c&logoColor=white)
+![C++](https://img.shields.io/badge/C%2B%2B-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white)
+![php](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logophpor=white)
 - STM32CubeIDE V1.11.2
 - Any Serial Communication Software Like PuTTY, Docklight, ...
 - STM32CubeProgrammer (Optional)
@@ -78,7 +86,8 @@ you can update firmware in two way: offline or Online programming.
 - STM32 Will Check the new firmware and download it automatically.
 
 ## License
-[![MIT LICENSE]https://img.shields.io/github/license/hmda77/STM32F429ZIT6_OTA.svg](LICENSE)
+[![MIT LICENSE](https://img.shields.io/github/license/hmda77/STM32F429ZIT6_OTA.svg)](LICENSE)
+
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 # Acknowledgments
@@ -86,3 +95,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Embetronicx Bootloader](https://github.com/Embetronicx/STM32-Bootloader/blob/main/)
 - [ChatGPT3.5](https://chat.openai.com)
 
+[![Website](https://img.shields.io/badge/website-000000?style=for-the-badge&logo=About.me&logoColor=white)](https://hamidarabsorkhi.ir/eng)
