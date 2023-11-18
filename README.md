@@ -1,4 +1,6 @@
 # STM32F429ZIT6 OTA Project
+## Overview
+Welcome to the Over-the-Air (OTA) Update Project with STM32! This project is designed to facilitate firmware updates for STM32 microcontrollers using a wireless communication protocol. With OTA updates, you can remotely deploy firmware updates to STM32 devices without the need for physical access.
 
 ## To-Do:
 
