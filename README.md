@@ -78,7 +78,7 @@ you can update firmware in two way: offline or Online programming.
 - STM32 Will Check the new firmware and download it automatically.
 
 ## License
-
+[![MIT LICENSE]https://img.shields.io/github/license/hmda77/STM32F429ZIT6_OTA.svg](LICENSE)
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 # Acknowledgments
